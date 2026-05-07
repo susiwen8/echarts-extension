@@ -1,7 +1,0 @@
-import * as echarts from 'echarts/lib/echarts';
-import { installGraphLayout } from '@echarts-extension/layout-core';
-installGraphLayout(echarts, {
-    chartType: 'radial',
-    layoutType: 'radial'
-});
-//# sourceMappingURL=radial.js.map

@@ -3,3 +3,5 @@ npm-debug.log
 test-results
 .DS_Store
 .omx/
+packages/*/dist/
+packages/*/lib/
