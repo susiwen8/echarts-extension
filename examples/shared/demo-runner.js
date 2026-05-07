@@ -1255,13 +1255,41 @@
       const option = applyDemoInteractionDefaults(customOption || createDemoOption(exampleName, data, state, context));
       applyReplayContext(option, context);
       chart.resize();
+      const afterSet = () => {
+        interactions.applyViewport();
+        updateOptionEditor(controlsPanel, option);
+      };
+      setDemoOption(chart, option, context, afterSet);
+    }
+  }
+
+  function setDemoOption(chart, option, context = {}, afterSet = () => {}) {
+    if (context.replayKey != null) {
+      setReplayOption(chart, option, afterSet);
+      return;
+    }
+
+    chart.setOption(option, {
+      notMerge: false,
+      lazyUpdate: false
+    });
+    afterSet();
+  }
+
+  function setReplayOption(chart, option, afterSet = () => {}) {
+    chart.setOption({ series: [] }, {
+      replaceMerge: ['series'],
+      lazyUpdate: false
+    });
+
+    const raf = root.requestAnimationFrame || ((callback) => root.setTimeout(callback, 16));
+    raf(() => {
       chart.setOption(option, {
         notMerge: false,
         lazyUpdate: false
       });
-      interactions.applyViewport();
-      updateOptionEditor(controlsPanel, option);
-    }
+      afterSet();
+    });
   }
 
   function applyReplayContext(option, context = {}) {

@@ -521,7 +521,24 @@ test('demo control renders update charts without clearing instances', () => {
 
   assert.doesNotMatch(runnerSource, /chart\.clear\(\)/);
   assert.doesNotMatch(runnerSource, /setOption\(option,\s*true\)/);
-  assert.match(runnerSource, /setOption\(option,\s*\{\s*notMerge:\s*false/);
+  assert.match(runnerSource, /setDemoOption\(chart,\s*option,\s*context,\s*afterSet\)/);
+  assert.match(runnerSource, /setReplayOption\(chart,\s*option,\s*afterSet\)/);
+  assert.match(runnerSource, /replaceMerge:\s*\['series'\]/);
+});
+
+test('replay buttons force a visible series rerender without clearing chart instances', () => {
+  const runnerSource = readFileSync(path.join(root, 'examples/shared/demo-runner.js'), 'utf8');
+  const largeSource = readFileSync(path.join(root, 'examples/shared/large-data.js'), 'utf8');
+
+  assert.match(runnerSource, /onReplay\(\)\s*\{[\s\S]*replayKey \+= 1;[\s\S]*render\(\{ replayKey \}\)/);
+  assert.match(runnerSource, /function setDemoOption\(/);
+  assert.match(runnerSource, /function setReplayOption\(/);
+  assert.match(runnerSource, /requestAnimationFrame/);
+  assert.doesNotMatch(runnerSource, /chart\.clear\(\)/);
+
+  assert.match(largeSource, /onReplay\(\)\s*\{[\s\S]*state\.replayKey \+= 1;[\s\S]*run\(\{ replayKey: state\.replayKey \}\)/);
+  assert.match(largeSource, /replaceMerge:\s*\['series'\]/);
+  assert.doesNotMatch(largeSource, /chart\.clear\(\)/);
 });
 
 test('sunrise sunset icon controls update the demo option', () => {

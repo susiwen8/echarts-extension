@@ -666,7 +666,8 @@
       count: readCountFromLocation(definition.defaultCount),
       seed: readNumericQuery('seed', 0),
       runId: 0,
-      detailLevel: 0
+      detailLevel: 0,
+      replayKey: 0
     };
     const chart = root.echarts.init(chartElement, null, {
       renderer: 'canvas',
@@ -689,7 +690,8 @@
         run();
       },
       onReplay() {
-        run();
+        state.replayKey += 1;
+        run({ replayKey: state.replayKey });
       },
       onJsonApply(option) {
         customOption = option;
@@ -770,6 +772,13 @@
       : createLargeOption(caseName, count, seed, renderContext);
     renderContext.onOption?.(prepared.option);
     const setOptionStart = now();
+    if (renderContext.replayKey != null) {
+      chart.setOption({ series: [] }, {
+        replaceMerge: ['series'],
+        lazyUpdate: false
+      });
+      await nextFrame();
+    }
     const finishedPromise = waitForFinished(chart);
     chart.setOption(prepared.option, {
       notMerge: false,
