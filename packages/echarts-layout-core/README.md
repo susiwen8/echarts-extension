@@ -56,6 +56,7 @@ The registered series accepts ECharts graph-style `data`/`links` or `nodes`/`edg
 - `computeGraphLayout`: dispatches to a named graph layout.
 - `computeArcLayout`, `computeConcentricLayout`, `computeGridLayout`, `computeMDSLayout`, `computeRadialLayout`: layout-specific APIs.
 - `installGraphLayout`: registers a graph-style ECharts series.
+- `installFisheyeController`, `resolveFisheyeOptions`, `fisheyeTransform`: reusable fisheye magnifier primitives for chart packages.
 - `installElementHover`, `renderAlive`, `clearAliveRender`, `setAliveRenderKey`: shared rendering helpers used by custom chart packages.
 
 ## Local Development

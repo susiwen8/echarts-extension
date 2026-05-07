@@ -20,6 +20,7 @@ const expectedExamples = {
   'echarts-venn': ['examples/index.html', 'examples/hollow.html', 'examples/bubble.html', 'examples/large.html'],
   'echarts-pack-bubble': ['examples/index.html', 'examples/large.html'],
   'echarts-circle-packing': ['examples/index.html', 'examples/large.html'],
+  'echarts-fisheye': ['examples/index.html'],
   'echarts-nested-circle': ['examples/index.html', 'examples/large.html'],
   'echarts-mosaic': ['examples/index.html', 'examples/large.html'],
   'echarts-voronoi-treemap': ['examples/index.html', 'examples/large.html'],

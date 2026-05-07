@@ -1017,7 +1017,7 @@ function indent(value, spaces) {
   const prefix = ' '.repeat(spaces);
   return value
     .split('\n')
-    .map((line) => `${prefix}${line}`)
+    .map((line) => (line ? `${prefix}${line}` : ''))
     .join('\n');
 }
 

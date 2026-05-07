@@ -1,8 +1,14 @@
 import { createArcBezierShape, createArcPath, pathToString } from './arc.js';
 import { normalizeGraphData } from './data.js';
+import {
+  fisheyeTransform,
+  installFisheyeController,
+  resolveFisheyeOptions
+} from './fisheye.js';
 import { computeGraphLayout } from './layouts.js';
 import { clearAliveRender, renderAlive, setAliveRenderKey } from './render-transition.js';
 import type { GraphEdge, GraphInput, LayoutOptions, LayoutResult, Point, PublicLayoutNode } from './types.js';
+import type { FisheyeController, FisheyeOptions, FisheyeTransform } from './fisheye.js';
 import type { AliveRenderState } from './render-transition.js';
 
 type LabelPosition = 'top' | 'bottom' | 'left' | 'right';
@@ -228,29 +234,8 @@ interface GraphRenderState {
   viewport: Rect;
 }
 
-interface FisheyeOptions {
-  radius: number;
-  scale: number;
-  labelScale: number;
-  stroke: unknown;
-  strokeWidth: number;
-  opacity: number;
-  preview: boolean;
-}
-
-interface FisheyeController {
-  dispose(): void;
-}
-
 interface GraphHoverController {
   dispose(): void;
-}
-
-interface FisheyeTransform {
-  x: number;
-  y: number;
-  scale: number;
-  influence: number;
 }
 
 interface EdgeAnimationConfig {
@@ -1281,24 +1266,7 @@ function updateFisheyeRenderState(
 }
 
 function readFisheyeOptions(seriesModel: GraphSeriesModel, viewport: Rect): FisheyeOptions | null {
-  const raw = seriesModel.get('fisheye');
-  if (raw === false) return null;
-
-  const option = raw == null || raw === true ? {} : asRecord(raw);
-  if (option.show === false || option.enabled === false) return null;
-
-  const defaultRadius = Math.max(48, Math.min(viewport.width, viewport.height) * 0.32);
-  const radius = resolveFisheyeNumber(option.radius, defaultRadius, Math.min(viewport.width, viewport.height));
-  const scale = Math.max(1, finiteNumber(option.scale ?? option.magnification, 2.2));
-  return {
-    radius: Math.max(1, radius),
-    scale,
-    labelScale: Math.max(1, finiteNumber(option.labelScale, Math.min(scale, 1.55))),
-    stroke: option.stroke || option.borderColor || 'rgba(17, 24, 39, 0.86)',
-    strokeWidth: Math.max(0, finiteNumber(option.strokeWidth ?? option.borderWidth, 3)),
-    opacity: Math.max(0, Math.min(1, finiteNumber(option.opacity, 0.92))),
-    preview: option.preview === true
-  };
+  return resolveFisheyeOptions(seriesModel.get('fisheye'), viewport);
 }
 
 function scheduleInitialFisheyePreview(
@@ -1338,31 +1306,15 @@ function installFisheye(
   renderState: GraphRenderState,
   fisheye: FisheyeOptions
 ): FisheyeController | undefined {
-  const zr = api.getZr?.();
-  if (!zr || !renderState.lens) return undefined;
-
-  const handleMove = (event: ZRenderEvent) => {
-    const point = eventPoint(event);
-    if (!point || !pointInRect(point, renderState.viewport)) {
-      resetFisheye(renderState);
-      return;
-    }
-    applyFisheye(renderState, fisheye, point);
-  };
-  const handleLeave = () => resetFisheye(renderState);
-
-  zr.on('mousemove', handleMove);
-  zr.on('globalout', handleLeave);
-  zr.on('mouseout', handleLeave);
-
-  return {
-    dispose() {
-      zr.off('mousemove', handleMove);
-      zr.off('globalout', handleLeave);
-      zr.off('mouseout', handleLeave);
-      resetFisheye(renderState);
-    }
-  };
+  return installFisheyeController({
+    zrender: api.getZr?.(),
+    viewport: renderState.viewport,
+    fisheye: { ...fisheye, preview: false },
+    lens: renderState.lens,
+    targetElements: () => [],
+    onApply: (focus) => applyFisheye(renderState, fisheye, focus),
+    onReset: () => resetFisheye(renderState)
+  });
 }
 
 function applyFisheye(renderState: GraphRenderState, fisheye: FisheyeOptions, focus: Point): void {
@@ -1379,7 +1331,7 @@ function applyFisheye(renderState: GraphRenderState, fisheye: FisheyeOptions, fo
   }
 
   renderState.nodes.forEach((node) => {
-    const transform = fisheyeTransform(node, fisheye, focus);
+    const transform = fisheyeTransform([node.baseX, node.baseY], fisheye, focus);
     transforms.set(node.id, transform);
     setGraphicShape(node.circle, {
       cx: transform.x,
@@ -1485,52 +1437,6 @@ function updateFisheyeEdge(edge: RenderedEdge, source: Point, target: Point, act
   }
 
   setGraphicShape(edge.element, shape);
-}
-
-function fisheyeTransform(node: RenderedNode, fisheye: FisheyeOptions, focus: Point): FisheyeTransform {
-  const dx = node.baseX - focus[0];
-  const dy = node.baseY - focus[1];
-  const distance = Math.hypot(dx, dy);
-  if (distance >= fisheye.radius) {
-    return {
-      x: node.baseX,
-      y: node.baseY,
-      scale: 1,
-      influence: 0
-    };
-  }
-
-  const ratio = 1 - distance / fisheye.radius;
-  const influence = ratio * ratio * (3 - 2 * ratio);
-  const scale = 1 + (fisheye.scale - 1) * influence;
-  const distanceScale = 1 + (fisheye.scale - 1) * influence * 0.35;
-  return {
-    x: focus[0] + dx * distanceScale,
-    y: focus[1] + dy * distanceScale,
-    scale,
-    influence
-  };
-}
-
-function eventPoint(event: ZRenderEvent): Point | null {
-  const x = finiteNumber(event.offsetX, finiteNumber(event.zrX, NaN));
-  const y = finiteNumber(event.offsetY, finiteNumber(event.zrY, NaN));
-  return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : null;
-}
-
-function pointInRect(point: Point, rect: Rect): boolean {
-  return point[0] >= rect.x
-    && point[0] <= rect.x + rect.width
-    && point[1] >= rect.y
-    && point[1] <= rect.y + rect.height;
-}
-
-function resolveFisheyeNumber(value: unknown, fallback: number, percentBase: number): number {
-  if (typeof value === 'string' && value.endsWith('%')) {
-    const ratio = Number(value.slice(0, -1));
-    return Number.isFinite(ratio) ? percentBase * ratio / 100 : fallback;
-  }
-  return finiteNumber(value, fallback);
 }
 
 function getLabelPoint(node: PublicLayoutNode, position: string, offset: number): LabelPoint {

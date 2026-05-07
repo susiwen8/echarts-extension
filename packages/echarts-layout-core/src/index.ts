@@ -9,6 +9,14 @@ export {
   installElementHover
 } from './element-hover.js';
 export {
+  fisheyeTransform,
+  installFisheyeController,
+  resolveFisheyeOptions,
+  setFisheyeGraphicIgnore,
+  setFisheyeGraphicShape,
+  setFisheyeGraphicStyle
+} from './fisheye.js';
+export {
   clearAliveRender,
   renderAlive,
   setAliveRenderKey
@@ -19,6 +27,17 @@ export type {
   ElementHoverOptions,
   HoverGraphicElement
 } from './element-hover.js';
+export type {
+  FisheyeController,
+  FisheyeControllerOptions,
+  FisheyeGraphicElement,
+  FisheyeOptions,
+  FisheyePoint,
+  FisheyeRect,
+  FisheyeTransform,
+  FisheyeZRenderEvent,
+  FisheyeZRenderLike
+} from './fisheye.js';
 export type {
   AliveGraphicElement,
   AliveGraphicGroup,

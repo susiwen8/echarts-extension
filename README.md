@@ -24,8 +24,10 @@ Implemented packages:
 - `echarts-spiral` registers `series.type = 'spiral'`
 - `echarts-vector-field` registers `series.type = 'vectorField'`
 - `echarts-beeswarm` registers `series.type = 'beeswarm'`
+- `echarts-fisheye` registers the reusable top-level `fisheye` magnifier component
 
 The radial, radial area, radial boxplot, concentric, grid, mds, and arc layouts are implemented locally without `@antv/layout`. The Venn, pack bubble, circle packing, sleep, nested circle, mosaic, Voronoi treemap, subway, flame, sunrise/sunset, spiral, vector-field, and beeswarm extensions also use local deterministic layout implementations.
+The fisheye component is chart-agnostic: import it once and enable `fisheye` in any ECharts option.
 
 Source implementation files live in `index.ts` and `src/**/*.ts`; package entrypoints are compiled to `lib/`, and UMD bundles are emitted to `dist/`.
 
@@ -71,6 +73,34 @@ chart.setOption({
 ```
 
 The five graph layout packages accept ECharts graph-style `data`/`links` or `nodes`/`edges`. When `symbolSize` is omitted, node sizes are scaled from each node's numeric `value`; set series-level or node-level `symbolSize` to override that behavior.
+
+### Fisheye Magnifier
+
+`echarts-fisheye` provides the graph fisheye magnifier as a reusable ECharts component. Import the package once, then opt in with a top-level `fisheye` option on any chart.
+
+```js
+import * as echarts from 'echarts';
+import 'echarts-fisheye';
+
+const chart = echarts.init(document.getElementById('main'));
+chart.setOption({
+  fisheye: {
+    show: true,
+    radius: 140,
+    scale: 2.4
+  },
+  xAxis: {},
+  yAxis: {},
+  series: [
+    {
+      type: 'scatter',
+      data: [[1, 2], [2, 3], [3, 1]]
+    }
+  ]
+});
+```
+
+The existing graph packages still support their series-level `fisheye` option for graph-aware node, label, and edge distortion. Use `echarts-fisheye` when you want the same lens interaction across standard or custom chart types.
 
 ### Grid
 
