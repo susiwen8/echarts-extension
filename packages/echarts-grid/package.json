@@ -1,0 +1,20 @@
+{
+  "name": "echarts-grid",
+  "version": "0.1.0",
+  "description": "ECharts extension chart using the grid graph layout",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build:ts": "tsc -p tsconfig.json",
+    "build": "vite build --config ../../vite.config.js --mode development",
+    "release": "vite build --config ../../vite.config.js --mode production && vite build --config ../../vite.config.js --mode development"
+  },
+  "dependencies": {
+    "@echarts-extension/layout-core": "0.1.0"
+  },
+  "peerDependencies": {
+    "echarts": "^5.0.1 || ^6.0.0"
+  }
+}

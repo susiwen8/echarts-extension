@@ -1,0 +1,19 @@
+{
+  "name": "@echarts-extension/layout-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    }
+  },
+  "scripts": {
+    "build:ts": "tsc -p tsconfig.json",
+    "test": "npm run build:ts && vitest run --config ../../vitest.config.js packages/echarts-layout-core/test/layouts.test.js",
+    "test:unit": "vitest run --config ../../vitest.config.js packages/echarts-layout-core/test/layouts.test.js"
+  }
+}

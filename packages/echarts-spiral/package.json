@@ -1,0 +1,22 @@
+{
+  "name": "echarts-spiral",
+  "version": "0.1.0",
+  "description": "ECharts extension chart for segmented spiral heatmaps",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build:ts": "tsc -p tsconfig.json",
+    "test": "npm run build:ts && vitest run --config ../../vitest.config.js packages/echarts-spiral/test/spiral.test.js",
+    "test:unit": "vitest run --config ../../vitest.config.js packages/echarts-spiral/test/spiral.test.js",
+    "build": "vite build --config ../../vite.config.js --mode development",
+    "release": "vite build --config ../../vite.config.js --mode production && vite build --config ../../vite.config.js --mode development"
+  },
+  "dependencies": {
+    "@echarts-extension/layout-core": "0.1.0"
+  },
+  "peerDependencies": {
+    "echarts": "^5.0.1 || ^6.0.0"
+  }
+}

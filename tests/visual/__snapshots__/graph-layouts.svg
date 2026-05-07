@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1080" height="760" viewBox="0 0 1080 760" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="760" fill="#f6f7fb"/>
+  <g id="panel-radial">
+    <rect x="20" y="20" width="516" height="352" rx="8" fill="#fff" stroke="#d8dee9"/>
+    <line x1="20" y1="58" x2="536" y2="58" stroke="#e5e7eb"/>
+    <text x="34" y="44" fill="#374151" font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="650">Radial</text>
+    <svg x="20" y="58" width="516" height="314" viewBox="0 0 516 314">
+      <rect width="516" height="314" x="0" y="0" fill="#ffffff"></rect>
+      <path d="M258 157L330 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-0"></path>
+      <path d="M258 157L222 219.4" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-0"></path>
+      <path d="M258 157L222 94.6" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-0"></path>
+      <path d="M330 157L402 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-0"></path>
+      <path d="M330 157L186 281.7" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-0"></path>
+      <path d="M222 219.4L186 32.3" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-0"></path>
+      <path d="M222 94.6L186 281.7" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-0"></path>
+      <circle cx="258" cy="157" r="11" fill="#2454a6" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="258" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">10</text>
+      <circle cx="330" cy="157" r="11" fill="#3c7d5a" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr-cls-2"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="330" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">7</text>
+      <circle cx="222" cy="219.4" r="11" fill="#d0872f" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr-cls-3"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="222" y="219.35382907247958" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">6</text>
+      <circle cx="222" cy="94.6" r="11" fill="#9c4f97" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="3" ecmeta_ssr_type="chart" class="zr-cls-4"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="221.99999999999997" y="94.64617092752043" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">5</text>
+      <circle cx="402" cy="157" r="11" fill="#5f6fb4" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="4" ecmeta_ssr_type="chart" class="zr-cls-5"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="402" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">4</text>
+      <circle cx="186" cy="281.7" r="11" fill="#c4554d" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="5" ecmeta_ssr_type="chart" class="zr-cls-6"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="186.00000000000003" y="281.70765814495917" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">3</text>
+      <circle cx="186" cy="32.3" r="11" fill="#4b8f8c" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="6" ecmeta_ssr_type="chart" class="zr-cls-7"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="185.99999999999994" y="32.29234185504086" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">2</text>
+      <path d="M275 150.4l23.3 0l0 13.2l-23.3 0Z" fill="none" pointer-events="visible" class="zr-cls-0"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="275" y="157" fill="#374151">Root</text>
+      <path d="M347 150.4l28.3 0l0 13.2l-28.3 0Z" fill="none" pointer-events="visible" class="zr-cls-0"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="347" y="157" fill="#374151">Alpha</text>
+      <path d="M210.6 236.4l22.8 0l0 13.2l-22.8 0Z" fill="none" pointer-events="visible" class="zr-cls-0"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="222" y="242.95382907247958" fill="#374151">Beta</text>
+      <path d="M202.4 64.4l39.2 0l0 13.2l-39.2 0Z" fill="none" pointer-events="visible" class="zr-cls-0"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="221.99999999999997" y="71.04617092752042" fill="#374151">Gamma</text>
+      <path d="M419 150.4l25.7 0l0 13.2l-25.7 0Z" fill="none" pointer-events="visible" class="zr-cls-0"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="419" y="157" fill="#374151">Delta</text>
+      <path d="M203 275.1l36.2 0l0 13.2l-36.2 0Z" fill="none" pointer-events="visible" class="zr-cls-0"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="203.00000000000003" y="281.70765814495917" fill="#374151">Epsilon</text>
+      <path d="M203 25.7l22.1 0l0 13.2l-22.1 0Z" fill="none" pointer-events="visible" class="zr-cls-0"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="202.99999999999994" y="32.29234185504086" fill="#374151">Zeta</text>
+      <style ><![CDATA[
+      .zr-cls-0:hover {
+      cursor:pointer;
+      }
+      .zr-cls-1:hover {
+      cursor:pointer;
+      fill:rgba(39,92,182,1);
+      }
+      .zr-cls-2:hover {
+      cursor:pointer;
+      fill:rgba(66,137,99,1);
+      }
+      .zr-cls-3:hover {
+      cursor:pointer;
+      fill:rgba(228,148,51,1);
+      }
+      .zr-cls-4:hover {
+      cursor:pointer;
+      fill:rgba(171,86,166,1);
+      }
+      .zr-cls-5:hover {
+      cursor:pointer;
+      fill:rgba(104,122,198,1);
+      }
+      .zr-cls-6:hover {
+      cursor:pointer;
+      fill:rgba(215,93,84,1);
+      }
+      .zr-cls-7:hover {
+      cursor:pointer;
+      fill:rgba(82,157,154,1);
+      }
+
+      ]]>
+
+      </style>
+    </svg>
+  </g>
+  <g id="panel-concentric">
+    <rect x="544" y="20" width="516" height="352" rx="8" fill="#fff" stroke="#d8dee9"/>
+    <line x1="544" y1="58" x2="1060" y2="58" stroke="#e5e7eb"/>
+    <text x="558" y="44" fill="#374151" font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="650">Concentric</text>
+    <svg x="544" y="58" width="516" height="314" viewBox="0 0 516 314">
+      <rect width="516" height="314" x="0" y="0" fill="#ffffff"></rect>
+      <path d="M258 138L258 176" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-8"></path>
+      <path d="M258 138L258 100" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-8"></path>
+      <path d="M258 138L307.4 185.5" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-8"></path>
+      <path d="M258 176L258 62" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-8"></path>
+      <path d="M258 176L208.6 185.5" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-8"></path>
+      <path d="M258 100L258 252" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-8"></path>
+      <path d="M307.4 185.5L208.6 185.5" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-8"></path>
+      <circle cx="258" cy="138" r="11" fill="#2454a6" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-9"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="258" y="138" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">10</text>
+      <circle cx="258" cy="176" r="11" fill="#3c7d5a" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr-cls-10"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="258" y="176" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">7</text>
+      <circle cx="258" cy="100" r="11" fill="#d0872f" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr-cls-11"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="258" y="100" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">6</text>
+      <circle cx="307.4" cy="185.5" r="11" fill="#9c4f97" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="3" ecmeta_ssr_type="chart" class="zr-cls-12"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="307.363448015713" y="185.5" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">5</text>
+      <circle cx="258" cy="62" r="11" fill="#5f6fb4" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="4" ecmeta_ssr_type="chart" class="zr-cls-13"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="258" y="62" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">4</text>
+      <circle cx="208.6" cy="185.5" r="11" fill="#c4554d" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="5" ecmeta_ssr_type="chart" class="zr-cls-14"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="208.636551984287" y="185.5" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">3</text>
+      <circle cx="258" cy="252" r="11" fill="#4b8f8c" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="6" ecmeta_ssr_type="chart" class="zr-cls-15"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="258.00000000000006" y="252" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">2</text>
+      <path d="M275 131.4l23.3 0l0 13.2l-23.3 0Z" fill="none" pointer-events="visible" class="zr-cls-8"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="275" y="138" fill="#374151">Root</text>
+      <path d="M243.9 193l28.3 0l0 13.2l-28.3 0Z" fill="none" pointer-events="visible" class="zr-cls-8"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="258" y="199.6" fill="#374151">Alpha</text>
+      <path d="M275 93.4l22.8 0l0 13.2l-22.8 0Z" fill="none" pointer-events="visible" class="zr-cls-8"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="275" y="100" fill="#374151">Beta</text>
+      <path d="M324.4 178.9l39.2 0l0 13.2l-39.2 0Z" fill="none" pointer-events="visible" class="zr-cls-8"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="324.363448015713" y="185.5" fill="#374151">Gamma</text>
+      <path d="M245.1 31.8l25.7 0l0 13.2l-25.7 0Z" fill="none" pointer-events="visible" class="zr-cls-8"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="258" y="38.4" fill="#374151">Delta</text>
+      <path d="M155.4 178.9l36.2 0l0 13.2l-36.2 0Z" fill="none" pointer-events="visible" class="zr-cls-8"></path>
+      <text dominant-baseline="central" text-anchor="end" style="font-size:11px;font-family:sans-serif;" x="191.636551984287" y="185.5" fill="#374151">Epsilon</text>
+      <path d="M246.9 269l22.1 0l0 13.2l-22.1 0Z" fill="none" pointer-events="visible" class="zr-cls-8"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="258.00000000000006" y="275.6" fill="#374151">Zeta</text>
+      <style ><![CDATA[
+      .zr-cls-8:hover {
+      cursor:pointer;
+      }
+      .zr-cls-9:hover {
+      cursor:pointer;
+      fill:rgba(39,92,182,1);
+      }
+      .zr-cls-10:hover {
+      cursor:pointer;
+      fill:rgba(66,137,99,1);
+      }
+      .zr-cls-11:hover {
+      cursor:pointer;
+      fill:rgba(228,148,51,1);
+      }
+      .zr-cls-12:hover {
+      cursor:pointer;
+      fill:rgba(171,86,166,1);
+      }
+      .zr-cls-13:hover {
+      cursor:pointer;
+      fill:rgba(104,122,198,1);
+      }
+      .zr-cls-14:hover {
+      cursor:pointer;
+      fill:rgba(215,93,84,1);
+      }
+      .zr-cls-15:hover {
+      cursor:pointer;
+      fill:rgba(82,157,154,1);
+      }
+
+      ]]>
+
+      </style>
+    </svg>
+  </g>
+  <g id="panel-mds">
+    <rect x="20" y="388" width="516" height="352" rx="8" fill="#fff" stroke="#d8dee9"/>
+    <line x1="20" y1="426" x2="536" y2="426" stroke="#e5e7eb"/>
+    <text x="34" y="412" fill="#374151" font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="650">MDS</text>
+    <svg x="20" y="426" width="516" height="314" viewBox="0 0 516 314">
+      <rect width="516" height="314" x="0" y="0" fill="#ffffff"></rect>
+      <path d="M279.2 158.1L202.4 194.3" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-16"></path>
+      <path d="M279.2 158.1L358 167.9" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-16"></path>
+      <path d="M279.2 158.1L245.4 48.4" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-16"></path>
+      <path d="M202.4 194.3L144.5 256.2" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-16"></path>
+      <path d="M202.4 194.3L139.7 96.4" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-16"></path>
+      <path d="M358 167.9L436.8 177.7" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-16"></path>
+      <path d="M245.4 48.4L139.7 96.4" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-16"></path>
+      <circle cx="279.2" cy="158.1" r="11" fill="#2454a6" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-17"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="279.2012425925149" y="158.08427074937276" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">10</text>
+      <circle cx="202.4" cy="194.3" r="11" fill="#3c7d5a" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr-cls-18"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="202.41999037582505" y="194.32316021916938" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">7</text>
+      <circle cx="358" cy="167.9" r="11" fill="#d0872f" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr-cls-19"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="357.9840993527537" y="167.88554254548544" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">6</text>
+      <circle cx="245.4" cy="48.4" r="11" fill="#9c4f97" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="3" ecmeta_ssr_type="chart" class="zr-cls-20"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="245.43293601378122" y="48.36008628203483" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">5</text>
+      <circle cx="144.5" cy="256.2" r="11" fill="#5f6fb4" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="4" ecmeta_ssr_type="chart" class="zr-cls-21"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="144.47819218030241" y="256.2313237439881" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">4</text>
+      <circle cx="139.7" cy="96.4" r="11" fill="#c4554d" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="5" ecmeta_ssr_type="chart" class="zr-cls-22"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="139.71658337183027" y="96.42880211835129" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">3</text>
+      <circle cx="436.8" cy="177.7" r="11" fill="#4b8f8c" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="6" ecmeta_ssr_type="chart" class="zr-cls-23"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="436.7669561129925" y="177.68681434159814" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">2</text>
+      <path d="M296.2 151.5l23.3 0l0 13.2l-23.3 0Z" fill="none" pointer-events="visible" class="zr-cls-16"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="296.2012425925149" y="158.08427074937276" fill="#374151">Root</text>
+      <path d="M157.1 187.7l28.3 0l0 13.2l-28.3 0Z" fill="none" pointer-events="visible" class="zr-cls-16"></path>
+      <text dominant-baseline="central" text-anchor="end" style="font-size:11px;font-family:sans-serif;" x="185.41999037582505" y="194.32316021916938" fill="#374151">Alpha</text>
+      <path d="M375 161.3l22.8 0l0 13.2l-22.8 0Z" fill="none" pointer-events="visible" class="zr-cls-16"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="374.9840993527537" y="167.88554254548544" fill="#374151">Beta</text>
+      <path d="M225.9 18.2l39.2 0l0 13.2l-39.2 0Z" fill="none" pointer-events="visible" class="zr-cls-16"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="245.43293601378122" y="24.760086282034827" fill="#374151">Gamma</text>
+      <path d="M101.7 249.6l25.7 0l0 13.2l-25.7 0Z" fill="none" pointer-events="visible" class="zr-cls-16"></path>
+      <text dominant-baseline="central" text-anchor="end" style="font-size:11px;font-family:sans-serif;" x="127.47819218030241" y="256.2313237439881" fill="#374151">Delta</text>
+      <path d="M86.5 89.8l36.2 0l0 13.2l-36.2 0Z" fill="none" pointer-events="visible" class="zr-cls-16"></path>
+      <text dominant-baseline="central" text-anchor="end" style="font-size:11px;font-family:sans-serif;" x="122.71658337183027" y="96.42880211835129" fill="#374151">Epsilon</text>
+      <path d="M453.8 171.1l22.1 0l0 13.2l-22.1 0Z" fill="none" pointer-events="visible" class="zr-cls-16"></path>
+      <text dominant-baseline="central" text-anchor="start" style="font-size:11px;font-family:sans-serif;" x="453.7669561129925" y="177.68681434159814" fill="#374151">Zeta</text>
+      <style ><![CDATA[
+      .zr-cls-16:hover {
+      cursor:pointer;
+      }
+      .zr-cls-17:hover {
+      cursor:pointer;
+      fill:rgba(39,92,182,1);
+      }
+      .zr-cls-18:hover {
+      cursor:pointer;
+      fill:rgba(66,137,99,1);
+      }
+      .zr-cls-19:hover {
+      cursor:pointer;
+      fill:rgba(228,148,51,1);
+      }
+      .zr-cls-20:hover {
+      cursor:pointer;
+      fill:rgba(171,86,166,1);
+      }
+      .zr-cls-21:hover {
+      cursor:pointer;
+      fill:rgba(104,122,198,1);
+      }
+      .zr-cls-22:hover {
+      cursor:pointer;
+      fill:rgba(215,93,84,1);
+      }
+      .zr-cls-23:hover {
+      cursor:pointer;
+      fill:rgba(82,157,154,1);
+      }
+
+      ]]>
+
+      </style>
+    </svg>
+  </g>
+  <g id="panel-arc">
+    <rect x="544" y="388" width="516" height="352" rx="8" fill="#fff" stroke="#d8dee9"/>
+    <line x1="544" y1="426" x2="1060" y2="426" stroke="#e5e7eb"/>
+    <text x="558" y="412" fill="#374151" font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="650">Arc</text>
+    <svg x="544" y="426" width="516" height="314" viewBox="0 0 516 314">
+      <rect width="516" height="314" x="0" y="0" fill="#ffffff"></rect>
+      <path d="M69 157A31.5 31.5 0 1 1 132 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-24"></path>
+      <path d="M69 157A63 63 0 1 1 195 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-24"></path>
+      <path d="M69 157A94.5 94.5 0 1 1 258 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-24"></path>
+      <path d="M132 157A94.5 94.5 0 1 1 321 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-24"></path>
+      <path d="M132 157A126 126 0 1 1 384 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-24"></path>
+      <path d="M195 157A126 126 0 1 1 447 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-24"></path>
+      <path d="M258 157A63 63 0 1 1 384 157" fill="none" pointer-events="visible" stroke="#8a94a6" stroke-width="1.25" stroke-opacity="0.62" class="zr-cls-24"></path>
+      <circle cx="69" cy="157" r="9" fill="#2454a6" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-25"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="69" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">10</text>
+      <circle cx="132" cy="157" r="9" fill="#3c7d5a" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr-cls-26"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="132" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">7</text>
+      <circle cx="195" cy="157" r="9" fill="#d0872f" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr-cls-27"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="195" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">6</text>
+      <circle cx="258" cy="157" r="9" fill="#9c4f97" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="3" ecmeta_ssr_type="chart" class="zr-cls-28"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="258" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">5</text>
+      <circle cx="321" cy="157" r="9" fill="#5f6fb4" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="4" ecmeta_ssr_type="chart" class="zr-cls-29"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="321" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">4</text>
+      <circle cx="384" cy="157" r="9" fill="#c4554d" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="5" ecmeta_ssr_type="chart" class="zr-cls-30"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="384" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">3</text>
+      <circle cx="447" cy="157" r="9" fill="#4b8f8c" stroke="#ffffff" stroke-width="1.5" ecmeta_series_index="0" ecmeta_data_index="6" ecmeta_ssr_type="chart" class="zr-cls-31"></circle>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:8px;font-family:sans-serif;font-weight:700;" x="447" y="157" fill="#ffffff" stroke="rgb(15,23,42)" stroke-width="1.12" paint-order="stroke" stroke-opacity="0.28" stroke-miterlimit="2">2</text>
+      <path d="M57.3 172l23.3 0l0 13.2l-23.3 0Z" fill="none" pointer-events="visible" class="zr-cls-24"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="69" y="178.6" fill="#374151">Root</text>
+      <path d="M117.9 172l28.3 0l0 13.2l-28.3 0Z" fill="none" pointer-events="visible" class="zr-cls-24"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="132" y="178.6" fill="#374151">Alpha</text>
+      <path d="M183.6 172l22.8 0l0 13.2l-22.8 0Z" fill="none" pointer-events="visible" class="zr-cls-24"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="195" y="178.6" fill="#374151">Beta</text>
+      <path d="M238.4 172l39.2 0l0 13.2l-39.2 0Z" fill="none" pointer-events="visible" class="zr-cls-24"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="258" y="178.6" fill="#374151">Gamma</text>
+      <path d="M308.1 172l25.7 0l0 13.2l-25.7 0Z" fill="none" pointer-events="visible" class="zr-cls-24"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="321" y="178.6" fill="#374151">Delta</text>
+      <path d="M365.9 172l36.2 0l0 13.2l-36.2 0Z" fill="none" pointer-events="visible" class="zr-cls-24"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="384" y="178.6" fill="#374151">Epsilon</text>
+      <path d="M435.9 172l22.1 0l0 13.2l-22.1 0Z" fill="none" pointer-events="visible" class="zr-cls-24"></path>
+      <text dominant-baseline="central" text-anchor="middle" style="font-size:11px;font-family:sans-serif;" x="447" y="178.6" fill="#374151">Zeta</text>
+      <style ><![CDATA[
+      .zr-cls-24:hover {
+      cursor:pointer;
+      }
+      .zr-cls-25:hover {
+      cursor:pointer;
+      fill:rgba(39,92,182,1);
+      }
+      .zr-cls-26:hover {
+      cursor:pointer;
+      fill:rgba(66,137,99,1);
+      }
+      .zr-cls-27:hover {
+      cursor:pointer;
+      fill:rgba(228,148,51,1);
+      }
+      .zr-cls-28:hover {
+      cursor:pointer;
+      fill:rgba(171,86,166,1);
+      }
+      .zr-cls-29:hover {
+      cursor:pointer;
+      fill:rgba(104,122,198,1);
+      }
+      .zr-cls-30:hover {
+      cursor:pointer;
+      fill:rgba(215,93,84,1);
+      }
+      .zr-cls-31:hover {
+      cursor:pointer;
+      fill:rgba(82,157,154,1);
+      }
+
+      ]]>
+
+      </style>
+    </svg>
+  </g>
+</svg>

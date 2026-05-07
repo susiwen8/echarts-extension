@@ -1,0 +1,5 @@
+node_modules
+npm-debug.log
+test-results
+.DS_Store
+.omx/

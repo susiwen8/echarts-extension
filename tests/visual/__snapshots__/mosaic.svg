@@ -1,0 +1,76 @@
+<svg width="720" height="460" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 720 460">
+<rect width="720" height="460" x="0" y="0" fill="#ffffff"></rect>
+<path d="M10 10l216.7 0l0 175.6l-216.6 0Z" transform="translate(36 56)" fill="#7fb3d5" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-0"></path>
+<path d="M10 188.6l216.7 0l0 125.4l-216.6 0Z" transform="translate(36 56)" fill="#59a14f" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M10 317l216.7 0l0 50.2l-216.6 0Z" transform="translate(36 56)" fill="#f2b447" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr-cls-2"></path>
+<path d="M229.7 10l180.5 0l0 140.5l-180.5 0Z" transform="translate(36 56)" fill="#7fb3d5" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="3" ecmeta_ssr_type="chart" class="zr-cls-0"></path>
+<path d="M229.7 153.5l180.5 0l0 90.3l-180.5 0Z" transform="translate(36 56)" fill="#59a14f" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="4" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M229.7 246.8l180.5 0l0 120.4l-180.5 0Z" transform="translate(36 56)" fill="#f2b447" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="5" ecmeta_ssr_type="chart" class="zr-cls-2"></path>
+<path d="M413.2 10l113.5 0l0 95.8l-113.5 0Z" transform="translate(36 56)" fill="#7fb3d5" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="6" ecmeta_ssr_type="chart" class="zr-cls-0"></path>
+<path d="M413.2 108.8l113.5 0l0 207.5l-113.5 0Z" transform="translate(36 56)" fill="#59a14f" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="7" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M413.2 319.3l113.5 0l0 47.9l-113.5 0Z" transform="translate(36 56)" fill="#f2b447" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="8" ecmeta_ssr_type="chart" class="zr-cls-2"></path>
+<path d="M529.7 10l108.3 0l0 150.5l-108.3 0Z" transform="translate(36 56)" fill="#7fb3d5" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="9" ecmeta_ssr_type="chart" class="zr-cls-0"></path>
+<path d="M529.7 163.5l108.3 0l0 75.3l-108.3 0Z" transform="translate(36 56)" fill="#59a14f" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="10" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M529.7 241.8l108.3 0l0 125.4l-108.3 0Z" transform="translate(36 56)" fill="#f2b447" fill-opacity="0.94" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.94" ecmeta_series_index="0" ecmeta_data_index="11" ecmeta_ssr_type="chart" class="zr-cls-2"></path>
+<path d="M96.2 82.8l44.2 0l0 30l-44.2 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="118.32499999999999" y="90.3" transform="translate(36 56)" fill="#172033">Organic</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="118.32499999999999" y="105.3" transform="translate(36 56)" fill="#172033">New: 42</text>
+<path d="M82.1 236.3l72.4 0l0 30l-72.4 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="118.32499999999999" y="243.81428571428572" transform="translate(36 56)" fill="#172033">Organic</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="118.32499999999999" y="258.8142857142857" transform="translate(36 56)" fill="#172033">Returning: 30</text>
+<path d="M85.2 327.1l66.2 0l0 30l-66.2 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="118.32499999999999" y="334.61428571428576" transform="translate(36 56)" fill="#172033">Organic</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="118.32499999999999" y="349.61428571428576" transform="translate(36 56)" fill="#172033">Dormant: 12</text>
+<path d="M297.8 65.2l44.2 0l0 30l-44.2 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="319.92083333333335" y="72.74" transform="translate(36 56)" fill="#172033">Paid</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="319.92083333333335" y="87.74" transform="translate(36 56)" fill="#172033">New: 28</text>
+<path d="M283.7 183.6l72.4 0l0 30l-72.4 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="319.92083333333335" y="191.13428571428568" transform="translate(36 56)" fill="#172033">Paid</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="319.92083333333335" y="206.13428571428568" transform="translate(36 56)" fill="#172033">Returning: 18</text>
+<path d="M286.8 292l66.2 0l0 30l-66.2 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="319.92083333333335" y="299.4942857142857" transform="translate(36 56)" fill="#172033">Paid</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="319.92083333333335" y="314.4942857142857" transform="translate(36 56)" fill="#172033">Dormant: 24</text>
+<path d="M433.2 42.9l73.4 0l0 30l-73.4 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="469.93333333333334" y="50.39090909090908" transform="translate(36 56)" fill="#172033">Referral New:</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="469.93333333333334" y="65.39090909090908" transform="translate(36 56)" fill="#172033">12</text>
+<path d="M433.8 197.5l72.4 0l0 30l-72.4 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="469.93333333333334" y="205.04545454545453" transform="translate(36 56)" fill="#172033">Referral</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="469.93333333333334" y="220.04545454545453" transform="translate(36 56)" fill="#172033">Returning: 26</text>
+<path d="M440.2 328.3l59.5 0l0 30l-59.5 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="469.93333333333334" y="335.75454545454545" transform="translate(36 56)" fill="#172033">Referral</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="469.93333333333334" y="350.75454545454545" transform="translate(36 56)" fill="#172033">Dormant: 6</text>
+<path d="M561.8 70.3l44.2 0l0 30l-44.2 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="583.8375" y="77.75714285714285" transform="translate(36 56)" fill="#172033">Social</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="583.8375" y="92.75714285714285" transform="translate(36 56)" fill="#172033">New: 18</text>
+<path d="M551 186.1l65.6 0l0 30l-65.6 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="583.8375" y="193.64285714285714" transform="translate(36 56)" fill="#172033">Social</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="583.8375" y="208.64285714285714" transform="translate(36 56)" fill="#172033">Returning: 9</text>
+<path d="M550.7 289.5l66.2 0l0 30l-66.2 0Z" transform="translate(36 56)" fill="none" pointer-events="visible" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="583.8375" y="296.98571428571427" transform="translate(36 56)" fill="#172033">Social</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="583.8375" y="311.98571428571427" transform="translate(36 56)" fill="#172033">Dormant: 15</text>
+<path d="M-100 -5l200.1 0l0 32l-200.1 0Z" transform="translate(360 21)" fill="rgb(0,0,0)" fill-opacity="0" stroke="#3c3c41" stroke-width="0" class="zr-cls-4"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:22px;font-family:sans-serif;font-weight:700;" xml:space="preserve" y="11" transform="translate(360 21)" fill="#111827">Acquisition Cohorts</text>
+<style ><![CDATA[
+.zr-cls-0:hover {
+cursor:pointer;
+fill:rgba(139,196,234,1);
+}
+.zr-cls-1:hover {
+cursor:pointer;
+fill:rgba(97,177,86,1);
+}
+.zr-cls-2:hover {
+cursor:pointer;
+fill:rgba(255,198,78,1);
+}
+.zr-cls-3:hover {
+cursor:pointer;
+}
+.zr-cls-4:hover {
+pointer-events:none;
+}
+
+]]>
+
+</style>
+</svg>
