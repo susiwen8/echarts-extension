@@ -282,13 +282,252 @@ test('sunriseSunset custom sun and moon icons move with the arc lines', () => {
   );
 });
 
-function renderDisplayList(series, animation) {
-  const chart = echarts.init(null, null, {
-    renderer: 'svg',
-    ssr: true,
-    width: 420,
-    height: 320
+test('sunriseSunset time updates grow the day line and area on a stable trajectory', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 10:47:33',
+    padding: 72,
+    enterAnimation: false,
+    animationDurationUpdate: 0,
+    dayLineStyle: { color: '#ffa72b' },
+    dayAreaStyle: { color: '#ffa72b', opacity: 0.2 }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  const before = sunriseSunsetGeometry(chart);
+
+  chart.setOption({
+    animation: true,
+    series: [{
+      ...series,
+      enterAnimation: false,
+      currentTime: '2026-05-05 16:30:00'
+    }]
+  }, {
+    notMerge: false,
+    lazyUpdate: false
   });
+  chart.getZr().flush?.();
+  const after = sunriseSunsetGeometry(chart);
+  chart.dispose();
+
+  assert.ok(before.dayArea && after.dayArea);
+  assert.ok(before.daySolid && after.daySolid);
+  assert.ok(before.dayFuture && after.dayFuture);
+  assert.equal(after.dayArea.width, before.dayArea.width);
+  assert.ok(after.dayArea.clipWidth > before.dayArea.clipWidth + 80);
+  assert.equal(after.daySolid.pointCount, before.daySolid.pointCount);
+  assert.equal(after.daySolid.endX, before.daySolid.endX);
+  assert.ok(after.daySolid.clipWidth > before.daySolid.clipWidth + 80);
+  assert.ok(after.daySolid.clipWidth < after.daySolid.width);
+  assert.equal(after.dayFuture.pointCount, before.dayFuture.pointCount);
+  assert.equal(after.dayFuture.endX, before.dayFuture.endX);
+  assert.ok(after.dayFuture.clipX > before.dayFuture.clipX + 80);
+  assert.ok(after.dayFuture.clipWidth < before.dayFuture.clipWidth - 80);
+});
+
+test('sunriseSunset time updates cancel in-flight enter path animations', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 10:47:33',
+    padding: 72,
+    animationDurationUpdate: 0,
+    dayLineStyle: { color: '#ffa72b' },
+    dayAreaStyle: { color: '#ffa72b', opacity: 0.2 }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  chart.setOption({
+    animation: true,
+    series: [{
+      ...series,
+      enterAnimation: false,
+      currentTime: '2026-05-05 16:30:00'
+    }]
+  }, {
+    notMerge: false,
+    lazyUpdate: false
+  });
+  chart.getZr().flush?.();
+  const after = sunriseSunsetGeometry(chart);
+  chart.dispose();
+
+  assert.ok(after.daySolid);
+  assert.ok(after.dayArea);
+  assert.ok(after.daySolid.clipWidth > 220);
+  assert.ok(after.dayArea.clipWidth > 220);
+});
+
+test('sunriseSunset time updates grow the moon progress line on a stable trajectory', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 23:20:00',
+    padding: 72,
+    enterAnimation: false,
+    animationDurationUpdate: 0,
+    moonLineStyle: { color: '#5a91f2' }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  const before = sunriseSunsetGeometry(chart);
+
+  chart.setOption({
+    animation: true,
+    series: [{
+      ...series,
+      enterAnimation: false,
+      currentTime: '2026-05-05 02:30:00'
+    }]
+  }, {
+    notMerge: false,
+    lazyUpdate: false
+  });
+  chart.getZr().flush?.();
+  const after = sunriseSunsetGeometry(chart);
+  chart.dispose();
+
+  assert.ok(before.moonSolid && after.moonSolid);
+  assert.equal(after.moonSolid.pointCount, before.moonSolid.pointCount);
+  assert.equal(after.moonSolid.endX, before.moonSolid.endX);
+  assert.ok(after.moonSolid.clipWidth > before.moonSolid.clipWidth + 30);
+  assert.ok(after.moonSolid.clipWidth < after.moonSolid.width);
+});
+
+test('sunriseSunset time updates add the moon progress line after moonrise', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 10:47:33',
+    padding: 72,
+    enterAnimation: false,
+    animationDurationUpdate: 0,
+    moonLineStyle: { color: '#5a91f2' }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  const before = sunriseSunsetGeometry(chart);
+
+  chart.setOption({
+    animation: true,
+    series: [{
+      ...series,
+      enterAnimation: false,
+      currentTime: '2026-05-05 23:20:00'
+    }]
+  }, {
+    notMerge: false,
+    lazyUpdate: false
+  });
+  chart.getZr().flush?.();
+  const after = sunriseSunsetGeometry(chart);
+  chart.dispose();
+
+  assert.equal(before.moonSolid, null);
+  assert.ok(after.moonSolid);
+  assert.ok(after.moonSolid.clipWidth > 10);
+  assert.equal(after.moonSolid.endX, after.moonFull.endX);
+});
+
+test('sunriseSunset hides the active day chart after sunset so the moon chart stays primary', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 23:20:00',
+    padding: 72,
+    enterAnimation: false,
+    animationDurationUpdate: 0,
+    dayLineStyle: { color: '#ffa72b' },
+    moonLineStyle: { color: '#5a91f2' },
+    dayAreaStyle: { color: '#ffa72b', opacity: 0.2 }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  chart.getZr().flush?.();
+  const geometry = sunriseSunsetGeometry(chart);
+  chart.dispose();
+
+  assert.equal(geometry.dayArea, null);
+  assert.equal(geometry.daySolid, null);
+  assert.ok(geometry.dayFuture);
+  assert.equal(geometry.dayFuture.pointCount, 37);
+  assert.deepEqual(geometry.dayFuture.lineDash, [7, 8]);
+  assert.ok(geometry.dayFuture.opacity < 0.42);
+  assert.ok(geometry.moonSolid);
+  assert.ok(geometry.moonSolid.clipWidth > 10);
+});
+
+test('sunriseSunset keeps sun and moon motion icon identities separate across sunset', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 10:47:33',
+    padding: 72,
+    enterAnimation: false,
+    animationDurationUpdate: 0,
+    sunIcon: {
+      path: 'M -10 -7 L 10 -7 L 0 11 Z',
+      style: {
+        fill: '#ffdd55'
+      }
+    },
+    moonIcon: null
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  chart.setOption({
+    animation: true,
+    series: [{
+      ...series,
+      currentTime: '2026-05-05 23:20:00'
+    }]
+  }, {
+    notMerge: false,
+    lazyUpdate: false
+  });
+  chart.getZr().flush?.();
+  const tree = collectElementTree(chart);
+  chart.dispose();
+
+  assert.ok(
+    tree.some((element) => element.type === 'group' && element.key === 'sky:moon-icon'),
+    'the moving moon icon should have a stable moon-specific key'
+  );
+  assert.equal(
+    tree.some((element) => element.type === 'group' && element.key === 'sky:sun-icon'),
+    false,
+    'the moving sun icon should not be reused for the moon after sunset'
+  );
+});
+
+function renderDisplayList(series, animation) {
+  const chart = createSsrChart();
 
   chart.setOption({
     ...(animation === undefined ? {} : { animation }),
@@ -301,24 +540,64 @@ function renderDisplayList(series, animation) {
 }
 
 function renderElementTree(series, animation) {
-  const chart = echarts.init(null, null, {
-    renderer: 'svg',
-    ssr: true,
-    width: 420,
-    height: 320
-  });
+  const chart = createSsrChart();
 
   chart.setOption({
     ...(animation === undefined ? {} : { animation }),
     series: [series]
   });
 
+  const elements = collectElementTree(chart);
+  chart.dispose();
+  return elements;
+}
+
+function createSsrChart(width = 420, height = 320) {
+  return echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width,
+    height
+  });
+}
+
+function sunriseSunsetGeometry(chart) {
+  const displayList = chart.getZr().storage.getDisplayList(true);
+  return {
+    dayArea: shapeStateForElement(displayList, (element) => element.z2 === -2 && element.style?.fill),
+    dayFuture: shapeStateForElement(displayList, (element) => element.z2 === 1 && element.style?.stroke === '#ffa72b'),
+    daySolid: shapeStateForElement(displayList, (element) => element.z2 === 3 && element.style?.stroke === '#ffa72b'),
+    moonFull: shapeStateForElement(displayList, (element) => element.z2 === 0 && element.style?.stroke === '#5a91f2'),
+    moonSolid: shapeStateForElement(displayList, (element) => element.z2 === 2 && element.style?.stroke === '#5a91f2')
+  };
+}
+
+function shapeStateForElement(displayList, predicate) {
+  const element = displayList.find(predicate);
+  const rect = element?.getBoundingRect();
+  const points = element?.shape?.points || [];
+  const lastPoint = points[points.length - 1];
+  return rect ? {
+    x: rect.x,
+    y: rect.y,
+    width: rect.width,
+    height: rect.height,
+    pointCount: points.length,
+    endX: Array.isArray(lastPoint) ? Math.round(lastPoint[0]) : undefined,
+    percent: element?.shape?.percent,
+    clipX: element?.__clipPaths?.[0]?.shape?.x,
+    clipWidth: element?.__clipPaths?.[0]?.shape?.width,
+    lineDash: element?.style?.lineDash,
+    opacity: element?.style?.opacity
+  } : null;
+}
+
+function collectElementTree(chart) {
   const elements = [];
   const roots = chart.getZr().storage._roots;
   for (const root of roots) {
     collectElement(root, elements);
   }
-  chart.dispose();
   return elements;
 }
 
@@ -326,6 +605,7 @@ function collectElement(element, elements) {
   const children = element.children?.() ?? [];
   elements.push({
     type: element.type,
+    key: element.__aliveRenderKey,
     animatorCount: element.animators?.length ?? 0,
     childCount: children.length,
     x: element.x,

@@ -4,6 +4,7 @@ const DEFAULT_PADDING = 72;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
 const MINUTE_MS = 60 * 1000;
+const ARC_SEGMENT_STEPS = 36;
 
 export type SunriseSunsetTimeValue = string | number | Date;
 
@@ -54,6 +55,10 @@ export interface SunriseSunsetArcLayout {
   end: SunriseSunsetPoint;
   current: SunriseSunsetPoint;
   motionPoints: SunriseSunsetPoint[];
+  solidPoints: SunriseSunsetPoint[];
+  dashedPoints: SunriseSunsetPoint[];
+  fullPoints: SunriseSunsetPoint[];
+  areaPoints: SunriseSunsetPoint[];
   progress: number;
   visible: boolean;
   wraps: boolean;
@@ -283,27 +288,43 @@ function createArcLayout(
   durationMinutes: number
 ): SunriseSunsetArcLayout {
   const safeProgress = clamp(progress, 0, 1);
+  const fullPoints = createArcPoints(geometry, 0, 1, ARC_SEGMENT_STEPS);
+  const solidPoints = fullPoints;
+  const dashedPoints = fullPoints;
+  const areaPoints = createAreaPoints(geometry, fullPoints);
+  const progressPoints = safeProgress > 0 ? createArcPoints(geometry, 0, safeProgress, ARC_SEGMENT_STEPS) : [];
+  const futurePoints = safeProgress < 1 ? createArcPoints(geometry, safeProgress, 1, ARC_SEGMENT_STEPS) : [];
+  const progressAreaPoints = safeProgress > 0 ? createAreaPoints(geometry, progressPoints) : [];
 
   return {
     start: pointOnArc(geometry, 0),
     end: pointOnArc(geometry, 1),
     current: pointOnArc(geometry, safeProgress),
     motionPoints: createMotionPoints(geometry, safeProgress),
+    solidPoints,
+    dashedPoints,
+    fullPoints,
+    areaPoints,
     progress: safeProgress,
     visible,
     wraps,
     durationMinutes,
-    solidPath: safeProgress > 0 ? createArcPath(geometry, 0, safeProgress) : '',
-    dashedPath: safeProgress < 1 ? createArcPath(geometry, safeProgress, 1) : '',
-    fullPath: createArcPath(geometry, 0, 1),
-    areaPath: safeProgress > 0 ? createAreaPath(geometry, safeProgress) : ''
+    solidPath: pointsToPath(progressPoints),
+    dashedPath: pointsToPath(futurePoints),
+    fullPath: pointsToPath(fullPoints),
+    areaPath: pointsToAreaPath(progressAreaPoints)
   };
 }
 
-function createArcPath(geometry: ArcGeometry, startProgress: number, endProgress: number): string {
+function createArcPoints(
+  geometry: ArcGeometry,
+  startProgress: number,
+  endProgress: number,
+  fixedSteps?: number
+): SunriseSunsetPoint[] {
   const start = clamp(startProgress, 0, 1);
   const end = clamp(endProgress, start, 1);
-  const steps = Math.max(2, Math.ceil(Math.abs(end - start) * 36));
+  const steps = Math.max(2, fixedSteps ?? Math.ceil(Math.abs(end - start) * ARC_SEGMENT_STEPS));
   const points: SunriseSunsetPoint[] = [];
 
   for (let index = 0; index <= steps; index += 1) {
@@ -311,20 +332,16 @@ function createArcPath(geometry: ArcGeometry, startProgress: number, endProgress
     points.push(pointOnArc(geometry, progress));
   }
 
-  return pointsToPath(points);
+  return points;
 }
 
-function createAreaPath(geometry: ArcGeometry, progress: number): string {
-  const end = clamp(progress, 0, 1);
-  const steps = Math.max(2, Math.ceil(end * 36));
-  const points: SunriseSunsetPoint[] = [];
-
-  for (let index = 0; index <= steps; index += 1) {
-    points.push(pointOnArc(geometry, (end * index) / steps));
-  }
-
-  const current = points[points.length - 1] || pointOnArc(geometry, 0);
-  return `${pointsToPath(points)} L ${formatNumber(current.x)} ${formatNumber(geometry.baselineY)} L ${formatNumber(geometry.startX)} ${formatNumber(geometry.baselineY)} Z`;
+function createAreaPoints(geometry: ArcGeometry, arcPoints: SunriseSunsetPoint[]): SunriseSunsetPoint[] {
+  const current = arcPoints[arcPoints.length - 1] || pointOnArc(geometry, 0);
+  return [
+    ...arcPoints,
+    { x: current.x, y: geometry.baselineY },
+    { x: geometry.startX, y: geometry.baselineY }
+  ];
 }
 
 function createMotionPoints(geometry: ArcGeometry, progress: number): SunriseSunsetPoint[] {
@@ -353,6 +370,18 @@ function pointsToPath(points: SunriseSunsetPoint[]): string {
   return [
     `M ${formatNumber(first.x)} ${formatNumber(first.y)}`,
     ...rest.map((point) => `L ${formatNumber(point.x)} ${formatNumber(point.y)}`)
+  ].join(' ');
+}
+
+function pointsToAreaPath(points: SunriseSunsetPoint[]): string {
+  if (points.length < 3) return '';
+  const arcPoints = points.slice(0, -2);
+  const [baselineEnd, baselineStart] = points.slice(-2);
+  return [
+    pointsToPath(arcPoints),
+    `L ${formatNumber(baselineEnd.x)} ${formatNumber(baselineEnd.y)}`,
+    `L ${formatNumber(baselineStart.x)} ${formatNumber(baselineStart.y)}`,
+    'Z'
   ].join(' ');
 }
 

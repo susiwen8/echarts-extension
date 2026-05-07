@@ -1,11 +1,17 @@
 <svg width="1260" height="795" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 1260 795">
 <rect width="1260" height="795" x="0" y="0" fill="none"></rect>
 <path d="M0 0l1260 0l0 795l-1260 0Z" fill="#202124" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
-<path d="M216 640L239 610.9L261.9 582.1L284.9 553.7L307.8 526L330.8 499.1L353.7 473.3L376.7 448.8L399.6 425.7L422.6 404.3L445.5 384.6L468.5 366.8L491.4 351.2L514.4 337.7L537.3 326.5L560.3 317.7L560.3 640L216 640Z" fill="rgb(255,167,43)" fill-opacity="0.2" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
+<g clip-path="url(#zr12-c0)">
+<polygon points="216 640 239 610.9 262 582 285 553.6 308 525.8 331 498.9 354 473 377 448.5 400 425.3 423 403.9 446 384.2 469 366.5 492 350.8 515 337.4 538 326.2 561 317.5 584 311.1 607 307.3 630 306.1 653 307.3 676 311.1 699 317.5 722 326.2 745 337.4 768 350.8 791 366.5 814 384.2 837 403.9 860 425.3 883 448.5 906 473 929 498.9 952 525.8 975 553.6 998 582 1021 610.9 1044 640 1044 640 216 640" fill="rgb(255,167,43)" fill-opacity="0.2" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></polygon>
+</g>
 <path d="M17.3 640L1242.7 640" fill="none" pointer-events="visible" stroke="#3f4245" stroke-width="1.2" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
-<path d="M447.8 640L458 627.5L468.1 615L478.2 602.8L488.3 590.9L498.4 579.3L508.6 568.2L518.7 557.6L528.8 547.7L538.9 538.5L549 530L559.2 522.4L569.3 515.6L579.4 509.9L589.5 505.1L599.6 501.3L609.8 498.6L619.9 496.9L630 496.4L640.1 496.9L650.2 498.6L660.4 501.3L670.5 505.1L680.6 509.9L690.7 515.6L700.8 522.4L711 530L721.1 538.5L731.2 547.7L741.3 557.6L751.4 568.2L761.6 579.3L771.7 590.9L781.8 602.8L791.9 615L802 627.5L812.2 640" fill="none" pointer-events="visible" stroke="#5a91f2" stroke-width="4" stroke-opacity="0.72" stroke-dasharray="6,7" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
-<path d="M560.3 317.7L582.3 311.5L604.3 307.7L626.2 306.1L648.2 306.9L670.2 310L692.2 315.3L714.2 323L736.2 332.8L758.2 344.8L780.2 358.8L802.1 374.8L824.1 392.6L846.1 412.2L868.1 433.3L890.1 455.9L912.1 479.7L934.1 504.7L956.1 530.6L978 557.3L1000 584.5L1022 612.2L1044 640" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="5" stroke-opacity="0.42" stroke-dasharray="7,8" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
-<path d="M216 640L239 610.9L261.9 582.1L284.9 553.7L307.8 526L330.8 499.1L353.7 473.3L376.7 448.8L399.6 425.7L422.6 404.3L445.5 384.6L468.5 366.8L491.4 351.2L514.4 337.7L537.3 326.5L560.3 317.7" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<polyline points="447.8 640 458 627.5 468.1 615 478.2 602.8 488.3 590.9 498.4 579.3 508.6 568.2 518.7 557.6 528.8 547.7 538.9 538.5 549 530 559.2 522.4 569.3 515.6 579.4 509.9 589.5 505.1 599.6 501.3 609.8 498.6 619.9 496.9 630 496.4 640.1 496.9 650.2 498.6 660.4 501.3 670.5 505.1 680.6 509.9 690.7 515.6 700.8 522.4 711 530 721.1 538.5 731.2 547.7 741.3 557.6 751.4 568.2 761.6 579.3 771.7 590.9 781.8 602.8 791.9 615 802 627.5 812.2 640" fill="none" pointer-events="visible" stroke="#5a91f2" stroke-width="4" stroke-opacity="0.72" stroke-dasharray="6,7" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></polyline>
+<g clip-path="url(#zr12-c1)">
+<polyline points="216 640 239 610.9 262 582 285 553.6 308 525.8 331 498.9 354 473 377 448.5 400 425.3 423 403.9 446 384.2 469 366.5 492 350.8 515 337.4 538 326.2 561 317.5 584 311.1 607 307.3 630 306.1 653 307.3 676 311.1 699 317.5 722 326.2 745 337.4 768 350.8 791 366.5 814 384.2 837 403.9 860 425.3 883 448.5 906 473 929 498.9 952 525.8 975 553.6 998 582 1021 610.9 1044 640" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="5" stroke-opacity="0.42" stroke-dasharray="7,8" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></polyline>
+</g>
+<g clip-path="url(#zr12-c2)">
+<polyline points="216 640 239 610.9 262 582 285 553.6 308 525.8 331 498.9 354 473 377 448.5 400 425.3 423 403.9 446 384.2 469 366.5 492 350.8 515 337.4 538 326.2 561 317.5 584 311.1 607 307.3 630 306.1 653 307.3 676 311.1 699 317.5 722 326.2 745 337.4 768 350.8 791 366.5 814 384.2 837 403.9 860 425.3 883 448.5 906 473 929 498.9 952 525.8 975 553.6 998 582 1021 610.9 1044 640" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></polyline>
+</g>
 <path d="M133.2 670.9L137.3 670.9" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="2" stroke-linecap="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
 <path d="M130.8 678.4L134.1 680.8" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="2" stroke-linecap="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
 <path d="M124.5 683L125.8 686.8" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="2" stroke-linecap="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
@@ -42,9 +48,9 @@
 <path d="M553.1 295.4L550.7 288.2" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="3.6" stroke-linecap="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
 <path d="M567.5 295.4L569.8 288.2" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="3.6" stroke-linecap="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
 <path d="M579.2 303.9L585.3 299.5" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="3.6" stroke-linecap="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
-<circle cx="447.8" cy="624" r="19" fill="#5a91f2" fill-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></circle>
+<circle cx="0" cy="0" r="19" transform="translate(447.84 623.975)" fill="#5a91f2" fill-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></circle>
 <circle cx="560.3" cy="317.7" r="18" fill="#ffa72b" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></circle>
-<circle cx="456.4" cy="622.5" r="17.5" fill="#202124" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></circle>
+<circle cx="8.6" cy="-1.5" r="17.5" transform="translate(447.84 623.975)" fill="#202124" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></circle>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:46px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:650;" x="630" y="70.69999999999999" fill="#f5f6f7">距离日落还剩</text>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:78px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:300;" x="630" y="161.43" fill="#ffffff">07:51:27</text>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:34px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:500;" x="630" y="239.6" fill="#aeb0b5">更新于10:46</text>
@@ -56,6 +62,17 @@
 <text dominant-baseline="central" text-anchor="end" style="font-size:36px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:420;" x="797.04" y="672.375" fill="#eef0f2">07:59</text>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:20.88px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:800;" x="1139.4" y="642.855" fill="#ffa72b">↓</text>
 <text dominant-baseline="central" text-anchor="end" style="font-size:36px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:420;" x="1098" y="672.375" fill="#eef0f2">18:39</text>
+<defs >
+<clipPath id="zr12-c0">
+<path d="M216 0l344.3 0l0 795l-344.3 0Z" fill="#000" class="zr-cls-0"></path>
+</clipPath>
+<clipPath id="zr12-c1">
+<path d="M555.3 0l493.7 0l0 795l-493.7 0Z" fill="#000" class="zr-cls-0"></path>
+</clipPath>
+<clipPath id="zr12-c2">
+<path d="M211 0l354.3 0l0 795l-354.3 0Z" fill="#000" class="zr-cls-0"></path>
+</clipPath>
+</defs>
 <style ><![CDATA[
 .zr-cls-0:hover {
 pointer-events:none;

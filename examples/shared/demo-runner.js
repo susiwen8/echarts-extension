@@ -1883,6 +1883,7 @@
     }
     if (context.interactionControlId === control.id) {
       setPath(option, 'series.0.enterAnimation', false);
+      setPath(option, 'series.0.animationDurationUpdate', 0);
     }
   }
 

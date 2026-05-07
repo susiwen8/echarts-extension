@@ -592,6 +592,7 @@ test('sunrise sunset time slider updates do not replay enter animation', () => {
 
   assert.equal(typeof replayOption.series[0].enterAnimation, 'object');
   assert.equal(dragOption.series[0].enterAnimation, false);
+  assert.equal(dragOption.series[0].animationDurationUpdate, 0);
 });
 
 test('layout core svg example wires zoom hover and click interactions', () => {

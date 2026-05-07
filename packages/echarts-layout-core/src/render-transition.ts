@@ -47,6 +47,9 @@ export interface AliveGraphicElement extends HoverGraphicElement {
     animationProps?: Record<string, unknown>
   ) => void;
   stopAnimation?: (scope?: string, forwardToLast?: boolean) => void;
+  getClipPath?: () => AliveGraphicElement | null | undefined;
+  setClipPath?: (clipPath: AliveGraphicElement) => void;
+  removeClipPath?: () => void;
   dirty?: () => void;
 }
 
@@ -365,6 +368,7 @@ function findCurrentMatch(
   const key = transitionKey(nextChild, index);
   const keyedMatch = key ? keyedCurrent.get(key) : undefined;
   if (keyedMatch && !usedCurrent.has(keyedMatch)) return keyedMatch;
+  if (hasExplicitTransitionKey(nextChild)) return undefined;
 
   const indexMatch = currentChildren[index];
   if (indexMatch && !usedCurrent.has(indexMatch) && sameElementKind(indexMatch, nextChild)) return indexMatch;
@@ -381,19 +385,43 @@ function transitionElement(
   const target = elementTarget(next);
   removeMissingKeys(asRecord(current.shape), asRecord(target.shape));
   removeMissingKeys(asRecord(current.style), asRecord(target.style));
+  transitionClipPath(current, next, context, animate);
+
+  if (animate) current.stopAnimation?.(undefined, false);
 
   if (!animate || context.duration <= 0 || typeof current.animateTo !== 'function') {
     applyElementTarget(current, target);
     return;
   }
 
-  current.stopAnimation?.(TRANSITION_SCOPE, false);
   current.animateTo(target, {
     duration: context.duration,
     easing: context.easing,
     scope: TRANSITION_SCOPE,
     done: () => applyElementTarget(current, target)
   }, animationProps(target));
+}
+
+function transitionClipPath(
+  current: AliveGraphicElement,
+  next: AliveGraphicElement,
+  context: RenderContext,
+  animate: boolean
+): void {
+  const nextClipPath = getClipPath(next);
+  const currentClipPath = getClipPath(current);
+
+  if (!nextClipPath) {
+    if (currentClipPath) current.removeClipPath?.();
+    return;
+  }
+
+  if (!currentClipPath || !sameElementKind(currentClipPath, nextClipPath)) {
+    current.setClipPath?.(nextClipPath);
+    return;
+  }
+
+  transitionElement(currentClipPath, nextClipPath, context, animate);
 }
 
 function addEnteringChild(parent: AliveGraphicGroup, child: AliveGraphicElement, context: RenderContext): void {
@@ -533,19 +561,29 @@ function sameElementKind(left: AliveGraphicElement, right: AliveGraphicElement):
   return elementKind(left) === elementKind(right);
 }
 
+function hasExplicitTransitionKey(element: AliveGraphicElement): boolean {
+  const key = element[ALIVE_KEY];
+  return key != null && !String(key).startsWith('implicit:');
+}
+
 function elementKind(element: AliveGraphicElement): string {
   if (isGroup(element)) return 'group';
   return element.type || Object.getPrototypeOf(element)?.constructor?.name || 'element';
 }
 
 function isGroup(element: AliveGraphicElement): boolean {
-  return element.isGroup === true || typeof element.childrenRef === 'function' || typeof element.children === 'function';
+  const group = element as AliveGraphicGroup;
+  return element.isGroup === true || (typeof group.add === 'function' && typeof group.removeAll === 'function');
 }
 
 function childrenOf(group: AliveGraphicGroup): AliveGraphicElement[] {
-  if (typeof group.childrenRef === 'function') return group.childrenRef();
-  if (typeof group.children === 'function') return group.children();
+  if (typeof group.childrenRef === 'function') return group.childrenRef().slice();
+  if (typeof group.children === 'function') return group.children().slice();
   return [];
+}
+
+function getClipPath(element: AliveGraphicElement): AliveGraphicElement | null | undefined {
+  return typeof element.getClipPath === 'function' ? element.getClipPath() : undefined;
 }
 
 function elementTarget(element: AliveGraphicElement): Record<string, unknown> {
