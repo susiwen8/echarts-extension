@@ -36,6 +36,26 @@ test('does not render or expose a spiral guide line', () => {
   assert.equal(demoRunner.includes('Spiral line'), false);
 });
 
+test('demo uses a one-by-one spiral-path enter stagger instead of ring-like burst timing', () => {
+  const source = readFileSync(new URL('../src/spiral.ts', import.meta.url), 'utf8');
+  const demoRunner = readFileSync(new URL('../../../examples/shared/demo-runner.js', import.meta.url), 'utf8');
+
+  assert.equal(source.includes('resolveEnterAnimation(seriesModel, segment.animationOrder)'), true);
+  assert.equal(source.includes("seriesModel.get(['enterAnimation', 'replayKey'])"), true);
+  assert.equal(demoRunner.includes('chart.clear();'), false);
+  assert.match(demoRunner, /onReplay\(\) \{[\s\S]*replayKey \+= 1;[\s\S]*render\(\{ replayKey \}\);/);
+  assert.equal(demoRunner.includes('enterAnimation.replayKey'), true);
+  assert.match(
+    demoRunner,
+    /spiral: \{[\s\S]*rangeControl\('enterDuration', 'Enter duration', 'series\.0\.enterAnimation\.duration', 180, 80, 1200, 20\)/
+  );
+  assert.match(
+    demoRunner,
+    /spiral: \{[\s\S]*rangeControl\('enterStagger', 'Enter stagger', 'series\.0\.enterAnimation\.stagger', 80, 0, 240, 5\)/
+  );
+  assert.match(demoRunner, /spiral: \{[\s\S]*enterAnimation: \{ duration: 180, stagger: 80, easing: 'cubicOut' \}/);
+});
+
 test('normalizes object and tuple rows into named spiral data points', () => {
   const points = normalizeSpiralData([
     { stage: 'Alpha', score: 42 },
@@ -96,6 +116,7 @@ test('lays out values as deterministic clockwise segments on one spiral path', (
   assert.equal(firstSegment.name, 'Acquire');
   assert.equal(firstSegment.turnIndex, 0);
   assert.equal(firstSegment.segmentIndex, 0);
+  assert.equal(firstSegment.animationOrder, 0);
   assert.equal(firstSegment.innerRadius, 53.150367);
   assert.equal(firstSegment.outerRadius, 75.750249);
   assert.equal(firstSegment.startInnerRadius, 48.217207);
@@ -107,16 +128,20 @@ test('lays out values as deterministic clockwise segments on one spiral path', (
   assert.equal(firstSegment.path.includes(' A '), false);
 
   assert.equal(secondSegment.segmentIndex, 1);
+  assert.equal(secondSegment.animationOrder, 1);
   assert.equal(secondSegment.startAngleDegree, 122);
   assert.equal(secondSegment.endAngleDegree, 238);
   assert.ok(secondSegment.innerRadius > firstSegment.innerRadius);
   assert.equal(thirdSegment.segmentIndex, 2);
+  assert.equal(thirdSegment.animationOrder, 2);
   assert.equal(thirdSegment.startAngleDegree, 242);
   assert.equal(thirdSegment.endAngleDegree, 358);
   assert.ok(thirdSegment.innerRadius > secondSegment.innerRadius);
   assert.equal(fourthSegment.turnIndex, 1);
+  assert.equal(fourthSegment.animationOrder, 3);
   assert.ok(fourthSegment.innerRadius > thirdSegment.innerRadius);
   assert.equal(fifthSegment.turnIndex, 1);
+  assert.equal(fifthSegment.animationOrder, 4);
   assert.ok(fifthSegment.path.endsWith('Z'));
 });
 

@@ -866,8 +866,8 @@
     spiral: {
       controls: [
         ...commonChartControls('Spiral Heatmap', [0]),
-        rangeControl('enterDuration', 'Enter duration', 'series.0.enterAnimation.duration', 520, 120, 1800, 20),
-        rangeControl('enterStagger', 'Enter stagger', 'series.0.enterAnimation.stagger', 4, 0, 60, 1),
+        rangeControl('enterDuration', 'Enter duration', 'series.0.enterAnimation.duration', 180, 80, 1200, 20),
+        rangeControl('enterStagger', 'Enter stagger', 'series.0.enterAnimation.stagger', 80, 0, 240, 5),
         rangeControl('turns', 'Turns', 'series.0.turns', 5, 1, 8, 1),
         rangeControl('segmentsPerTurn', 'Segments/turn', 'series.0.segmentsPerTurn', 20, 6, 32, 1),
         rangeControl('startAngle', 'Start angle', 'series.0.startAngle', -90, -180, 180, 5),
@@ -906,7 +906,7 @@
               data: spiralData,
               minOpacity: 0.16,
               maxOpacity: 0.9,
-              enterAnimation: { duration: 520, stagger: 4, easing: 'cubicOut' },
+              enterAnimation: { duration: 180, stagger: 80, easing: 'cubicOut' },
               itemStyle: { color: '#f04438', borderColor: '#ffffff', borderWidth: 0 },
               label: { show: false, color: '#1f2937', fontSize: 11, fontWeight: 650, formatter: '{b}' },
               emphasis: {
@@ -1222,6 +1222,7 @@
     chart.hideLoading();
     const state = createControlState(entry.controls || []);
     let customOption = null;
+    let replayKey = 0;
     const controlsPanel = createControlsPanel(entry.controls || [], state, {
       onChange(control) {
         customOption = null;
@@ -1234,7 +1235,8 @@
         render();
       },
       onReplay() {
-        render();
+        replayKey += 1;
+        render({ replayKey });
       },
       onJsonApply(option) {
         customOption = option;
@@ -1251,6 +1253,7 @@
 
     function render(context = {}) {
       const option = applyDemoInteractionDefaults(customOption || createDemoOption(exampleName, data, state, context));
+      applyReplayContext(option, context);
       chart.resize();
       chart.setOption(option, {
         notMerge: false,
@@ -1259,6 +1262,15 @@
       interactions.applyViewport();
       updateOptionEditor(controlsPanel, option);
     }
+  }
+
+  function applyReplayContext(option, context = {}) {
+    if (!option || context.replayKey == null) return option;
+    const series = Array.isArray(option.series) ? option.series : option.series ? [option.series] : [];
+    series.forEach((_, seriesIndex) => {
+      setPath(option, `series.${seriesIndex}.enterAnimation.replayKey`, context.replayKey);
+    });
+    return option;
   }
 
   function createControlsPanel(controls, state, handlers) {

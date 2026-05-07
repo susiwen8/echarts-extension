@@ -58,6 +58,7 @@ export interface SpiralSegment extends SpiralDataPoint {
   index: number;
   turnIndex: number;
   segmentIndex: number;
+  animationOrder: number;
   startAngle: number;
   endAngle: number;
   midAngle: number;
@@ -209,6 +210,7 @@ export function layoutSpiral(data: unknown[], options: SpiralLayoutOptions = {})
       index,
       turnIndex,
       segmentIndex,
+      animationOrder: index,
       startAngle: startAngleDegree * Math.PI / 180,
       endAngle: endAngleDegree * Math.PI / 180,
       midAngle,

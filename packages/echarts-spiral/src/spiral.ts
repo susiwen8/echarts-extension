@@ -93,6 +93,7 @@ interface SpiralChartView {
   __renderToken?: object | null;
   __hoverController?: ElementHoverController;
   __aliveRenderState?: AliveRenderState;
+  __enterReplayKey?: unknown;
 }
 
 interface EnterAnimationConfig {
@@ -222,6 +223,7 @@ echartsHost.extendChartView({
       });
       const layout = resolveSpiralLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
+      resetAliveRenderForReplay(this, seriesModel, group);
       const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
         drawSpiral(echartsHost, targetGroup, targetSeriesModel, layout, rect)
       ));
@@ -252,6 +254,19 @@ echartsHost.extendChartView({
     this.group.removeAll();
   }
 });
+
+function resetAliveRenderForReplay(
+  view: SpiralChartView,
+  seriesModel: SpiralSeriesModel,
+  group: GraphicGroup
+): void {
+  const replayKey = seriesModel.get(['enterAnimation', 'replayKey']);
+  if (replayKey == null || replayKey === view.__enterReplayKey) return;
+
+  view.__enterReplayKey = replayKey;
+  clearAliveRender(view);
+  group.removeAll();
+}
 
 function readLayoutOption(seriesModel: SpiralSeriesModel, rect: ViewRect): SpiralLayoutOption {
   const option = seriesModel.option || {};
@@ -296,13 +311,13 @@ function drawSpiral(
       elements: [segmentElement]
     };
 
-    applyFadeEnterAnimation(segmentElement, resolveEnterAnimation(seriesModel, itemIndex));
+    applyFadeEnterAnimation(segmentElement, resolveEnterAnimation(seriesModel, segment.animationOrder));
     enableHover(segmentElement, itemModel);
     itemGroup.add(segmentElement);
 
     const label = createLabelElement(echartsInstance, seriesModel, itemModel, segment);
     if (label) {
-      applyFadeEnterAnimation(label, resolveEnterAnimation(seriesModel, itemIndex));
+      applyFadeEnterAnimation(label, resolveEnterAnimation(seriesModel, segment.animationOrder));
       itemGroup.add(label);
       hoverItem.elements.push(label);
     }
