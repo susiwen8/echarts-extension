@@ -1,5 +1,9 @@
 import * as echarts from 'echarts/lib/echarts';
-import { clearAliveRender, installElementHover, renderAlive } from '@echarts-extension/layout-core';
+import {
+  clearAliveRender,
+  installElementHover,
+  renderAlive
+} from '@echarts-extension/layout-core';
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
 import { DEFAULT_PACK_BUBBLE_COLORS, resolvePackBubbleLayout } from './layout.js';
@@ -55,6 +59,7 @@ interface AnimatableGraphicElement extends GraphicElement {
 interface GraphicAnimator {
   when(duration: number, target: Record<string, unknown>): GraphicAnimator;
   delay?: (duration: number) => GraphicAnimator;
+  done?: (callback: () => void) => GraphicAnimator;
   start(easing?: string): void;
 }
 
@@ -92,6 +97,8 @@ interface PackBubbleChartView {
   __renderToken?: object | null;
   __hoverController?: ElementHoverController;
   __aliveRenderState?: AliveRenderState;
+  __packBubbleEntering?: boolean;
+  __packBubbleEnterTimer?: ReturnType<typeof setTimeout>;
 }
 
 interface EnterAnimationConfig {
@@ -99,6 +106,10 @@ interface EnterAnimationConfig {
   duration: number;
   delay: number;
   easing: string;
+}
+
+interface EnterAnimationTracker {
+  totalDuration: number;
 }
 
 type AnimationTargetKey = 'shape' | 'style';
@@ -182,6 +193,7 @@ echartsHost.extendChartView({
     const group = this.group;
     const renderToken = {};
     this.__renderToken = renderToken;
+    clearPackBubbleEnterGate(this);
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
 
@@ -192,10 +204,15 @@ echartsHost.extendChartView({
       });
       const layout = resolvePackBubbleLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
+      const enterTracker: EnterAnimationTracker = {
+        totalDuration: 0
+      };
       const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
-        drawPackBubble(echartsHost, targetGroup, targetSeriesModel, layout, rect)
+        drawPackBubble(echartsHost, targetGroup, targetSeriesModel, layout, rect, enterTracker)
       ));
+      startPackBubbleEnterGate(this, renderToken, enterTracker.totalDuration);
       this.__hoverController = installElementHover(hoverItems, {
+        enabled: () => this.__packBubbleEntering !== true,
         zrender: api.getZr?.()
       });
     } catch (error) {
@@ -207,6 +224,7 @@ echartsHost.extendChartView({
 
   remove(this: PackBubbleChartView) {
     this.__renderToken = null;
+    clearPackBubbleEnterGate(this);
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
     clearAliveRender(this);
@@ -215,6 +233,7 @@ echartsHost.extendChartView({
 
   dispose(this: PackBubbleChartView) {
     this.__renderToken = null;
+    clearPackBubbleEnterGate(this);
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
     clearAliveRender(this);
@@ -245,7 +264,8 @@ function drawPackBubble(
   group: GraphicGroup,
   seriesModel: PackBubbleSeriesModel,
   layout: PackBubbleLayoutResult,
-  rect: ViewRect
+  rect: ViewRect,
+  enterTracker: EnterAnimationTracker
 ): ElementHoverItem[] {
   const data = seriesModel.getData();
   const chartGroup = new echartsInstance.graphic.Group();
@@ -264,7 +284,7 @@ function drawPackBubble(
       },
       style: readCircleStyle(data, seriesModel, itemModel, circle, index)
     });
-    applyCircleEnterAnimation(circleEl, circle.r, readEnterAnimation(seriesModel, index));
+    applyCircleEnterAnimation(circleEl, circle.r, readEnterAnimation(seriesModel, index), enterTracker);
 
     data.setItemLayout(circle.dataIndex, [circle.x, circle.y]);
     data.setItemGraphicEl(circle.dataIndex, circleEl);
@@ -274,7 +294,7 @@ function drawPackBubble(
     chartGroup.add(circleEl);
   });
 
-  drawLabels(echartsInstance, chartGroup, seriesModel, data, layout.labels, hoverItemsByDataIndex);
+  drawLabels(echartsInstance, chartGroup, seriesModel, data, layout.labels, hoverItemsByDataIndex, enterTracker);
 
   group.add(chartGroup);
   return hoverItems;
@@ -286,7 +306,8 @@ function drawLabels(
   seriesModel: PackBubbleSeriesModel,
   data: SeriesData,
   labels: PackBubbleLabel[],
-  hoverItemsByDataIndex: Map<number, ElementHoverItem>
+  hoverItemsByDataIndex: Map<number, ElementHoverItem>,
+  enterTracker: EnterAnimationTracker
 ): void {
   labels.forEach((label) => {
     const itemModel = data.getItemModel(label.dataIndex);
@@ -314,7 +335,7 @@ function drawLabels(
       },
       silent: true
     });
-    applyFadeEnterAnimation(textEl, readEnterAnimation(seriesModel, label.dataIndex));
+    applyFadeEnterAnimation(textEl, readEnterAnimation(seriesModel, label.dataIndex), enterTracker);
     addHoverElement(hoverItemsByDataIndex.get(label.dataIndex), textEl);
 
     group.add(textEl);
@@ -473,7 +494,12 @@ function resolveAnimationEasing(value: unknown): string {
   return typeof value === 'string' && value ? value : 'cubicOut';
 }
 
-function applyCircleEnterAnimation(element: GraphicElement, radius: number, animation: EnterAnimationConfig): void {
+function applyCircleEnterAnimation(
+  element: GraphicElement,
+  radius: number,
+  animation: EnterAnimationConfig,
+  enterTracker: EnterAnimationTracker
+): void {
   if (!animation.enabled) return;
   const animatable = element as AnimatableGraphicElement;
   if (typeof animatable.animate !== 'function') return;
@@ -481,6 +507,7 @@ function applyCircleEnterAnimation(element: GraphicElement, radius: number, anim
   const shape = animatable.shape || {};
   const style = animatable.style || {};
   const opacity = finiteNumber(style.opacity, 1);
+  trackEnterAnimation(enterTracker, animation);
   shape.r = 0;
   style.opacity = 0;
   animatable.shape = shape;
@@ -489,13 +516,18 @@ function applyCircleEnterAnimation(element: GraphicElement, radius: number, anim
   animateGraphicProperty(animatable, 'style', animation, { opacity });
 }
 
-function applyFadeEnterAnimation(element: GraphicElement, animation: EnterAnimationConfig): void {
+function applyFadeEnterAnimation(
+  element: GraphicElement,
+  animation: EnterAnimationConfig,
+  enterTracker: EnterAnimationTracker
+): void {
   if (!animation.enabled) return;
   const animatable = element as AnimatableGraphicElement;
   if (typeof animatable.animate !== 'function') return;
 
   const style = animatable.style || {};
   const opacity = finiteNumber(style.opacity, 1);
+  trackEnterAnimation(enterTracker, animation);
   style.opacity = 0;
   animatable.style = style;
   animateGraphicProperty(animatable, 'style', animation, { opacity });
@@ -516,6 +548,29 @@ function animateGraphicProperty(
   const chain = animator.when(animation.duration, target);
   if (animation.delay > 0) chain.delay?.(animation.delay);
   chain.start(animation.easing);
+}
+
+function trackEnterAnimation(tracker: EnterAnimationTracker, animation: EnterAnimationConfig): void {
+  tracker.totalDuration = Math.max(tracker.totalDuration, Math.max(0, animation.delay) + Math.max(0, animation.duration));
+}
+
+function startPackBubbleEnterGate(view: PackBubbleChartView, renderToken: object, totalDuration: number): void {
+  clearPackBubbleEnterGate(view);
+  if (totalDuration <= 0) return;
+
+  view.__packBubbleEntering = true;
+  view.__packBubbleEnterTimer = setTimeout(() => {
+    if (view.__renderToken === renderToken) view.__packBubbleEntering = false;
+    view.__packBubbleEnterTimer = undefined;
+  }, totalDuration);
+}
+
+function clearPackBubbleEnterGate(view: PackBubbleChartView): void {
+  if (view.__packBubbleEnterTimer) {
+    clearTimeout(view.__packBubbleEnterTimer);
+    view.__packBubbleEnterTimer = undefined;
+  }
+  view.__packBubbleEntering = false;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

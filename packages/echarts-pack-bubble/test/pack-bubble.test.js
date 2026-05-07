@@ -2,11 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
+import * as echarts from 'echarts/lib/echarts';
+import { SVGRenderer } from 'echarts/renderers';
+
+import '../lib/index.js';
 import {
   createDemoPackBubbleData,
   layoutPackBubble,
   resolvePackBubbleLayout
 } from '../lib/src/layout.js';
+
+echarts.use([SVGRenderer]);
 
 const sampleData = [
   { name: 'China', value: 1412, category: 'Asia' },
@@ -128,6 +134,44 @@ test('demo data provides a dense many-country pack bubble fixture', () => {
   assertNoOverlap(result.circles, 0.001);
 });
 
+test('does not apply hover transitions to pack bubbles that are still entering', () => {
+  const chart = createSsrChart();
+
+  chart.setOption({
+    animation: true,
+    series: [{
+      type: 'packBubble',
+      enterAnimation: {
+        duration: 600,
+        delay: 0,
+        stagger: 120,
+        easing: 'linear'
+      },
+      data: sampleData.slice(0, 4)
+    }]
+  });
+
+  const circles = chart.getZr().storage.getDisplayList().filter((element) => element.type === 'circle');
+  assert.equal(circles.length, 4);
+  assert.equal(circles[1].style.opacity, 0);
+
+  circles[0].trigger('mouseover', {
+    target: circles[0]
+  });
+
+  assert.equal(hasElementHoverAnimator(circles[1]), false);
+  assert.equal(circles[1].style.opacity, 0);
+
+  circles[0].trigger('mouseout', {
+    target: circles[0]
+  });
+
+  assert.equal(hasElementHoverAnimator(circles[1]), false);
+  assert.equal(circles[1].style.opacity, 0);
+
+  chart.dispose();
+});
+
 function assertNoOverlap(circles, gap) {
   for (let leftIndex = 0; leftIndex < circles.length; leftIndex += 1) {
     for (let rightIndex = leftIndex + 1; rightIndex < circles.length; rightIndex += 1) {
@@ -142,4 +186,17 @@ function assertNoOverlap(circles, gap) {
       );
     }
   }
+}
+
+function createSsrChart(width = 420, height = 320) {
+  return echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width,
+    height
+  });
+}
+
+function hasElementHoverAnimator(element) {
+  return element.animators?.some((animator) => animator.scope === 'element-hover') === true;
 }

@@ -8,7 +8,9 @@ import {
   createArcPath,
   installElementHover,
   installGraphLayout,
-  normalizeGraphData
+  normalizeGraphData,
+  setElementHoverBaseStyle,
+  setElementHoverEntering
 } from '../lib/index.js';
 
 const sampleGraph = {
@@ -97,6 +99,97 @@ test('installs graph-style hover transitions for generic element groups', () => 
   assert.equal(primary.style.opacity, 1);
   assert.equal(primaryLabel.style.opacity, 1);
   assert.equal(secondary.style.opacity, 0.82);
+});
+
+test('keeps hover transitions away from elements that are still entering', () => {
+  const host = createFakeEChartsHost();
+  const active = new host.graphic.Circle({
+    style: {
+      fill: '#2454a6',
+      opacity: 0.9
+    }
+  });
+  const entering = new host.graphic.Circle({
+    style: {
+      fill: '#248f6a',
+      opacity: 0
+    }
+  });
+
+  setElementHoverBaseStyle(entering, {
+    fill: '#248f6a',
+    opacity: 0.82
+  });
+  setElementHoverEntering(entering, true);
+
+  installElementHover([
+    {
+      elements: [active]
+    },
+    {
+      elements: [entering]
+    }
+  ], {
+    zrender: host.zr
+  });
+
+  active.trigger('mouseover');
+
+  assert.equal(entering.style.opacity, 0);
+  assert.equal(entering.animations.length, 0);
+
+  active.trigger('mouseout');
+
+  assert.equal(entering.style.opacity, 0);
+  assert.equal(entering.animations.length, 0);
+
+  setElementHoverEntering(entering, false);
+  active.trigger('mouseover');
+
+  assert.equal(entering.style.opacity, 0.12);
+
+  active.trigger('mouseout');
+
+  assert.equal(entering.style.opacity, 0.82);
+});
+
+test('can defer element hover while a chart-level gate is disabled', () => {
+  const host = createFakeEChartsHost();
+  let hoverEnabled = false;
+  const active = new host.graphic.Circle({
+    style: {
+      opacity: 0.9
+    }
+  });
+  const secondary = new host.graphic.Circle({
+    style: {
+      opacity: 0.82
+    }
+  });
+
+  installElementHover([
+    {
+      elements: [active]
+    },
+    {
+      elements: [secondary]
+    }
+  ], {
+    enabled: () => hoverEnabled,
+    zrender: host.zr
+  });
+
+  active.trigger('mouseover');
+
+  assert.equal(active.style.opacity, 0.9);
+  assert.equal(secondary.style.opacity, 0.82);
+  assert.equal(secondary.animations.length, 0);
+
+  hoverEnabled = true;
+  active.trigger('mouseover');
+
+  assert.equal(active.style.opacity, 0.9);
+  assert.equal(secondary.style.opacity, 0.12);
 });
 
 function expectFinitePositions(nodes) {

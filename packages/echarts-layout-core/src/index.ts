@@ -6,7 +6,9 @@ export {
 } from './arc.js';
 export { normalizeGraphData } from './data.js';
 export {
-  installElementHover
+  installElementHover,
+  setElementHoverBaseStyle,
+  setElementHoverEntering
 } from './element-hover.js';
 export {
   fisheyeTransform,

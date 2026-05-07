@@ -1,3 +1,6 @@
+const HOVER_BASE_STYLE_KEY = '__echartsExtensionHoverBaseStyle';
+const HOVER_ENTERING_KEY = '__echartsExtensionHoverEntering';
+
 export interface ElementHoverItem {
   elements: HoverGraphicElement[];
   triggerElements?: HoverGraphicElement[];
@@ -5,6 +8,7 @@ export interface ElementHoverItem {
 
 export interface ElementHoverOptions {
   dimOpacity?: number;
+  enabled?: boolean | (() => boolean);
   transitionDuration?: number;
   transitionEasing?: string;
   zrender?: HoverZRender | null;
@@ -26,6 +30,11 @@ interface HoverAnimatableElement extends HoverGraphicElement {
   style?: Record<string, unknown>;
   animate?: (key: 'style', loop?: boolean) => HoverAnimator | null | undefined;
   stopAnimation?: (scope?: string, forwardToLast?: boolean) => void;
+}
+
+interface HoverStateElement extends HoverGraphicElement {
+  [HOVER_BASE_STYLE_KEY]?: Record<string, unknown>;
+  [HOVER_ENTERING_KEY]?: boolean;
 }
 
 interface HoverAnimator {
@@ -67,9 +76,16 @@ export function installElementHover(
   const transitionEasing = typeof options.transitionEasing === 'string' && options.transitionEasing
     ? options.transitionEasing
     : DEFAULT_HOVER_TRANSITION_EASING;
+  const isEnabled = createEnabledPredicate(options.enabled);
   const hoverTargets = new WeakSet<object>();
   const baseStyles = new Map<HoverGraphicElement, Record<string, unknown>>();
   let active = false;
+
+  const resetActive = (duration: number) => {
+    if (!active) return;
+    active = false;
+    resetHoverItems(hoverItems, baseStyles, duration, transitionEasing);
+  };
 
   hoverItems.forEach((item, itemIndex) => {
     item.triggerElements.forEach((element) => {
@@ -79,20 +95,19 @@ export function installElementHover(
       attachHoverHandlers(
         element,
         () => {
+          if (!isEnabled()) return;
           captureBaseStyles(hoverItems, baseStyles);
           active = true;
           applyHoverItem(hoverItems, baseStyles, itemIndex, dimOpacity, transitionDuration, transitionEasing);
         },
-        () => resetHoverItems(hoverItems, baseStyles, transitionDuration, transitionEasing)
+        () => resetActive(transitionDuration)
       );
     });
   });
 
   const reset = (eventOrImmediate: HoverZRenderEvent | boolean = false) => {
-    if (!active) return;
     const immediate = eventOrImmediate === true;
-    active = false;
-    resetHoverItems(hoverItems, baseStyles, immediate ? 0 : transitionDuration, transitionEasing);
+    resetActive(immediate ? 0 : transitionDuration);
   };
 
   const handleMove = (event: HoverZRenderEvent) => {
@@ -111,6 +126,32 @@ export function installElementHover(
       reset(true);
     }
   };
+}
+
+export function setElementHoverBaseStyle(
+  element: HoverGraphicElement | null | undefined,
+  style: Record<string, unknown> | null | undefined
+): void {
+  if (!element || typeof element !== 'object') return;
+  const target = element as HoverStateElement;
+  if (style == null) {
+    delete target[HOVER_BASE_STYLE_KEY];
+    return;
+  }
+  target[HOVER_BASE_STYLE_KEY] = cloneRecord(style);
+}
+
+export function setElementHoverEntering(
+  element: HoverGraphicElement | null | undefined,
+  entering = true
+): void {
+  if (!element || typeof element !== 'object') return;
+  const target = element as HoverStateElement;
+  if (entering) {
+    target[HOVER_ENTERING_KEY] = true;
+  } else {
+    delete target[HOVER_ENTERING_KEY];
+  }
 }
 
 function captureBaseStyles(
@@ -135,6 +176,7 @@ function applyHoverItem(
   const activeElements = new Set(items[activeIndex]?.elements || []);
   items.forEach((item) => {
     item.elements.forEach((element) => {
+      if (isHoverEntering(element)) return;
       const baseStyle = baseStyles.get(element) || {};
       const nextStyle = activeElements.has(element)
         ? cloneRecord(baseStyle)
@@ -158,6 +200,7 @@ function resetHoverItems(
     item.elements.forEach((element) => {
       if (seen.has(element)) return;
       seen.add(element);
+      if (isHoverEntering(element)) return;
       transitionStyle(element, cloneRecord(baseStyles.get(element) || {}), ['opacity'], duration, easing);
     });
   });
@@ -207,6 +250,11 @@ function attachHoverHandlers(element: HoverGraphicElement, onEnter: () => void, 
   evented.on?.('mouseout', onLeave);
 }
 
+function createEnabledPredicate(enabled: ElementHoverOptions['enabled']): () => boolean {
+  if (typeof enabled === 'function') return enabled;
+  return () => enabled !== false;
+}
+
 function isHoverTarget(target: unknown, hoverTargets: WeakSet<object>): boolean {
   let current = target;
   while (current && typeof current === 'object') {
@@ -254,7 +302,8 @@ function removeMissingStyleKeys(current: unknown, next: Record<string, unknown>)
 }
 
 function cloneStyle(element: HoverGraphicElement): Record<string, unknown> {
-  return cloneRecord(asRecord((element as { style?: unknown }).style));
+  const target = element as HoverStateElement & { style?: unknown };
+  return cloneRecord(asRecord(target[HOVER_BASE_STYLE_KEY] ?? target.style));
 }
 
 function cloneRecord(record: Record<string, unknown>): Record<string, unknown> {
@@ -265,6 +314,10 @@ function cloneRecord(record: Record<string, unknown>): Record<string, unknown> {
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function isHoverEntering(element: HoverGraphicElement): boolean {
+  return (element as HoverStateElement)[HOVER_ENTERING_KEY] === true;
 }
 
 function finiteNumber(value: unknown, fallback: number): number {
