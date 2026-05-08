@@ -73,12 +73,12 @@ test('GitHub Pages workflow deploys built examples through a Pages artifact', ()
   assert.match(workflow, /uses: actions\/checkout@v6/);
   assert.match(workflow, /uses: actions\/setup-node@v6/);
   assert.match(workflow, /run: npm run pages:build/);
-  assert.match(workflow, /uses: actions\/configure-pages@v5/);
-  assert.match(workflow, /uses: actions\/upload-pages-artifact@v4/);
+  assert.match(workflow, /uses: actions\/configure-pages@v6/);
+  assert.match(workflow, /uses: actions\/upload-pages-artifact@v5/);
   assert.match(workflow, /path: \.pages/);
   assert.match(workflow, /pages: write/);
   assert.match(workflow, /id-token: write/);
-  assert.match(workflow, /uses: actions\/deploy-pages@v4/);
+  assert.match(workflow, /uses: actions\/deploy-pages@v5/);
 });
 
 test('release builds keep minified and development bundles together', async () => {
