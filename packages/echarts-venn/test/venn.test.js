@@ -2,11 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
+import * as echarts from 'echarts/lib/echarts';
+import { SVGRenderer } from 'echarts/renderers';
+
 import {
   layoutBubbleVenn,
   layoutHollowVenn,
   resolveVennLayout
 } from '../lib/src/layout.js';
+import '../lib/index.js';
+
+echarts.use([SVGRenderer]);
 
 const hollowData = [
   { name: 'A', sets: ['A'], value: 100 },
@@ -100,3 +106,74 @@ test('resolves layout mode from Venn series options', () => {
   assert.equal(resolveVennLayout({ layout: 'bubble', data: bubbleData }).mode, 'bubble');
   assert.equal(resolveVennLayout({ data: hollowData }).mode, 'hollow');
 });
+
+test('highlights related hollow Venn circles when hovering an intersection label', () => {
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 600,
+    height: 420
+  });
+
+  chart.setOption({
+    animation: false,
+    series: [{
+      type: 'venn',
+      layout: 'hollow',
+      data: hollowData,
+      label: {
+        show: true
+      }
+    }]
+  });
+
+  const elements = collectVennElements(chart);
+  const acLabel = elements.labels.find((label) => label.style.text === 'A&C');
+  const baseCircleOpacities = elements.circles.map((circle) => circle.style.opacity);
+
+  assert.ok(acLabel, 'A&C label should render');
+  assert.equal(acLabel.silent, false);
+
+  acLabel.trigger('mouseover', {
+    target: acLabel
+  });
+
+  assert.equal(lastElementHoverOpacityTarget(elements.circles[0]), baseCircleOpacities[0]);
+  assert.equal(lastElementHoverOpacityTarget(elements.circles[1]), 0.12);
+  assert.equal(lastElementHoverOpacityTarget(elements.circles[2]), baseCircleOpacities[2]);
+  assert.equal(lastElementHoverOpacityTarget(acLabel), 1);
+
+  acLabel.trigger('mouseout', {
+    target: acLabel
+  });
+
+  assert.deepEqual(elements.circles.map(lastElementHoverOpacityTarget), baseCircleOpacities);
+
+  chart.dispose();
+});
+
+function collectVennElements(chart) {
+  const view = chart._chartsViews.find((chartView) => chartView.type === 'venn');
+  const circles = [];
+  const labels = [];
+
+  visitElement(view.group, (element) => {
+    if (element.type === 'circle') circles.push(element);
+    if (element.type === 'text') labels.push(element);
+  });
+
+  return {
+    circles,
+    labels
+  };
+}
+
+function visitElement(element, visitor) {
+  visitor(element);
+  element.childrenRef?.().forEach((child) => visitElement(child, visitor));
+}
+
+function lastElementHoverOpacityTarget(element) {
+  const animator = element.animators?.findLast((item) => item.scope === 'element-hover');
+  return animator?._tracks?.opacity?.keyframes?.at(-1)?.value;
+}

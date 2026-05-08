@@ -260,6 +260,8 @@ function drawHollowVenn(
   hoverItems: ElementHoverItem[],
   hoverItemsByDataIndex: Map<number, ElementHoverItem>
 ): void {
+  const circleElementsBySetKey = new Map<string, GraphicElement>();
+
   layout.circles.forEach((circle, index) => {
     const dataIndex = findDataIndexForCircle(circle, layout.labels, index);
     const itemModel = dataIndex >= 0 ? data.getItemModel(dataIndex) : null;
@@ -272,6 +274,7 @@ function drawHollowVenn(
       style: readHollowCircleStyle(seriesModel, itemModel, index)
     });
     applyCircleEnterAnimation(circleEl, circle.r, readEnterAnimation(seriesModel, index));
+    addCircleElementBySet(circleElementsBySetKey, circle, circleEl);
 
     if (dataIndex >= 0) {
       data.setItemLayout(dataIndex, [circle.x, circle.y]);
@@ -284,7 +287,7 @@ function drawHollowVenn(
     group.add(circleEl);
   });
 
-  drawLabels(echartsInstance, group, seriesModel, data, layout.labels, hoverItemsByDataIndex);
+  drawLabels(echartsInstance, group, seriesModel, data, layout.labels, hoverItemsByDataIndex, hoverItems, circleElementsBySetKey);
 }
 
 function drawBubbleVenn(
@@ -325,7 +328,9 @@ function drawLabels(
   seriesModel: VennSeriesModel,
   data: SeriesData,
   labels: VennLabel[],
-  hoverItemsByDataIndex: Map<number, ElementHoverItem>
+  hoverItemsByDataIndex: Map<number, ElementHoverItem>,
+  hoverItems?: ElementHoverItem[],
+  circleElementsBySetKey?: Map<string, GraphicElement>
 ): void {
   labels.forEach((label) => {
     const itemModel = data.getItemModel(label.dataIndex);
@@ -348,10 +353,57 @@ function drawLabels(
       silent: true
     });
     applyFadeEnterAnimation(textEl, readEnterAnimation(seriesModel, label.dataIndex));
-    addHoverElement(hoverItemsByDataIndex.get(label.dataIndex), textEl);
+    addLabelHoverElement(label, textEl, hoverItemsByDataIndex, hoverItems, circleElementsBySetKey);
 
     group.add(textEl);
   });
+}
+
+function addCircleElementBySet(
+  circleElementsBySetKey: Map<string, GraphicElement>,
+  circle: VennCircle,
+  element: GraphicElement
+): void {
+  [circle.id, circle.name, circle.setKey, ...(circle.sets || [])].forEach((key) => {
+    if (typeof key === 'string' && key) circleElementsBySetKey.set(key, element);
+  });
+}
+
+function addLabelHoverElement(
+  label: VennLabel,
+  textEl: GraphicElement,
+  hoverItemsByDataIndex: Map<number, ElementHoverItem>,
+  hoverItems?: ElementHoverItem[],
+  circleElementsBySetKey?: Map<string, GraphicElement>
+): void {
+  const relatedCircleElements = collectRelatedCircleElements(label, circleElementsBySetKey);
+
+  if (relatedCircleElements.length > 1 && hoverItems) {
+    hoverItems.push({
+      elements: [...relatedCircleElements, textEl],
+      triggerElements: [textEl]
+    });
+    return;
+  }
+
+  addHoverElement(hoverItemsByDataIndex.get(label.dataIndex), textEl);
+}
+
+function collectRelatedCircleElements(
+  label: VennLabel,
+  circleElementsBySetKey?: Map<string, GraphicElement>
+): GraphicElement[] {
+  if (!circleElementsBySetKey || !label.sets?.length) return [];
+
+  const result: GraphicElement[] = [];
+  const seen = new Set<GraphicElement>();
+  label.sets.forEach((setName) => {
+    const circle = circleElementsBySetKey.get(setName);
+    if (!circle || seen.has(circle)) return;
+    seen.add(circle);
+    result.push(circle);
+  });
+  return result;
 }
 
 function findDataIndexForCircle(circle: VennCircle, labels: VennLabel[], fallbackIndex: number): number {
