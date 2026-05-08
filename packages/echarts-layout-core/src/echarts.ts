@@ -232,6 +232,7 @@ interface GraphRenderState {
   edges: RenderedEdge[];
   lens: GraphicElement | null;
   viewport: Rect;
+  enterAnimationEnd: number;
 }
 
 interface GraphHoverController {
@@ -368,7 +369,7 @@ export function installGraphLayout(echarts: unknown, config: InstallGraphLayoutC
         this.__fisheyeSignature = fisheyeSignature;
         if (fisheye) {
           this.__fisheyeController = installFisheye(api, renderState, fisheye);
-          scheduleInitialFisheyePreview(this, renderState, fisheye, readFisheyePreviewDelay(seriesModel, renderState.nodes.length));
+          scheduleInitialFisheyePreview(this, renderState, fisheye, renderState.enterAnimationEnd);
         }
       } catch (error) {
         this.__fisheyeSignature = undefined;
@@ -574,9 +575,7 @@ function drawGraph(
   const edgeGroup = new echarts.graphic.Group();
   const nodeGroup = new echarts.graphic.Group();
   const labelGroup = new echarts.graphic.Group();
-  const edgeCount = layout.edges.length;
-  const sequenceEdgesAfterNodes = shouldSequenceEdgesAfterNodes(layoutType);
-  const edgeDelayOffset = sequenceEdgesAfterNodes ? readNodeEnterAnimationEnd(seriesModel, graph.nodes.length) : 0;
+  const enterAnimationEnd = readGraphEnterAnimationEnd(seriesModel, graph.nodes.length, layout.edges);
   const defaultNodeSize = createValueNodeSizeResolver(layout.nodes);
   const renderNodes: RenderNode[] = [];
   const renderedNodes: RenderedNode[] = [];
@@ -587,7 +586,7 @@ function drawGraph(
     const source = nodeById.get(edge.source);
     const target = nodeById.get(edge.target);
     if (!source || !target) return;
-    const renderedEdge = createEdgeElement(echarts, seriesModel, layoutType, edge, source, target, edgeIndex, edgeDelayOffset);
+    const renderedEdge = createEdgeElement(echarts, seriesModel, layoutType, edge, source, target, edgeIndex, enterAnimationEnd);
     edgeGroup.add(renderedEdge.element);
     renderedEdges.push({
       ...renderedEdge,
@@ -603,7 +602,7 @@ function drawGraph(
   layout.nodes.forEach((node) => {
     const dataIndex = indexById.get(node.id);
     if (dataIndex == null) return;
-    const animationIndex = sequenceEdgesAfterNodes ? dataIndex : edgeCount;
+    const animationIndex = dataIndex;
     const itemModel = data.getItemModel(dataIndex);
     const size = readNodeSize(seriesModel, data, node, dataIndex, defaultNodeSize);
     renderNodes.push({
@@ -620,7 +619,7 @@ function drawGraph(
   const placedLabels = placeLabels(renderNodes, layoutType, viewport);
 
   renderNodes.forEach((renderNode) => {
-    const renderedNode = createNodeElement(echarts, seriesModel, data, renderNode);
+    const renderedNode = createNodeElement(echarts, seriesModel, data, renderNode, enterAnimationEnd);
     nodeGroup.add(renderedNode.group);
     renderedNodes.push({
       id: renderNode.node.id,
@@ -640,7 +639,7 @@ function drawGraph(
       const label = createLabelElement(echarts, placedLabel);
       setAliveRenderKey(label, `node-label:${renderNode.node.id}`);
       const baseStyle = cloneStyle(label);
-      applyFadeEnterAnimation(label, readEnterAnimation(seriesModel, renderNode.animationIndex));
+      applyFadeEnterAnimation(label, readGraphEnterAnimation(seriesModel, renderNode.animationIndex, enterAnimationEnd));
       labelGroup.add(label);
       renderedLabels.push({
         nodeId: renderNode.node.id,
@@ -665,7 +664,8 @@ function drawGraph(
     labels: renderedLabels,
     edges: renderedEdges,
     lens,
-    viewport
+    viewport,
+    enterAnimationEnd
   };
   return renderState;
 }
@@ -703,11 +703,11 @@ function createEdgeElement(
   source: PublicLayoutNode,
   target: PublicLayoutNode,
   edgeIndex: number,
-  delayOffset = 0
+  enterAnimationEnd: number
 ): RenderedEdgeElement {
   const style = readEdgeStyle(seriesModel, edge);
   const baseStyle = cloneRecord(style);
-  const animation = readEdgeAnimation(seriesModel, edge, edgeIndex, delayOffset);
+  const animation = syncEnterAnimationEnd(readEdgeAnimation(seriesModel, edge, edgeIndex), enterAnimationEnd);
   const edgeKey = `edge:${edge.id || `${edge.source}->${edge.target}`}:${edgeIndex}`;
   if (layoutType === 'arc') {
     const path = createArcPath([source.x, source.y], [target.x, target.y]);
@@ -772,7 +772,8 @@ function createNodeElement(
   echarts: EChartsHost,
   seriesModel: GraphSeriesModel,
   data: SeriesData,
-  renderNode: RenderNode
+  renderNode: RenderNode,
+  enterAnimationEnd: number
 ): RenderedNodeElement {
   const { node, dataIndex, animationIndex, itemModel, size } = renderNode;
   const itemGroup = new echarts.graphic.Group();
@@ -789,7 +790,8 @@ function createNodeElement(
   });
   setAliveRenderKey(circle, `node:${node.id}`);
   circle.cursor = 'pointer';
-  applyNodeEnterAnimation(circle, size, readEnterAnimation(seriesModel, animationIndex));
+  const enterAnimation = readGraphEnterAnimation(seriesModel, animationIndex, enterAnimationEnd);
+  applyNodeEnterAnimation(circle, size, enterAnimation);
 
   data.setItemLayout(dataIndex, [node.x, node.y]);
   data.setItemGraphicEl(dataIndex, circle);
@@ -801,7 +803,7 @@ function createNodeElement(
   if (valueLabel) {
     setAliveRenderKey(valueLabel, `node-value:${node.id}`);
     valueLabel.cursor = 'pointer';
-    applyFadeEnterAnimation(valueLabel, readEnterAnimation(seriesModel, animationIndex));
+    applyFadeEnterAnimation(valueLabel, enterAnimation);
     itemGroup.add(valueLabel);
   }
   return {
@@ -1297,10 +1299,6 @@ function clearFisheyePreviewTimer(view: GraphChartView): void {
   view.__fisheyePreviewTimer = undefined;
 }
 
-function readFisheyePreviewDelay(seriesModel: GraphSeriesModel, nodeCount: number): number {
-  return readNodeEnterAnimationEnd(seriesModel, nodeCount);
-}
-
 function installFisheye(
   api: EChartsApi,
   renderState: GraphRenderState,
@@ -1685,22 +1683,12 @@ function readEdgeStyle(seriesModel: GraphSeriesModel, edge: GraphEdge): Record<s
 function readEdgeAnimation(
   seriesModel: GraphSeriesModel,
   edge: GraphEdge,
-  edgeIndex: number,
-  delayOffset = 0
+  edgeIndex: number
 ): EdgeAnimationConfig {
   const animationOption = edge.edgeAnimation ?? seriesModel.get('edgeAnimation');
   const fallbackToEnterAnimation = animationOption == null;
   const resolvedAnimationOption = fallbackToEnterAnimation ? seriesModel.get('enterAnimation') : animationOption;
-  const animation = readEnterAnimation(seriesModel, edgeIndex, resolvedAnimationOption);
-  if (!animation.enabled || delayOffset <= 0) return animation;
-
-  const repeatedBaseDelay = fallbackToEnterAnimation
-    ? readEnterAnimationBaseDelay(seriesModel, edgeIndex, resolvedAnimationOption)
-    : 0;
-  return {
-    ...animation,
-    delay: delayOffset + Math.max(0, animation.delay - repeatedBaseDelay)
-  };
+  return readEnterAnimation(seriesModel, edgeIndex, resolvedAnimationOption);
 }
 
 function readEnterAnimation(
@@ -1727,15 +1715,6 @@ function readEnterAnimation(
   };
 }
 
-function readEnterAnimationBaseDelay(
-  seriesModel: GraphSeriesModel,
-  itemIndex: number,
-  animationOption = seriesModel.get('enterAnimation')
-): number {
-  const option = animationOption == null || animationOption === true ? {} : asRecord(animationOption);
-  return resolveAnimationNumber(option.delay ?? seriesModel.get('animationDelay'), itemIndex, itemIndex, 0);
-}
-
 function readNodeEnterAnimationEnd(seriesModel: GraphSeriesModel, nodeCount: number): number {
   let end = 0;
   for (let nodeIndex = 0; nodeIndex < nodeCount; nodeIndex += 1) {
@@ -1745,6 +1724,40 @@ function readNodeEnterAnimationEnd(seriesModel: GraphSeriesModel, nodeCount: num
     }
   }
   return end;
+}
+
+function readGraphEnterAnimationEnd(
+  seriesModel: GraphSeriesModel,
+  nodeCount: number,
+  edges: GraphEdge[]
+): number {
+  let end = readNodeEnterAnimationEnd(seriesModel, nodeCount);
+  edges.forEach((edge, edgeIndex) => {
+    const animation = readEdgeAnimation(seriesModel, edge, edgeIndex);
+    if (animation.enabled) {
+      end = Math.max(end, animation.delay + animation.duration);
+    }
+  });
+  return end;
+}
+
+function readGraphEnterAnimation(
+  seriesModel: GraphSeriesModel,
+  itemIndex: number,
+  enterAnimationEnd: number
+): EnterAnimationConfig {
+  return syncEnterAnimationEnd(readEnterAnimation(seriesModel, itemIndex), enterAnimationEnd);
+}
+
+function syncEnterAnimationEnd(
+  animation: EnterAnimationConfig,
+  enterAnimationEnd: number
+): EnterAnimationConfig {
+  if (!animation.enabled || enterAnimationEnd <= 0) return animation;
+  return {
+    ...animation,
+    duration: Math.max(0, enterAnimationEnd - animation.delay)
+  };
 }
 
 function createDisabledEdgeAnimation(): EdgeAnimationConfig {
@@ -1976,10 +1989,6 @@ function toNumericValue(value: unknown): number | undefined {
     }
   }
   return undefined;
-}
-
-function shouldSequenceEdgesAfterNodes(layoutType: string): boolean {
-  return layoutType === 'radial' || layoutType === 'concentric' || layoutType === 'grid' || layoutType === 'mds' || layoutType === 'arc';
 }
 
 function isLabelPosition(value: unknown): value is LabelPosition {

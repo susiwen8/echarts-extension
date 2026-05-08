@@ -403,7 +403,7 @@ test('computes arc layout and SVG arc edge paths', async () => {
   });
 });
 
-test('animates arc nodes before edge connections when edgeAnimation is enabled', () => {
+test('animates arc nodes and edge connections together to a shared end', () => {
   const host = createFakeEChartsHost();
   installGraphLayout(host, {
     chartType: 'arc',
@@ -445,24 +445,30 @@ test('animates arc nodes before edge connections when edgeAnimation is enabled',
   const edgeEls = edgeGroup.children;
   const firstNodeCircle = nodeGroup.children[0].children[0];
   const secondNodeCircle = nodeGroup.children[1].children[0];
-  const nodePhaseEnd = 10 + (sampleGraph.nodes.length - 1) * 20 + 300;
+  const graphEnterEnd = Math.max(
+    10 + (sampleGraph.nodes.length - 1) * 20 + 300,
+    12 + (sampleGraph.edges.length - 1) * 25 + 320
+  );
   assert.equal(edgeEls.length, sampleGraph.edges.length);
   assert.equal(firstNodeCircle.animations[0].delayValue, 10);
   assert.equal(secondNodeCircle.animations[0].delayValue, 30);
+  assert.equal(firstNodeCircle.animations[0].delayValue + firstNodeCircle.animations[0].duration, graphEnterEnd);
+  assert.equal(secondNodeCircle.animations[0].delayValue + secondNodeCircle.animations[0].duration, graphEnterEnd);
   assert.equal(edgeEls[0].style.strokePercent, 0);
   assert.equal(edgeEls[0].animations[0].key, 'style');
-  assert.equal(edgeEls[0].animations[0].duration, 320);
-  assert.equal(edgeEls[0].animations[0].delayValue, nodePhaseEnd + 12);
+  assert.equal(edgeEls[0].animations[0].duration, graphEnterEnd - 12);
+  assert.equal(edgeEls[0].animations[0].delayValue, 12);
   assert.equal(edgeEls[0].animations[0].easing, 'linear');
   assert.deepEqual(edgeEls[0].animations[0].targets, [
     {
       strokePercent: 1
     }
   ]);
-  assert.equal(edgeEls[1].animations[0].delayValue, nodePhaseEnd + 37);
+  assert.equal(edgeEls[1].animations[0].delayValue, 37);
+  assert.equal(edgeEls[1].animations[0].delayValue + edgeEls[1].animations[0].duration, graphEnterEnd);
 });
 
-test('animates radial, concentric, grid, and mds nodes before edges', () => {
+test('animates radial, concentric, grid, and mds nodes and edges together', () => {
   for (const layoutType of ['radial', 'concentric', 'grid', 'mds']) {
     const host = createFakeEChartsHost();
     installGraphLayout(host, {
@@ -494,11 +500,13 @@ test('animates radial, concentric, grid, and mds nodes before edges', () => {
     const firstNodeCircle = nodeGroup.children[0].children[0];
     const secondNodeCircle = nodeGroup.children[1].children[0];
     const firstEdge = edgeGroup.children[0];
-    const nodePhaseEnd = 10 + (sampleGraph.nodes.length - 1) * 20 + 300;
+    const graphEnterEnd = 10 + (sampleGraph.nodes.length - 1) * 20 + 300;
 
     assert.equal(firstNodeCircle.animations[0].delayValue, 10, `${layoutType} first node delay`);
     assert.equal(secondNodeCircle.animations[0].delayValue, 30, `${layoutType} second node delay`);
-    assert.equal(firstEdge.animations[0].delayValue, nodePhaseEnd, `${layoutType} first edge delay`);
+    assert.equal(firstNodeCircle.animations[0].delayValue + firstNodeCircle.animations[0].duration, graphEnterEnd, `${layoutType} first node end`);
+    assert.equal(firstEdge.animations[0].delayValue, 10, `${layoutType} first edge delay`);
+    assert.equal(firstEdge.animations[0].delayValue + firstEdge.animations[0].duration, graphEnterEnd, `${layoutType} first edge end`);
     assert.equal(firstEdge.shape.percent, 0, `${layoutType} edge draw starts hidden`);
   }
 });
