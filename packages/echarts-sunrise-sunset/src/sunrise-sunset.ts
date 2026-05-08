@@ -465,7 +465,7 @@ function drawSky(
       fill: dayAreaStyle.color || 'rgba(255, 167, 43, 0.2)',
       stroke: null,
       opacity: finiteNumber(dayAreaStyle.opacity, 1)
-    }, true, -2, dayAreaAnimation, 'sky:day-area', createArcProgressClip(layout.day.start, layout.day.end, layout.height, layout.day.progress, 0));
+    }, true, -2, dayAreaAnimation, 'sky:day-area', createArcProgressClip(layout.day.start, layout.day.end, layout.height, layout.day.progress, 0), daySolidAnimation);
   }
 
   if (layout.day.visible && layout.day.progress < 1) {
@@ -500,7 +500,7 @@ function drawSky(
       opacity: dayLineStyle.opacity,
       lineCap: 'round',
       lineJoin: 'round'
-    }, false, 3, daySolidAnimation, 'sky:day-solid', 1, createArcProgressClip(layout.day.start, layout.day.end, layout.height, layout.day.progress, dayLineStyle.lineWidth));
+    }, false, 3, daySolidAnimation, 'sky:day-solid', 1, createArcProgressClip(layout.day.start, layout.day.end, layout.height, layout.day.progress, dayLineStyle.lineWidth), daySolidAnimation);
   }
 
   addPolyline(echartsInstance, group, layout.moon.fullPoints, {
@@ -521,7 +521,7 @@ function drawSky(
       opacity: Math.min(moonLineStyle.opacity + 0.2, 1),
       lineCap: 'round',
       lineJoin: 'round'
-    }, false, 2, moonSolidAnimation, 'sky:moon-solid', 1, createArcProgressClip(layout.moon.start, layout.moon.end, layout.height, layout.moon.progress, moonLineStyle.lineWidth));
+    }, false, 2, moonSolidAnimation, 'sky:moon-solid', 1, createArcProgressClip(layout.moon.start, layout.moon.end, layout.height, layout.moon.progress, moonLineStyle.lineWidth), moonSolidAnimation);
   }
 
   const baseline = new echartsInstance.graphic.Line({
@@ -554,34 +554,27 @@ function drawSky(
     }, sunIcon);
   }
 
-  const moonPoint = layout.moon.visible ? layout.moon.current : layout.moon.start;
-  drawMoonIcon(
-    echartsInstance,
-    group,
-    moonPoint.x,
-    layout.moon.visible ? moonPoint.y - 1 : moonPoint.y - 16,
-    19,
-    String(moonLineStyle.stroke),
-    backgroundColor,
-    layout.moon.visible ? 1 : 0.92,
-    8,
-    layout.moon.visible
-      ? {
-          animation: moonSolidAnimation,
-          motionPoints: layout.moon.motionPoints,
-          yOffset: -1,
-          forceGroup: forceMotionGroup,
-          key: 'sky:moon-icon'
-        }
-      : {
-          animation: disabledEnterAnimation(),
-          motionPoints: layout.moon.motionPoints,
-          yOffset: -16,
-          forceGroup: true,
-          key: 'sky:moon-icon'
-        },
-    moonIcon
-  );
+  if (layout.moon.visible) {
+    drawMoonIcon(
+      echartsInstance,
+      group,
+      layout.moon.current.x,
+      layout.moon.current.y - 1,
+      19,
+      String(moonLineStyle.stroke),
+      backgroundColor,
+      1,
+      8,
+      {
+        animation: moonSolidAnimation,
+        motionPoints: layout.moon.motionPoints,
+        yOffset: -1,
+        forceGroup: forceMotionGroup,
+        key: 'sky:moon-icon'
+      },
+      moonIcon
+    );
+  }
 }
 
 function createArcProgressClip(
@@ -1074,7 +1067,8 @@ function addPolygon(
   z2: number,
   animation: EnterAnimationConfig,
   key: string,
-  clipRect?: GraphicRect
+  clipRect?: GraphicRect,
+  clipAnimation?: EnterAnimationConfig
 ): void {
   if (points.length < 3) return;
   const polygon = new echartsInstance.graphic.Polygon({
@@ -1086,8 +1080,8 @@ function addPolygon(
     z2
   });
   setAliveRenderKey(polygon, key);
-  setClipRect(echartsInstance, polygon, clipRect, key);
-  applyFadeEnterAnimation(polygon, animation);
+  setClipRect(echartsInstance, polygon, clipRect, key, clipAnimation);
+  if (!clipAnimation) applyFadeEnterAnimation(polygon, animation);
   group.add(polygon);
 }
 
@@ -1101,7 +1095,8 @@ function addPolyline(
   animation: EnterAnimationConfig,
   key: string,
   percent = 1,
-  clipRect?: GraphicRect
+  clipRect?: GraphicRect,
+  clipAnimation?: EnterAnimationConfig
 ): void {
   if (points.length < 2) return;
   const polyline = new echartsInstance.graphic.Polyline({
@@ -1117,8 +1112,8 @@ function addPolyline(
     z2
   });
   setAliveRenderKey(polyline, key);
-  setClipRect(echartsInstance, polyline, clipRect, key);
-  applyPathEnterAnimation(polyline, 'shape', 'percent', animation, clampPercent(percent));
+  setClipRect(echartsInstance, polyline, clipRect, key, clipAnimation);
+  if (!clipAnimation) applyPathEnterAnimation(polyline, 'shape', 'percent', animation, clampPercent(percent));
   group.add(polyline);
 }
 
@@ -1130,7 +1125,8 @@ function setClipRect(
   echartsInstance: EChartsHost,
   element: GraphicElement,
   rect: GraphicRect | undefined,
-  key: string
+  key: string,
+  animation?: EnterAnimationConfig
 ): void {
   if (!rect || typeof element.setClipPath !== 'function') return;
   const clipPath = new echartsInstance.graphic.Rect({
@@ -1138,6 +1134,7 @@ function setClipRect(
     silent: true
   });
   setAliveRenderKey(clipPath, `${key}:clip`);
+  applyClipWidthEnterAnimation(clipPath, animation);
   element.setClipPath(clipPath);
 }
 
@@ -1232,6 +1229,17 @@ function applyFadeEnterAnimation(element: GraphicElement, animation: EnterAnimat
   style.opacity = 0;
   animatable.style = style;
   animateGraphicProperty(animatable, 'style', animation, { opacity });
+}
+
+function applyClipWidthEnterAnimation(element: GraphicElement, animation: EnterAnimationConfig | undefined): void {
+  if (!animation?.enabled) return;
+  const animatable = element as AnimatableGraphicElement;
+  if (typeof animatable.animate !== 'function') return;
+
+  const shape = resolveAnimationTarget(animatable, 'shape');
+  const width = finiteNumber(shape.width, 0);
+  shape.width = 0;
+  animateGraphicProperty(animatable, 'shape', animation, { width });
 }
 
 function animateGraphicProperty(

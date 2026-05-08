@@ -331,6 +331,69 @@ test('sunriseSunset time updates grow the day line and area on a stable trajecto
   assert.ok(after.dayFuture.clipWidth < before.dayFuture.clipWidth - 80);
 });
 
+test('sunriseSunset enter animation grows the day line and area with the sun icon', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 10:47:33',
+    padding: 72,
+    enterAnimation: {
+      duration: 860,
+      stagger: 90,
+      easing: 'cubicOut'
+    },
+    dayLineStyle: { color: '#ffa72b' },
+    dayAreaStyle: { color: '#ffa72b', opacity: 0.2 }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  const geometry = sunriseSunsetGeometry(chart);
+  const tree = collectElementTree(chart);
+  chart.dispose();
+
+  assert.ok(geometry.dayArea);
+  assert.ok(geometry.daySolid);
+  assert.equal(geometry.dayArea.clipWidth, 0);
+  assert.ok(geometry.dayArea.clipWidthTarget > 100);
+  assert.ok(geometry.dayArea.clipAnimatorTracks.includes('width'));
+  assert.ok(geometry.daySolid.clipWidth <= 10);
+  assert.ok(geometry.daySolid.clipWidthTarget > 100);
+  assert.ok(geometry.daySolid.clipAnimatorTracks.includes('width'));
+  assert.ok(
+    tree.some((element) => (
+      element.type === 'group'
+      && element.key === 'sky:sun-icon'
+      && element.x === 72
+      && element.animatorTracks.includes('x')
+      && element.animatorTracks.includes('y')
+    )),
+    'sun icon should start at sunrise and animate to the same progress edge'
+  );
+});
+
+test('sunriseSunset does not show the moving moon icon before moonrise', () => {
+  const tree = renderElementTree({
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 10:47:33',
+    padding: 72,
+    enterAnimation: false
+  });
+
+  assert.equal(
+    tree.some((element) => element.type === 'group' && element.key === 'sky:moon-icon'),
+    false,
+    'the sky moon icon should wait until the moon is actually visible'
+  );
+});
+
 test('sunriseSunset time updates cancel in-flight enter path animations', () => {
   const chart = createSsrChart();
   const series = {
@@ -587,6 +650,8 @@ function shapeStateForElement(displayList, predicate) {
     percent: element?.shape?.percent,
     clipX: element?.__clipPaths?.[0]?.shape?.x,
     clipWidth: element?.__clipPaths?.[0]?.shape?.width,
+    clipWidthTarget: animationTrackTarget(element?.__clipPaths?.[0], 'width'),
+    clipAnimatorTracks: animatorTracks(element?.__clipPaths?.[0]),
     lineDash: element?.style?.lineDash,
     opacity: element?.style?.opacity
   } : null;
@@ -607,6 +672,7 @@ function collectElement(element, elements) {
     type: element.type,
     key: element.__aliveRenderKey,
     animatorCount: element.animators?.length ?? 0,
+    animatorTracks: animatorTracks(element),
     childCount: children.length,
     x: element.x,
     y: element.y
@@ -615,4 +681,18 @@ function collectElement(element, elements) {
   for (const child of children) {
     collectElement(child, elements);
   }
+}
+
+function animatorTracks(element) {
+  return [
+    ...new Set((element?.animators || []).flatMap((animator) => Object.keys(animator._tracks || {})))
+  ];
+}
+
+function animationTrackTarget(element, trackName) {
+  const track = (element?.animators || [])
+    .map((animator) => animator._tracks?.[trackName])
+    .find(Boolean);
+  const keyframes = track?._keyframes || track?.keyframes || [];
+  return keyframes.length ? keyframes[keyframes.length - 1].value : undefined;
 }
