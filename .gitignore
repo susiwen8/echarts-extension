@@ -1,6 +1,7 @@
 node_modules
 npm-debug.log
 test-results
+.pages/
 .DS_Store
 .omx/
 packages/*/dist/

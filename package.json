@@ -20,6 +20,7 @@
     "test:perf:browser:update": "BROWSER_PERF_MEASURE_UPDATE=1 BROWSER_PERF_PROFILE=smoke BROWSER_PERF_ENFORCE_BUDGET=1 node tests/browser-perf/perf-runner.js",
     "test:perf:browser:stress": "BROWSER_PERF_PROFILE=stress node tests/browser-perf/perf-runner.js",
     "test:perf:browser:stress:update": "BROWSER_PERF_MEASURE_UPDATE=1 BROWSER_PERF_PROFILE=stress BROWSER_PERF_ENFORCE_BUDGET=1 node tests/browser-perf/perf-runner.js",
+    "pages:build": "npm run build && node scripts/build-pages.mjs",
     "build": "npm run build:ts && npm --workspaces --if-present run build",
     "release": "npm run build:ts && npm --workspaces --if-present run release"
   },

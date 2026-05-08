@@ -55,6 +55,7 @@ test('test tooling runs through Vitest and browser visual diff scripts', () => {
     rootPackage.scripts['test:visual:browser:update'],
     'UPDATE_BROWSER_VISUAL_SNAPSHOTS=1 node tests/browser-visual/visual-diff.js'
   );
+  assert.equal(rootPackage.scripts['pages:build'], 'npm run build && node scripts/build-pages.mjs');
 
   assert.match(devDependencies.vitest ?? '', /^\^?4\./);
   assert.ok(devDependencies.playwright);
@@ -62,6 +63,22 @@ test('test tooling runs through Vitest and browser visual diff scripts', () => {
   assert.ok(devDependencies.pngjs);
   assert.ok(exists(path.join(root, 'vitest.config.js')));
   assert.ok(exists(path.join(root, 'tests/browser-visual/visual-diff.js')));
+  assert.ok(exists(path.join(root, 'scripts/build-pages.mjs')));
+});
+
+test('GitHub Pages workflow deploys built examples through a Pages artifact', () => {
+  const workflow = readFileSync(path.join(root, '.github/workflows/pages.yml'), 'utf8');
+
+  assert.match(workflow, /branches:\n\s+- main/);
+  assert.match(workflow, /uses: actions\/checkout@v6/);
+  assert.match(workflow, /uses: actions\/setup-node@v6/);
+  assert.match(workflow, /run: npm run pages:build/);
+  assert.match(workflow, /uses: actions\/configure-pages@v5/);
+  assert.match(workflow, /uses: actions\/upload-pages-artifact@v4/);
+  assert.match(workflow, /path: \.pages/);
+  assert.match(workflow, /pages: write/);
+  assert.match(workflow, /id-token: write/);
+  assert.match(workflow, /uses: actions\/deploy-pages@v4/);
 });
 
 test('release builds keep minified and development bundles together', async () => {
