@@ -469,6 +469,20 @@ function drawSky(
   }
 
   if (layout.day.visible && layout.day.progress < 1) {
+    const dayFutureClip = createArcFutureClip(
+      layout.day.start,
+      layout.day.end,
+      layout.height,
+      layout.day.progress,
+      dayLineStyle.lineWidth
+    );
+    const dayFutureEnterClip = createArcFutureClip(
+      layout.day.start,
+      layout.day.end,
+      layout.height,
+      0,
+      dayLineStyle.lineWidth
+    );
     addPolyline(echartsInstance, group, layout.day.fullPoints, {
       fill: null,
       stroke: dayLineStyle.stroke,
@@ -477,7 +491,7 @@ function drawSky(
       lineDash: [7, 8],
       lineCap: 'round',
       lineJoin: 'round'
-    }, true, 1, dayFutureAnimation, 'sky:day-future', 1, createArcFutureClip(layout.day.start, layout.day.end, layout.height, layout.day.progress, dayLineStyle.lineWidth));
+    }, true, 1, dayFutureAnimation, 'sky:day-future', 1, dayFutureClip, daySolidAnimation, dayFutureEnterClip);
   }
 
   if (!layout.day.visible) {
@@ -1068,7 +1082,8 @@ function addPolygon(
   animation: EnterAnimationConfig,
   key: string,
   clipRect?: GraphicRect,
-  clipAnimation?: EnterAnimationConfig
+  clipAnimation?: EnterAnimationConfig,
+  clipEnterRect?: GraphicRect
 ): void {
   if (points.length < 3) return;
   const polygon = new echartsInstance.graphic.Polygon({
@@ -1080,7 +1095,7 @@ function addPolygon(
     z2
   });
   setAliveRenderKey(polygon, key);
-  setClipRect(echartsInstance, polygon, clipRect, key, clipAnimation);
+  setClipRect(echartsInstance, polygon, clipRect, key, clipAnimation, clipEnterRect);
   if (!clipAnimation) applyFadeEnterAnimation(polygon, animation);
   group.add(polygon);
 }
@@ -1096,7 +1111,8 @@ function addPolyline(
   key: string,
   percent = 1,
   clipRect?: GraphicRect,
-  clipAnimation?: EnterAnimationConfig
+  clipAnimation?: EnterAnimationConfig,
+  clipEnterRect?: GraphicRect
 ): void {
   if (points.length < 2) return;
   const polyline = new echartsInstance.graphic.Polyline({
@@ -1112,7 +1128,7 @@ function addPolyline(
     z2
   });
   setAliveRenderKey(polyline, key);
-  setClipRect(echartsInstance, polyline, clipRect, key, clipAnimation);
+  setClipRect(echartsInstance, polyline, clipRect, key, clipAnimation, clipEnterRect);
   if (!clipAnimation) applyPathEnterAnimation(polyline, 'shape', 'percent', animation, clampPercent(percent));
   group.add(polyline);
 }
@@ -1126,7 +1142,8 @@ function setClipRect(
   element: GraphicElement,
   rect: GraphicRect | undefined,
   key: string,
-  animation?: EnterAnimationConfig
+  animation?: EnterAnimationConfig,
+  enterRect?: GraphicRect
 ): void {
   if (!rect || typeof element.setClipPath !== 'function') return;
   const clipPath = new echartsInstance.graphic.Rect({
@@ -1134,7 +1151,7 @@ function setClipRect(
     silent: true
   });
   setAliveRenderKey(clipPath, `${key}:clip`);
-  applyClipWidthEnterAnimation(clipPath, animation);
+  applyClipRectEnterAnimation(clipPath, animation, enterRect);
   element.setClipPath(clipPath);
 }
 
@@ -1231,15 +1248,33 @@ function applyFadeEnterAnimation(element: GraphicElement, animation: EnterAnimat
   animateGraphicProperty(animatable, 'style', animation, { opacity });
 }
 
-function applyClipWidthEnterAnimation(element: GraphicElement, animation: EnterAnimationConfig | undefined): void {
+function applyClipRectEnterAnimation(
+  element: GraphicElement,
+  animation: EnterAnimationConfig | undefined,
+  enterRect?: GraphicRect
+): void {
   if (!animation?.enabled) return;
   const animatable = element as AnimatableGraphicElement;
   if (typeof animatable.animate !== 'function') return;
 
   const shape = resolveAnimationTarget(animatable, 'shape');
-  const width = finiteNumber(shape.width, 0);
-  shape.width = 0;
-  animateGraphicProperty(animatable, 'shape', animation, { width });
+  const target: Record<string, unknown> = {};
+
+  if (enterRect) {
+    (['x', 'y', 'width', 'height'] as const).forEach((key) => {
+      const targetValue = finiteNumber(shape[key], enterRect[key]);
+      shape[key] = enterRect[key];
+      if (enterRect[key] !== targetValue) target[key] = targetValue;
+    });
+  } else {
+    const width = finiteNumber(shape.width, 0);
+    shape.width = 0;
+    target.width = width;
+  }
+
+  if (Object.keys(target).length) {
+    animateGraphicProperty(animatable, 'shape', animation, target);
+  }
 }
 
 function animateGraphicProperty(

@@ -363,6 +363,12 @@ test('sunriseSunset enter animation grows the day line and area with the sun ico
   assert.ok(geometry.daySolid.clipWidth <= 10);
   assert.ok(geometry.daySolid.clipWidthTarget > 100);
   assert.ok(geometry.daySolid.clipAnimatorTracks.includes('width'));
+  assert.ok(geometry.dayFuture);
+  assert.ok(geometry.dayFuture.clipX <= geometry.dayArea.clipX);
+  assert.ok(geometry.dayFuture.clipXTarget > geometry.dayFuture.clipX + 100);
+  assert.ok(geometry.dayFuture.clipWidth > geometry.dayFuture.clipWidthTarget + 100);
+  assert.ok(geometry.dayFuture.clipAnimatorTracks.includes('x'));
+  assert.ok(geometry.dayFuture.clipAnimatorTracks.includes('width'));
   assert.ok(
     tree.some((element) => (
       element.type === 'group'
@@ -650,6 +656,7 @@ function shapeStateForElement(displayList, predicate) {
     percent: element?.shape?.percent,
     clipX: element?.__clipPaths?.[0]?.shape?.x,
     clipWidth: element?.__clipPaths?.[0]?.shape?.width,
+    clipXTarget: animationTrackTarget(element?.__clipPaths?.[0], 'x'),
     clipWidthTarget: animationTrackTarget(element?.__clipPaths?.[0], 'width'),
     clipAnimatorTracks: animatorTracks(element?.__clipPaths?.[0]),
     lineDash: element?.style?.lineDash,
