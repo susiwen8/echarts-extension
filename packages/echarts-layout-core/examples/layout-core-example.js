@@ -19,32 +19,32 @@ const graph = {
   ]
 };
 
-const cases = [
+const layoutCaseDefinitions = [
   {
     id: 'radial',
     title: 'Radial',
-    layout: computeGraphLayout('radial', graph, {
+    options: {
       unitRadius: 72,
       linkDistance: 110,
       preventOverlap: true,
       nodeSize: 22,
       sortBy: 'data'
-    })
+    }
   },
   {
     id: 'concentric',
     title: 'Concentric',
-    layout: computeGraphLayout('concentric', graph, {
+    options: {
       nodeSize: 30,
       maxLevelDiff: 1,
       sortBy: 'degree',
       preventOverlap: true
-    })
+    }
   },
   {
     id: 'grid',
     title: 'Grid',
-    layout: computeGraphLayout('grid', graph, {
+    options: {
       width: 360,
       height: 220,
       cols: 4,
@@ -53,26 +53,32 @@ const cases = [
       nodeSpacing: 8,
       preventOverlap: true,
       sortBy: 'data'
-    })
+    }
   },
   {
     id: 'mds',
     title: 'MDS',
-    layout: computeGraphLayout('mds', graph, {
+    options: {
       linkDistance: 82
-    })
+    }
   },
   {
     id: 'arc',
     title: 'Arc',
-    layout: computeGraphLayout('arc', graph, {
+    options: {
       nodeSep: 44,
       nodeSize: 18
-    })
+    }
   }
 ];
 
 const host = document.getElementById('layouts');
+const cases = layoutCaseDefinitions.map((definition) => ({
+  ...definition,
+  graph: cloneGraph(graph),
+  addCount: 0
+}));
+
 cases.forEach((layoutCase) => {
   const card = document.createElement('article');
   card.className = 'layout-card';
@@ -81,14 +87,15 @@ cases.forEach((layoutCase) => {
       <h2>${layoutCase.title}</h2>
       <div class="layout-card__tools">
         <span class="layout-card__zoom">100%</span>
-        <button class="layout-card__button" type="button">Reset view</button>
+        <button class="layout-card__button layout-card__button--primary" data-layout-add type="button">添加数据</button>
+        <button class="layout-card__button" data-layout-reset type="button">Reset view</button>
       </div>
     </div>
     <div class="layout-card__event">Click None</div>
-    ${renderLayout(layoutCase.id, layoutCase.layout)}
+    <div class="layout-card__visual">${renderLayout(layoutCase.id, computeLayoutCase(layoutCase))}</div>
   `;
   host.append(card);
-  attachLayoutInteractions(card);
+  attachLayoutInteractions(card, layoutCase);
 });
 
 function renderLayout(type, layout) {
@@ -103,14 +110,15 @@ function renderLayout(type, layout) {
     const target = byId.get(edge.target);
     if (!source || !target) return '';
     const name = `${source.name} -> ${target.name}`;
+    const edgeId = `${edge.source}-${edge.target}`;
     if (type === 'arc') {
-      return `<path class="layout-edge" data-layout-kind="edge" data-layout-name="${escapeHtml(name)}" d="${pathToString(createArcPath([source.x, source.y], [target.x, target.y]))}" fill="none" stroke="#9aa4b2" stroke-width="1.4"/>`;
+      return `<path class="layout-edge" data-layout-kind="edge" data-layout-id="${escapeHtml(edgeId)}" data-layout-name="${escapeHtml(name)}" d="${pathToString(createArcPath([source.x, source.y], [target.x, target.y]))}" fill="none" stroke="#9aa4b2" stroke-width="1.4"/>`;
     }
-    return `<line class="layout-edge" data-layout-kind="edge" data-layout-name="${escapeHtml(name)}" x1="${source.x}" y1="${source.y}" x2="${target.x}" y2="${target.y}" stroke="#9aa4b2" stroke-width="1.4"/>`;
+    return `<line class="layout-edge" data-layout-kind="edge" data-layout-id="${escapeHtml(edgeId)}" data-layout-name="${escapeHtml(name)}" x1="${source.x}" y1="${source.y}" x2="${target.x}" y2="${target.y}" stroke="#9aa4b2" stroke-width="1.4"/>`;
   }).join('');
   const nodes = projected.map((node, index) => {
     const color = ['#2454a6', '#248f6a', '#c77725', '#9c4f97', '#5f6fb4', '#c4554d', '#4b8f8c'][index % 7];
-    return `<g class="layout-node" data-layout-kind="node" data-layout-name="${escapeHtml(node.name)}" data-layout-index="${index}">
+    return `<g class="layout-node" data-layout-kind="node" data-layout-id="${escapeHtml(node.id)}" data-layout-name="${escapeHtml(node.name)}" data-layout-index="${index}" data-layout-x="${node.x}" data-layout-y="${node.y}">
       <circle cx="${node.x}" cy="${node.y}" r="12" fill="${color}" stroke="#fff" stroke-width="2"/>
       <text x="${node.x + 16}" y="${node.y + 4}" fill="#374151" font-size="12" font-family="system-ui, sans-serif">${escapeHtml(node.name)}</text>
     </g>`;
@@ -125,13 +133,13 @@ function renderLayout(type, layout) {
   </svg>`;
 }
 
-function attachLayoutInteractions(card) {
-  const svg = card.querySelector('svg');
-  const viewport = card.querySelector('.layout-viewport');
+function attachLayoutInteractions(card, layoutCase) {
+  const visual = card.querySelector('.layout-card__visual');
   const eventLabel = card.querySelector('.layout-card__event');
   const zoomLabel = card.querySelector('.layout-card__zoom');
-  const resetButton = card.querySelector('.layout-card__button');
-  if (!svg || !viewport) return;
+  const addButton = card.querySelector('[data-layout-add]');
+  const resetButton = card.querySelector('[data-layout-reset]');
+  if (!visual) return;
 
   const state = { x: 0, y: 0, scale: 1 };
   let dragging = false;
@@ -140,21 +148,37 @@ function attachLayoutInteractions(card) {
   let lastPointerY = 0;
   let suppressClickUntil = 0;
 
+  addButton?.addEventListener('click', () => {
+    const before = readLayoutPositions(card);
+    appendLayoutData(layoutCase);
+    visual.innerHTML = renderLayout(layoutCase.id, computeLayoutCase(layoutCase));
+    const viewport = card.querySelector('.layout-viewport');
+    if (viewport) applySvgViewport(viewport, zoomLabel, state);
+    animateLayoutUpdate(card, before);
+    eventLabel.textContent = `Added ${layoutCase.addCount} · ${layoutCase.graph.data.length} nodes`;
+  });
+
   resetButton?.addEventListener('click', () => {
     state.x = 0;
     state.y = 0;
     state.scale = 1;
-    applySvgViewport(viewport, zoomLabel, state);
+    const viewport = card.querySelector('.layout-viewport');
+    if (viewport) applySvgViewport(viewport, zoomLabel, state);
   });
 
-  svg.addEventListener('wheel', (event) => {
+  visual.addEventListener('wheel', (event) => {
+    const svg = card.querySelector('svg');
+    const viewport = card.querySelector('.layout-viewport');
+    if (!svg || !viewport) return;
     event.preventDefault();
     const point = svgPoint(svg, event.clientX, event.clientY);
     zoomSvgViewport(state, event.deltaY <= 0 ? 1 : -1, point.x, point.y);
     applySvgViewport(viewport, zoomLabel, state);
   }, { passive: false });
 
-  svg.addEventListener('pointerdown', (event) => {
+  visual.addEventListener('pointerdown', (event) => {
+    const svg = card.querySelector('svg');
+    if (!svg) return;
     if (event.button != null && event.button !== 0) return;
     dragging = true;
     movedDuringDrag = false;
@@ -164,7 +188,10 @@ function attachLayoutInteractions(card) {
     safelySetPointerCapture(svg, event.pointerId);
   });
 
-  svg.addEventListener('pointermove', (event) => {
+  visual.addEventListener('pointermove', (event) => {
+    const svg = card.querySelector('svg');
+    const viewport = card.querySelector('.layout-viewport');
+    if (!svg || !viewport) return;
     if (!dragging) return;
     const delta = svgDelta(svg, event.clientX - lastPointerX, event.clientY - lastPointerY);
     lastPointerX = event.clientX;
@@ -178,36 +205,115 @@ function attachLayoutInteractions(card) {
   });
 
   const stopDragging = (event) => {
+    const svg = card.querySelector('svg');
     if (!dragging) return;
     dragging = false;
-    svg.classList.remove('is-panning');
+    svg?.classList.remove('is-panning');
     safelyReleasePointerCapture(svg, event.pointerId);
     if (movedDuringDrag) suppressClickUntil = Date.now() + 160;
   };
-  svg.addEventListener('pointerup', stopDragging);
-  svg.addEventListener('pointercancel', stopDragging);
-  svg.addEventListener('lostpointercapture', stopDragging);
+  visual.addEventListener('pointerup', stopDragging);
+  visual.addEventListener('pointercancel', stopDragging);
+  visual.addEventListener('lostpointercapture', stopDragging);
 
-  svg.addEventListener('mouseover', (event) => {
+  visual.addEventListener('mouseover', (event) => {
     const target = closestLayoutTarget(event.target);
     if (!target) return;
     target.classList.add('is-hovered');
     eventLabel.textContent = `Hover · ${target.dataset.layoutKind} · ${target.dataset.layoutName}`;
   });
 
-  svg.addEventListener('mouseout', (event) => {
+  visual.addEventListener('mouseout', (event) => {
     const target = closestLayoutTarget(event.target);
     if (!target || target.contains(event.relatedTarget)) return;
     target.classList.remove('is-hovered');
     eventLabel.textContent = 'Click None';
   });
 
-  svg.addEventListener('click', (event) => {
+  visual.addEventListener('click', (event) => {
     if (Date.now() < suppressClickUntil) return;
     const target = closestLayoutTarget(event.target);
     if (!target) return;
     eventLabel.textContent = `Click ${formatLayoutTime(new Date())} · ${target.dataset.layoutKind} · ${target.dataset.layoutName}`;
   });
+}
+
+function computeLayoutCase(layoutCase) {
+  return computeGraphLayout(layoutCase.id, layoutCase.graph, layoutCase.options);
+}
+
+function appendLayoutData(layoutCase) {
+  layoutCase.addCount += 1;
+  const index = layoutCase.addCount;
+  const id = `added-${layoutCase.id}-${index}`;
+  const parent = layoutCase.graph.data[(index * 3) % layoutCase.graph.data.length] || layoutCase.graph.data[0];
+  layoutCase.graph.data.push({
+    id,
+    name: `Added ${index}`
+  });
+  if (parent) {
+    layoutCase.graph.links.push({
+      source: parent.id,
+      target: id
+    });
+  }
+}
+
+function animateLayoutUpdate(card, previousPositions) {
+  card.querySelectorAll('.layout-node').forEach((node) => {
+    const id = node.dataset.layoutId;
+    const previous = previousPositions.get(id);
+    const next = readNodePosition(node);
+    if (!next) return;
+
+    if (previous && typeof node.animate === 'function') {
+      node.animate([
+        { transform: `translate(${previous.x - next.x}px, ${previous.y - next.y}px)` },
+        { transform: 'translate(0, 0)' }
+      ], {
+        duration: 120,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+      return;
+    }
+
+    if (typeof node.animate === 'function') {
+      node.animate([
+        { opacity: 0, transform: 'scale(0.2)' },
+        { opacity: 1, transform: 'scale(1)' }
+      ], {
+        duration: 120,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+      });
+    }
+  });
+
+  card.querySelectorAll('.layout-edge').forEach((edge) => {
+    if (typeof edge.animate !== 'function') return;
+    edge.animate([
+      { opacity: 0 },
+      { opacity: 1 }
+    ], {
+      duration: 120,
+      easing: 'ease-out'
+    });
+  });
+}
+
+function readLayoutPositions(card) {
+  const positions = new Map();
+  card.querySelectorAll('.layout-node').forEach((node) => {
+    const position = readNodePosition(node);
+    if (node.dataset.layoutId && position) positions.set(node.dataset.layoutId, position);
+  });
+  return positions;
+}
+
+function readNodePosition(node) {
+  const x = Number(node.dataset.layoutX);
+  const y = Number(node.dataset.layoutY);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  return { x, y };
 }
 
 function zoomSvgViewport(state, direction, originX, originY) {
@@ -327,6 +433,7 @@ function computeGraphLayout(type, input, options = {}) {
 
   if (type === 'radial') return layoutRadial(layout, options);
   if (type === 'concentric') return layoutConcentric(layout);
+  if (type === 'grid') return layoutGrid(layout, options);
   if (type === 'mds') return layoutMds(layout);
   if (type === 'arc') return layoutArc(layout, options);
   return layout;
@@ -362,6 +469,19 @@ function layoutMds(layout) {
   return layout;
 }
 
+function layoutGrid(layout, options) {
+  const cols = Math.max(1, Math.trunc(finiteNumber(options.cols, Math.ceil(Math.sqrt(layout.nodes.length)))));
+  const nodeSep = finiteNumber(options.nodeSpacing, 16) + finiteNumber(options.nodeSize, 24);
+  const rows = Math.max(1, Math.ceil(layout.nodes.length / cols));
+  layout.nodes.forEach((node, index) => {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    node.x = (col - (cols - 1) / 2) * nodeSep;
+    node.y = (row - (rows - 1) / 2) * nodeSep;
+  });
+  return layout;
+}
+
 function layoutArc(layout, options) {
   const nodeSep = finiteNumber(options.nodeSep, 20);
   const nodeSize = finiteNumber(options.nodeSize, 20);
@@ -385,6 +505,13 @@ function createArcPath(sourcePoint, targetPoint) {
 
 function pathToString(path) {
   return path.map((segment) => segment.join(' ')).join(' ');
+}
+
+function cloneGraph(input) {
+  return {
+    data: input.data.map((node) => ({ ...node })),
+    links: input.links.map((link) => ({ ...link }))
+  };
 }
 
 function finiteNumber(value, fallback) {

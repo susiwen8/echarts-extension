@@ -116,8 +116,8 @@ export function layoutHollowVenn(data: unknown[], options: VennLayoutOptions = {
   const height = finiteNumber(options.height, DEFAULT_HEIGHT);
   const padding = finiteNumber(options.padding, 24);
   const items = normalizeItems(data);
-  const baseSets = resolveBaseSets(items).slice(0, 3);
-  const circleCount = Math.max(1, Math.min(3, baseSets.length || items.length || 1));
+  const baseSets = resolveBaseSets(items);
+  const circleCount = Math.max(1, baseSets.length || items.length || 1);
   const circles = createHollowCircles(circleCount, baseSets, {
     width,
     height,
@@ -209,7 +209,8 @@ function resolveMode(option: VennLayoutOption, data: unknown[]): VennLayoutMode 
 function createHollowCircles(count: number, baseSets: string[], rect: LayoutRect): VennCircle[] {
   if (count === 1) return createOneSetCircles(baseSets, rect);
   if (count === 2) return createTwoSetCircles(baseSets, rect);
-  return createThreeSetCircles(baseSets, rect);
+  if (count === 3) return createThreeSetCircles(baseSets, rect);
+  return createManySetCircles(count, baseSets, rect);
 }
 
 function createOneSetCircles(baseSets: string[], { width, height, padding }: LayoutRect): VennCircle[] {
@@ -283,6 +284,40 @@ function createThreeSetCircles(baseSets: string[], { width, height, padding }: L
     y: points[index][1],
     r
   }));
+}
+
+function createManySetCircles(count: number, baseSets: string[], rect: LayoutRect): VennCircle[] {
+  const { width, height, padding } = rect;
+  const ids = fillSetNames(baseSets, count);
+  const innerWidth = Math.max(width - padding * 2, 1);
+  const innerHeight = Math.max(height - padding * 2, 1);
+  const cx = width / 2;
+  const cy = height / 2;
+  const sizeFactor = Math.sqrt(count);
+  const r = Math.max(1, Math.min(
+    innerWidth / (2.55 + sizeFactor * 0.42),
+    innerHeight / (2.1 + sizeFactor * 0.42),
+    innerWidth * 0.27,
+    innerHeight * 0.34
+  ));
+  const orbitX = Math.max(0, Math.min(innerWidth / 2 - r, r * 0.84));
+  const orbitY = Math.max(0, Math.min(innerHeight / 2 - r, r * 0.58));
+  const startAngle = -Math.PI / 2;
+
+  return ids.map((id, index) => {
+    const angle = startAngle + (Math.PI * 2 * index) / count;
+    const point = clampCircle(cx + Math.cos(angle) * orbitX, cy + Math.sin(angle) * orbitY, r, rect);
+    return {
+      id,
+      name: id,
+      sets: [id],
+      setKey: id,
+      dataIndex: -1,
+      x: point.x,
+      y: point.y,
+      r
+    };
+  });
 }
 
 function createHollowLabels(items: NormalizedVennItem[], circles: VennCircle[], { width, height }: SizeRect): VennLabel[] {
@@ -402,7 +437,7 @@ function createSetKey(sets: string[]): string {
 function fillSetNames(baseSets: string[], count: number): string[] {
   const fallback = ['A', 'B', 'C'];
   const names = baseSets.slice(0, count);
-  while (names.length < count) names.push(fallback[names.length]);
+  while (names.length < count) names.push(fallback[names.length] || `Set ${names.length + 1}`);
   return names;
 }
 

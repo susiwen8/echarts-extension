@@ -10,6 +10,15 @@ import {
 
 type ArcPathSegment = Array<string | number>;
 
+export interface ArcShape extends Record<string, unknown> {
+  cx: number;
+  cy: number;
+  r: number;
+  startAngle: number;
+  endAngle: number;
+  clockwise: boolean;
+}
+
 export function computeArcLayout(input: GraphData, options: LayoutOptions = {}): LayoutResult {
   const graph = buildLayoutGraph(input);
   const { width, height, center } = normalizeViewport(options);
@@ -44,6 +53,30 @@ export function createArcPath(sourcePoint: Point, targetPoint: Point): ArcPathSe
     ['M', sx, sy],
     ['A', r, r, 0, 0, sx < tx ? 1 : 0, tx, ty]
   ];
+}
+
+export function createArcShape(sourcePoint: Point, targetPoint: Point): ArcShape {
+  const [sx, sy] = sourcePoint;
+  const [tx] = targetPoint;
+  const r = Math.abs(tx - sx) / 2;
+  const cx = (sx + tx) / 2;
+  return sx <= tx
+    ? {
+        cx,
+        cy: sy,
+        r,
+        startAngle: Math.PI,
+        endAngle: 0,
+        clockwise: true
+      }
+    : {
+        cx,
+        cy: sy,
+        r,
+        startAngle: 0,
+        endAngle: Math.PI,
+        clockwise: false
+      };
 }
 
 export function createArcBezierShape(sourcePoint: Point, targetPoint: Point) {

@@ -7,75 +7,48 @@
 <circle cx="451.2" cy="629.7" r="222.3" transform="translate(28.8 72)" fill="#adbef5" fill-opacity="0.98" stroke="rgb(30,58,138)" stroke-opacity="0.41159999999999997" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr-cls-4"></circle>
 <circle cx="451.2" cy="679.7" r="172.3" transform="translate(28.8 72)" fill="#c5d4fb" fill-opacity="0.98" stroke="rgb(30,58,138)" stroke-opacity="0.41159999999999997" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr-cls-5"></circle>
 <circle cx="451.2" cy="729.6" r="122.4" transform="translate(28.8 72)" fill="#d7e7ff" fill-opacity="0.98" stroke="rgb(30,58,138)" stroke-opacity="0.41159999999999997" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-6"></circle>
+<path d="M411.6 73l79.2 0l0 22l-79.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="83.96000000000004" transform="translate(28.8 72)" fill="#0f172a">Soft Skills</text>
+<path d="M379.4 163.8l143.6 0l0 22l-143.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="174.84473333333335" transform="translate(28.8 72)" fill="#0f172a">Machine Learning</text>
+<path d="M378.9 254.7l144.5 0l0 22l-144.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="265.72946666666667" transform="translate(28.8 72)" fill="#0f172a">Data Visualization</text>
+<path d="M389 345.6l124.4 0l0 22l-124.4 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="356.6142" transform="translate(28.8 72)" fill="#0f172a">Data Wrangling</text>
+<path d="M433.1 436.5l36.2 0l0 22l-36.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" x="451.2" y="447.49893333333335" transform="translate(28.8 72)" fill="#0f172a">SQL</text>
+<path d="M423 527.4l56.3 0l0 22l-56.3 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" x="451.2" y="538.3836666666667" transform="translate(28.8 72)" fill="#0f172a">Python</text>
 <path d="M391.5 663.6l119.3 0l0 44l-119.3 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="674.5632" transform="translate(28.8 72)" fill="#0f172a">Mathematics &amp;</text>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" x="451.2" y="696.5632" transform="translate(28.8 72)" fill="#0f172a">Statistics</text>
-<path d="M423 527.4l56.3 0l0 22l-56.3 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" x="451.2" y="538.3836666666667" transform="translate(28.8 72)" fill="#0f172a">Python</text>
-<path d="M433.1 436.5l36.2 0l0 22l-36.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" x="451.2" y="447.49893333333335" transform="translate(28.8 72)" fill="#0f172a">SQL</text>
-<path d="M389 345.6l124.4 0l0 22l-124.4 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="356.6142" transform="translate(28.8 72)" fill="#0f172a">Data Wrangling</text>
-<path d="M378.9 254.7l144.5 0l0 22l-144.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="265.72946666666667" transform="translate(28.8 72)" fill="#0f172a">Data Visualization</text>
-<path d="M379.4 163.8l143.6 0l0 22l-143.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="174.84473333333335" transform="translate(28.8 72)" fill="#0f172a">Machine Learning</text>
-<path d="M411.6 73l79.2 0l0 22l-79.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:18px;font-family:sans-serif;font-weight:750;" xml:space="preserve" x="451.2" y="83.96000000000004" transform="translate(28.8 72)" fill="#0f172a">Soft Skills</text>
-<path d="M356.7 742.5l72.7 0l0 11l-72.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="393.0695" y="747.977" transform="translate(28.8 72)" fill="#111827">Probability Theory</text>
-<path d="M479.9 742.5l58.8 0l0 11l-58.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="509.3305" y="747.977" transform="translate(28.8 72)" fill="#111827">Linear Algebra</text>
-<path d="M370.8 774.9l44.6 0l0 22l-44.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="780.4148" transform="translate(28.8 72)" fill="#111827">Descriptive</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="791.4148" transform="translate(28.8 72)" fill="#111827">Statistics</text>
-<path d="M470.9 780.4l76.8 0l0 11l-76.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="509.3305" y="785.9148" transform="translate(28.8 72)" fill="#111827">Hypothesis Testing</text>
-<path d="M373.2 812.9l39.7 0l0 22l-39.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="818.3526" transform="translate(28.8 72)" fill="#111827">Inferential</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="829.3526" transform="translate(28.8 72)" fill="#111827">Statistics</text>
-<path d="M492.1 818.4l34.6 0l0 11l-34.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="509.3305" y="823.8526" transform="translate(28.8 72)" fill="#111827">Calculus</text>
-<path d="M314 665.6l27.6 0l0 11l-27.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="327.806082038166" y="671.0547900370433" transform="translate(28.8 72)" fill="#111827">Syntax</text>
-<path d="M319 631.6l46.2 0l0 11l-46.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="342.05355109808295" y="637.0557432785462" transform="translate(28.8 72)" fill="#111827">Data Types</text>
-<path d="M316.3 595.4l72.7 0l0 11l-72.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="352.6919544713011" y="600.8575568369769" transform="translate(28.8 72)" fill="#111827">Control Structures</text>
-<path d="M375.4 584.5l30.7 0l0 11l-30.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="390.7027464703179" y="589.9924665480071" transform="translate(28.8 72)" fill="#111827">Pandas</text>
-<path d="M502 577l29.5 0l0 11l-29.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="516.7236148618192" y="582.5405794233388" transform="translate(28.8 72)" fill="#111827">NumPy</text>
-<path d="M522.1 607.3l72.3 0l0 11l-72.3 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="558.1930834669396" y="612.8266346085662" transform="translate(28.8 72)" fill="#111827">Data Visualization</text>
-<path d="M549.9 657l47.6 0l0 11l-47.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="573.6914398255379" y="662.4682841363546" transform="translate(28.8 72)" fill="#111827">Scikit-Learn</text>
-<path d="M244.4 603.3l71.8 0l0 11l-71.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="280.3352974267366" y="608.7671191874031" transform="translate(28.8 72)" fill="#111827">Joins, Subqueries</text>
-<path d="M279.2 536.5l73.7 0l0 11l-73.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="316.061936261538" y="541.9869819449002" transform="translate(28.8 72)" fill="#111827">Window Functions</text>
-<path d="M351.6 487l34.2 0l0 11l-34.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="368.7316570790705" y="492.4962955999172" transform="translate(28.8 72)" fill="#111827">Indexing</text>
-<path d="M499.3 502.4l50.1 0l0 11l-50.1 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="524.4094004406564" y="507.90576359809916" transform="translate(28.8 72)" fill="#111827">Optimization</text>
-<path d="M548.6 532.1l52.7 0l0 22l-52.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="575.0003051980291" y="537.560759734344" transform="translate(28.8 72)" fill="#111827">Database</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="575.0003051980291" y="548.560759734344" transform="translate(28.8 72)" fill="#111827">Management</text>
-<path d="M579.6 591.8l77.2 0l0 11l-77.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="618.1966414697324" y="597.2858078728193" transform="translate(28.8 72)" fill="#111827">Query Optimization</text>
-<path d="M185.3 570.2l57.2 0l0 11l-57.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="213.89279854180333" y="575.6677873906135" transform="translate(28.8 72)" fill="#111827">Data Cleaning</text>
-<path d="M234.1 473.7l60.7 0l0 22l-60.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="264.4572393194995" y="479.15981092443735" transform="translate(28.8 72)" fill="#111827">Data</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="264.4572393194995" y="490.15981092443735" transform="translate(28.8 72)" fill="#111827">Transformation</text>
-<path d="M300.1 413.8l68.7 0l0 22l-68.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="334.4010642997014" y="419.31257720814347" transform="translate(28.8 72)" fill="#111827">Handling missing</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="334.4010642997014" y="430.31257720814347" transform="translate(28.8 72)" fill="#111827">values</text>
-<path d="M533.6 414.1l76.7 0l0 11l-76.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="571.9227094697476" y="419.6055535461861" transform="translate(28.8 72)" fill="#111827">Data Normalization</text>
-<path d="M653 548.4l62.7 0l0 22l-62.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="684.3926419912893" y="553.9082874081028" transform="translate(28.8 72)" fill="#111827">Data Merging &amp;</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="684.3926419912893" y="564.9082874081028" transform="translate(28.8 72)" fill="#111827">Joining</text>
+<path d="M27.3 417.7l64.1 0l0 11l-64.1 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="59.34829000448542" y="423.16020295979524" transform="translate(28.8 72)" fill="#111827">Critical Thinking</text>
+<path d="M95.5 254.2l64.6 0l0 22l-64.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="127.83591224155748" y="259.73776783452365" transform="translate(28.8 72)" fill="#111827">Problem-solving</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="127.83591224155748" y="270.73776783452365" transform="translate(28.8 72)" fill="#111827">Skills</text>
+<path d="M207.5 137.1l62.6 0l0 22l-62.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="238.80828457021144" y="142.64667388382344" transform="translate(28.8 72)" fill="#111827">Communication</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="238.80828457021144" y="153.64667388382344" transform="translate(28.8 72)" fill="#111827">Skills</text>
+<path d="M628.8 136.3l70.8 0l0 22l-70.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="664.201233685237" y="141.83781583924753" transform="translate(28.8 72)" fill="#111827">Collaboration and</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="664.201233685237" y="152.83781583924753" transform="translate(28.8 72)" fill="#111827">Teamwork</text>
+<path d="M806.3 385.7l50.8 0l0 22l-50.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="831.6567171482186" y="391.21435028724187" transform="translate(28.8 72)" fill="#111827">Presentation</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="831.6567171482186" y="402.21435028724187" transform="translate(28.8 72)" fill="#111827">Skills</text>
+<path d="M103.3 429l45.2 0l0 22l-45.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="125.91412349015093" y="434.4965831514884" transform="translate(28.8 72)" fill="#111827">Supervised</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="125.91412349015093" y="445.4965831514884" transform="translate(28.8 72)" fill="#111827">Learning</text>
+<path d="M155.3 294.7l55.2 0l0 22l-55.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="182.84683231263256" y="300.1660819118853" transform="translate(28.8 72)" fill="#111827">Unsupervised</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="182.84683231263256" y="311.1660819118853" transform="translate(28.8 72)" fill="#111827">Learning</text>
+<path d="M259.4 221.2l79.2 0l0 11l-79.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="299.01790589250777" y="226.66312986243173" transform="translate(28.8 72)" fill="#111827">K-Means Clustering</text>
+<path d="M579 216.7l47.5 0l0 22l-47.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="602.746356859727" y="222.22117432005342" transform="translate(28.8 72)" fill="#111827">Hierarchical</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="602.746356859727" y="233.22117432005342" transform="translate(28.8 72)" fill="#111827">Clustering</text>
+<path d="M730.6 413.4l69.3 0l0 11l-69.3 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="765.2956344891684" y="418.8826601358543" transform="translate(28.8 72)" fill="#111827">Model Evaluation</text>
 <path d="M156.8 504.7l25.1 0l0 11l-25.1 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="169.35221024365524" y="510.16461594234727" transform="translate(28.8 72)" fill="#111827">Bokey</text>
 <path d="M195.6 428.9l22.1 0l0 11l-22 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
@@ -92,33 +65,60 @@
 <text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="696.0670289816753" y="420.85150794441483" transform="translate(28.8 72)" fill="#111827">Looker</text>
 <path d="M706.2 485.8l38.6 0l0 11l-38.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="725.5329067975372" y="491.3183576256741" transform="translate(28.8 72)" fill="#111827">Matplotlib</text>
-<path d="M103.3 429l45.2 0l0 22l-45.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="125.91412349015093" y="434.4965831514884" transform="translate(28.8 72)" fill="#111827">Supervised</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="125.91412349015093" y="445.4965831514884" transform="translate(28.8 72)" fill="#111827">Learning</text>
-<path d="M155.3 294.7l55.2 0l0 22l-55.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="182.84683231263256" y="300.1660819118853" transform="translate(28.8 72)" fill="#111827">Unsupervised</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="182.84683231263256" y="311.1660819118853" transform="translate(28.8 72)" fill="#111827">Learning</text>
-<path d="M259.4 221.2l79.2 0l0 11l-79.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="299.01790589250777" y="226.66312986243173" transform="translate(28.8 72)" fill="#111827">K-Means Clustering</text>
-<path d="M579 216.7l47.5 0l0 22l-47.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="602.746356859727" y="222.22117432005342" transform="translate(28.8 72)" fill="#111827">Hierarchical</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="602.746356859727" y="233.22117432005342" transform="translate(28.8 72)" fill="#111827">Clustering</text>
-<path d="M730.6 413.4l69.3 0l0 11l-69.3 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="765.2956344891684" y="418.8826601358543" transform="translate(28.8 72)" fill="#111827">Model Evaluation</text>
-<path d="M27.3 417.7l64.1 0l0 11l-64.1 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="59.34829000448542" y="423.16020295979524" transform="translate(28.8 72)" fill="#111827">Critical Thinking</text>
-<path d="M95.5 254.2l64.6 0l0 22l-64.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="127.83591224155748" y="259.73776783452365" transform="translate(28.8 72)" fill="#111827">Problem-solving</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="127.83591224155748" y="270.73776783452365" transform="translate(28.8 72)" fill="#111827">Skills</text>
-<path d="M207.5 137.1l62.6 0l0 22l-62.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="238.80828457021144" y="142.64667388382344" transform="translate(28.8 72)" fill="#111827">Communication</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="238.80828457021144" y="153.64667388382344" transform="translate(28.8 72)" fill="#111827">Skills</text>
-<path d="M628.8 136.3l70.8 0l0 22l-70.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="664.201233685237" y="141.83781583924753" transform="translate(28.8 72)" fill="#111827">Collaboration and</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="664.201233685237" y="152.83781583924753" transform="translate(28.8 72)" fill="#111827">Teamwork</text>
-<path d="M806.3 385.7l50.8 0l0 22l-50.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="831.6567171482186" y="391.21435028724187" transform="translate(28.8 72)" fill="#111827">Presentation</text>
-<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="831.6567171482186" y="402.21435028724187" transform="translate(28.8 72)" fill="#111827">Skills</text>
+<path d="M185.3 570.2l57.2 0l0 11l-57.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="213.89279854180333" y="575.6677873906135" transform="translate(28.8 72)" fill="#111827">Data Cleaning</text>
+<path d="M234.1 473.7l60.7 0l0 22l-60.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="264.4572393194995" y="479.15981092443735" transform="translate(28.8 72)" fill="#111827">Data</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="264.4572393194995" y="490.15981092443735" transform="translate(28.8 72)" fill="#111827">Transformation</text>
+<path d="M300.1 413.8l68.7 0l0 22l-68.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="334.4010642997014" y="419.31257720814347" transform="translate(28.8 72)" fill="#111827">Handling missing</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="334.4010642997014" y="430.31257720814347" transform="translate(28.8 72)" fill="#111827">values</text>
+<path d="M533.6 414.1l76.7 0l0 11l-76.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="571.9227094697476" y="419.6055535461861" transform="translate(28.8 72)" fill="#111827">Data Normalization</text>
+<path d="M653 548.4l62.7 0l0 22l-62.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="684.3926419912893" y="553.9082874081028" transform="translate(28.8 72)" fill="#111827">Data Merging &amp;</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="684.3926419912893" y="564.9082874081028" transform="translate(28.8 72)" fill="#111827">Joining</text>
+<path d="M244.4 603.3l71.8 0l0 11l-71.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="280.3352974267366" y="608.7671191874031" transform="translate(28.8 72)" fill="#111827">Joins, Subqueries</text>
+<path d="M279.2 536.5l73.7 0l0 11l-73.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="316.061936261538" y="541.9869819449002" transform="translate(28.8 72)" fill="#111827">Window Functions</text>
+<path d="M351.6 487l34.2 0l0 11l-34.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="368.7316570790705" y="492.4962955999172" transform="translate(28.8 72)" fill="#111827">Indexing</text>
+<path d="M499.3 502.4l50.1 0l0 11l-50.1 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="524.4094004406564" y="507.90576359809916" transform="translate(28.8 72)" fill="#111827">Optimization</text>
+<path d="M548.6 532.1l52.7 0l0 22l-52.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="575.0003051980291" y="537.560759734344" transform="translate(28.8 72)" fill="#111827">Database</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="575.0003051980291" y="548.560759734344" transform="translate(28.8 72)" fill="#111827">Management</text>
+<path d="M579.6 591.8l77.2 0l0 11l-77.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="618.1966414697324" y="597.2858078728193" transform="translate(28.8 72)" fill="#111827">Query Optimization</text>
+<path d="M314 665.6l27.6 0l0 11l-27.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="327.806082038166" y="671.0547900370433" transform="translate(28.8 72)" fill="#111827">Syntax</text>
+<path d="M319 631.6l46.2 0l0 11l-46.2 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="342.05355109808295" y="637.0557432785462" transform="translate(28.8 72)" fill="#111827">Data Types</text>
+<path d="M316.3 595.4l72.7 0l0 11l-72.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="352.6919544713011" y="600.8575568369769" transform="translate(28.8 72)" fill="#111827">Control Structures</text>
+<path d="M375.4 584.5l30.7 0l0 11l-30.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="390.7027464703179" y="589.9924665480071" transform="translate(28.8 72)" fill="#111827">Pandas</text>
+<path d="M502 577l29.5 0l0 11l-29.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="516.7236148618192" y="582.5405794233388" transform="translate(28.8 72)" fill="#111827">NumPy</text>
+<path d="M522.1 607.3l72.3 0l0 11l-72.3 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="558.1930834669396" y="612.8266346085662" transform="translate(28.8 72)" fill="#111827">Data Visualization</text>
+<path d="M549.9 657l47.6 0l0 11l-47.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="573.6914398255379" y="662.4682841363546" transform="translate(28.8 72)" fill="#111827">Scikit-Learn</text>
+<path d="M356.7 742.5l72.7 0l0 11l-72.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="393.0695" y="747.977" transform="translate(28.8 72)" fill="#111827">Probability Theory</text>
+<path d="M479.9 742.5l58.8 0l0 11l-58.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="509.3305" y="747.977" transform="translate(28.8 72)" fill="#111827">Linear Algebra</text>
+<path d="M370.8 774.9l44.6 0l0 22l-44.5 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="780.4148" transform="translate(28.8 72)" fill="#111827">Descriptive</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="791.4148" transform="translate(28.8 72)" fill="#111827">Statistics</text>
+<path d="M470.9 780.4l76.8 0l0 11l-76.8 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" xml:space="preserve" x="509.3305" y="785.9148" transform="translate(28.8 72)" fill="#111827">Hypothesis Testing</text>
+<path d="M373.2 812.9l39.7 0l0 22l-39.7 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="818.3526" transform="translate(28.8 72)" fill="#111827">Inferential</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="393.0695" y="829.3526" transform="translate(28.8 72)" fill="#111827">Statistics</text>
+<path d="M492.1 818.4l34.6 0l0 11l-34.6 0Z" transform="translate(28.8 72)" fill="none" pointer-events="visible" class="zr-cls-7"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:9px;font-family:sans-serif;font-weight:500;" x="509.3305" y="823.8526" transform="translate(28.8 72)" fill="#111827">Calculus</text>
 <path d="M-134.8 -5l269.7 0l0 34l-269.7 0Z" transform="translate(480 23)" fill="rgb(0,0,0)" fill-opacity="0" stroke="#3c3c41" stroke-width="0" class="zr-cls-8"></path>
 <text dominant-baseline="central" text-anchor="middle" style="font-size:24px;font-family:sans-serif;font-weight:700;" xml:space="preserve" y="12" transform="translate(480 23)" fill="#111827">Data Scientist Roadmap</text>
 <style ><![CDATA[

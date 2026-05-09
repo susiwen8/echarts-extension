@@ -94,6 +94,9 @@ interface SpiralChartView {
   __hoverController?: ElementHoverController;
   __aliveRenderState?: AliveRenderState;
   __enterReplayKey?: unknown;
+  __spiralEntering?: boolean;
+  __spiralEnterTimer?: ReturnType<typeof setTimeout>;
+  __spiralSilentElements?: SilentElementSnapshot[];
 }
 
 interface EnterAnimationConfig {
@@ -101,6 +104,16 @@ interface EnterAnimationConfig {
   duration: number;
   delay: number;
   easing: string;
+}
+
+interface EnterAnimationTracker {
+  totalDuration: number;
+}
+
+interface SilentElementSnapshot {
+  element: GraphicElement;
+  hadSilent: boolean;
+  silent: unknown;
 }
 
 type AnimationTargetKey = 'shape' | 'style';
@@ -213,6 +226,7 @@ echartsHost.extendChartView({
     const group = this.group;
     const renderToken = {};
     this.__renderToken = renderToken;
+    clearSpiralEnterGate(this);
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
 
@@ -224,13 +238,18 @@ echartsHost.extendChartView({
       const layout = resolveSpiralLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
       resetAliveRenderForReplay(this, seriesModel, group);
+      const enterTracker: EnterAnimationTracker = {
+        totalDuration: 0
+      };
       const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
-        drawSpiral(echartsHost, targetGroup, targetSeriesModel, layout, rect)
+        drawSpiral(echartsHost, targetGroup, targetSeriesModel, layout, rect, enterTracker)
       ));
       this.__hoverController = installElementHover(hoverItems, {
         dimOpacity: 0.2,
+        enabled: () => this.__spiralEntering !== true,
         zrender: api.getZr?.()
       });
+      startSpiralEnterGate(this, renderToken, enterTracker.totalDuration, hoverItems);
     } catch (error) {
       if (typeof console !== 'undefined') {
         console.error('[spiral] render failed', error);
@@ -240,6 +259,7 @@ echartsHost.extendChartView({
 
   remove(this: SpiralChartView) {
     this.__renderToken = null;
+    clearSpiralEnterGate(this);
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
     clearAliveRender(this);
@@ -248,6 +268,7 @@ echartsHost.extendChartView({
 
   dispose(this: SpiralChartView) {
     this.__renderToken = null;
+    clearSpiralEnterGate(this);
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
     clearAliveRender(this);
@@ -289,7 +310,8 @@ function drawSpiral(
   group: GraphicGroup,
   seriesModel: SpiralSeriesModel,
   layout: SpiralLayoutResult,
-  rect: ViewRect
+  rect: ViewRect,
+  enterTracker: EnterAnimationTracker
 ): ElementHoverItem[] {
   const data = seriesModel.getData();
   const chartGroup = new echartsInstance.graphic.Group();
@@ -307,17 +329,18 @@ function drawSpiral(
       segment,
       readSegmentStyle(data, seriesModel, itemModel, segment, itemIndex)
     );
+    const enterAnimation = resolveEnterAnimation(seriesModel, segment.animationOrder);
     const hoverItem: ElementHoverItem = {
       elements: [segmentElement]
     };
 
-    applyFadeEnterAnimation(segmentElement, resolveEnterAnimation(seriesModel, segment.animationOrder));
+    applyFadeEnterAnimation(segmentElement, enterAnimation, enterTracker);
     enableHover(segmentElement, itemModel);
     itemGroup.add(segmentElement);
 
     const label = createLabelElement(echartsInstance, seriesModel, itemModel, segment);
     if (label) {
-      applyFadeEnterAnimation(label, resolveEnterAnimation(seriesModel, segment.animationOrder));
+      applyFadeEnterAnimation(label, enterAnimation, enterTracker);
       itemGroup.add(label);
       hoverItem.elements.push(label);
     }
@@ -467,7 +490,11 @@ function resolveEnterAnimation(seriesModel: SpiralSeriesModel, index: number): E
   };
 }
 
-function applyFadeEnterAnimation(element: GraphicElement, animation: EnterAnimationConfig): void {
+function applyFadeEnterAnimation(
+  element: GraphicElement,
+  animation: EnterAnimationConfig,
+  enterTracker: EnterAnimationTracker
+): void {
   if (!animation.enabled) return;
 
   const animatable = element as AnimatableGraphicElement;
@@ -475,6 +502,7 @@ function applyFadeEnterAnimation(element: GraphicElement, animation: EnterAnimat
 
   const style = animatable.style || {};
   const opacity = finiteNumber(style.opacity, 1);
+  trackEnterAnimation(enterTracker, animation);
   style.opacity = 0;
   animatable.style = style;
   animateGraphicProperty(animatable, 'style', animation, { opacity });
@@ -516,6 +544,75 @@ function disabledAnimation(): EnterAnimationConfig {
     delay: 0,
     easing: 'cubicOut'
   };
+}
+
+function trackEnterAnimation(tracker: EnterAnimationTracker, animation: EnterAnimationConfig): void {
+  tracker.totalDuration = Math.max(
+    tracker.totalDuration,
+    Math.max(0, animation.delay) + Math.max(0, animation.duration)
+  );
+}
+
+function startSpiralEnterGate(
+  view: SpiralChartView,
+  renderToken: object,
+  totalDuration: number,
+  hoverItems: ElementHoverItem[]
+): void {
+  clearSpiralEnterGate(view);
+  if (totalDuration <= 0) return;
+
+  view.__spiralEntering = true;
+  view.__spiralSilentElements = silenceSpiralHoverElements(hoverItems);
+  view.__spiralEnterTimer = setTimeout(() => {
+    if (view.__renderToken === renderToken) {
+      restoreSpiralHoverElements(view.__spiralSilentElements);
+      view.__spiralSilentElements = undefined;
+      view.__spiralEntering = false;
+    }
+    view.__spiralEnterTimer = undefined;
+  }, totalDuration);
+}
+
+function clearSpiralEnterGate(view: SpiralChartView): void {
+  if (view.__spiralEnterTimer) {
+    clearTimeout(view.__spiralEnterTimer);
+    view.__spiralEnterTimer = undefined;
+  }
+  restoreSpiralHoverElements(view.__spiralSilentElements);
+  view.__spiralSilentElements = undefined;
+  view.__spiralEntering = false;
+}
+
+function silenceSpiralHoverElements(hoverItems: ElementHoverItem[]): SilentElementSnapshot[] {
+  const snapshots: SilentElementSnapshot[] = [];
+  const seen = new Set<GraphicElement>();
+
+  hoverItems.forEach((item) => {
+    [...item.elements, ...(item.triggerElements || [])].forEach((element) => {
+      const target = element as GraphicElement | null | undefined;
+      if (!target || seen.has(target)) return;
+      seen.add(target);
+      snapshots.push({
+        element: target,
+        hadSilent: Object.prototype.hasOwnProperty.call(target, 'silent'),
+        silent: target.silent
+      });
+      target.silent = true;
+    });
+  });
+
+  return snapshots;
+}
+
+function restoreSpiralHoverElements(snapshots: SilentElementSnapshot[] | undefined): void {
+  snapshots?.forEach(({ element, hadSilent, silent }) => {
+    if (hadSilent) {
+      element.silent = silent;
+    } else {
+      delete element.silent;
+    }
+  });
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

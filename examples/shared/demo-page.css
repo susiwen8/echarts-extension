@@ -194,6 +194,18 @@ a {
   color: #163f9f;
 }
 
+.demo-control-button--primary {
+  border-color: #315fc0;
+  background: #3f6fd8;
+  color: #ffffff;
+}
+
+.demo-control-button--primary:hover {
+  border-color: #214aa3;
+  color: #ffffff;
+  background: #315fc0;
+}
+
 .demo-interactions {
   display: grid;
   gap: 10px;

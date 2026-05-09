@@ -1,5 +1,5 @@
 import * as echarts from 'echarts/lib/echarts';
-import { clearAliveRender, installElementHover, renderAlive } from '@echarts-extension/layout-core';
+import { clearAliveRender, installElementHover, renderAlive, setAliveRenderKey } from '@echarts-extension/layout-core';
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
 import { resolveLollipopLayout } from './layout.js';
@@ -41,6 +41,9 @@ interface LollipopSeriesModel extends EChartsModel {
 
 interface GraphicElement {
   [key: string]: unknown;
+  children?: () => GraphicElement[];
+  childrenRef?: () => GraphicElement[];
+  stopAnimation?: (scope?: string, forwardToLast?: boolean) => void;
 }
 
 interface AnimatableGraphicElement extends GraphicElement {
@@ -96,6 +99,7 @@ interface LollipopChartView {
   __renderToken?: object | null;
   __hoverController?: ElementHoverController;
   __aliveRenderState?: AliveRenderState;
+  __lollipopPointIds?: Set<string>;
 }
 
 interface EnterAnimationConfig {
@@ -270,9 +274,12 @@ echartsHost.extendChartView({
       });
       const layout = resolveLollipopLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
+      const previousPointIds = this.__lollipopPointIds;
+      if (previousPointIds) settleExistingPointEnterAnimations(group, previousPointIds);
       const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
-        drawLollipop(echartsHost, targetGroup, targetSeriesModel, layout, rect)
+        drawLollipop(echartsHost, targetGroup, targetSeriesModel, layout, rect, previousPointIds, seriesModel)
       ));
+      this.__lollipopPointIds = new Set(layout.points.map(lollipopPointKey));
       this.__hoverController = installElementHover(hoverItems, {
         zrender: api.getZr?.()
       });
@@ -287,6 +294,7 @@ echartsHost.extendChartView({
     this.__renderToken = null;
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
+    this.__lollipopPointIds = undefined;
     clearAliveRender(this);
     this.group.removeAll();
   },
@@ -295,6 +303,7 @@ echartsHost.extendChartView({
     this.__renderToken = null;
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
+    this.__lollipopPointIds = undefined;
     clearAliveRender(this);
     this.group.removeAll();
   }
@@ -323,14 +332,16 @@ function drawLollipop(
   group: GraphicGroup,
   seriesModel: LollipopSeriesModel,
   layout: LollipopLayoutResult,
-  rect: ViewRect
+  rect: ViewRect,
+  previousPointIds?: Set<string>,
+  animationSeriesModel: LollipopSeriesModel = seriesModel
 ): ElementHoverItem[] {
   const chartGroup = new echartsInstance.graphic.Group();
   chartGroup.x = rect.x;
   chartGroup.y = rect.y;
 
   drawAxes(echartsInstance, chartGroup, seriesModel, layout);
-  const hoverItems = drawPoints(echartsInstance, chartGroup, seriesModel, layout, rect);
+  const hoverItems = drawPoints(echartsInstance, chartGroup, seriesModel, layout, rect, previousPointIds, animationSeriesModel);
 
   group.add(chartGroup);
   return hoverItems;
@@ -408,7 +419,7 @@ function drawValueAxisLabels(
   if (labelModel.get('show') === false) return;
   const fontSize = finiteNumber(labelModel.get('fontSize'), 14);
   layout.ticks.forEach((tick) => {
-    group.add(new echartsInstance.graphic.Text({
+    const label = new echartsInstance.graphic.Text({
       style: {
         x: layout.plot.left - 12,
         y: tick.y,
@@ -421,13 +432,15 @@ function drawValueAxisLabels(
       },
       silent: true,
       z2: layerZ.axis
-    }));
+    });
+    setAliveRenderKey(label, `lollipop-value-label:${tick.value}`);
+    group.add(label);
   });
 
   const axisName = axisModel.get('name');
   if (typeof axisName !== 'string' || !axisName) return;
   const nameStyle = asRecord(axisModel.get('nameTextStyle'));
-  group.add(new echartsInstance.graphic.Text({
+  const name = new echartsInstance.graphic.Text({
     style: {
       x: Math.max(16, layout.plot.left - 58),
       y: layout.plot.top + layout.plot.height / 2,
@@ -443,7 +456,9 @@ function drawValueAxisLabels(
     originY: layout.plot.top + layout.plot.height / 2,
     silent: true,
     z2: layerZ.axis
-  }));
+  });
+  setAliveRenderKey(name, 'lollipop-value-axis-name');
+  group.add(name);
 }
 
 function drawCategoryAxisLabels(
@@ -459,7 +474,7 @@ function drawCategoryAxisLabels(
   const fontSize = finiteNumber(labelModel.get('fontSize'), 14);
 
   layout.categoryLabels.forEach((label) => {
-    group.add(new echartsInstance.graphic.Text({
+    const text = new echartsInstance.graphic.Text({
       style: {
         x: label.x,
         y: label.y,
@@ -475,7 +490,9 @@ function drawCategoryAxisLabels(
       originY: label.y,
       silent: true,
       z2: layerZ.axis
-    }));
+    });
+    setAliveRenderKey(text, `lollipop-category-label:${label.value}`);
+    group.add(text);
   });
 }
 
@@ -484,7 +501,9 @@ function drawPoints(
   group: GraphicGroup,
   seriesModel: LollipopSeriesModel,
   layout: LollipopLayoutResult,
-  rect: ViewRect
+  rect: ViewRect,
+  previousPointIds?: Set<string>,
+  animationSeriesModel: LollipopSeriesModel = seriesModel
 ): ElementHoverItem[] {
   const data = seriesModel.getData();
   const symbolSize = Math.max(0, finiteNumber(seriesModel.get('symbolSize'), 12));
@@ -501,7 +520,11 @@ function drawPoints(
       itemModel = itemModel || data.getItemModel(point.dataIndex);
       return itemModel;
     };
-    const animation = readEnterAnimation(seriesModel, pointIndex);
+    const pointKey = lollipopPointKey(point);
+    const isInsertedPoint = previousPointIds != null && !previousPointIds.has(pointKey);
+    const animation = isInsertedPoint
+      ? readEnterAnimation(animationSeriesModel, pointIndex)
+      : readEnterAnimation(seriesModel, pointIndex);
     let stem: GraphicElement | null = null;
     if (!mergedStems) {
       stem = new echartsInstance.graphic.Line({
@@ -516,6 +539,7 @@ function drawPoints(
       });
       applyStemEnterAnimation(stem, point, animation);
       stem.silent = silent;
+      setAliveRenderKey(stem, `lollipop-stem:${pointKey}`);
       group.add(stem);
     }
     data.setItemLayout(point.dataIndex, [point.x + rect.x, point.y + rect.y]);
@@ -534,6 +558,7 @@ function drawPoints(
       applyCircleEnterAnimation(symbol, symbolSize / 2, animation);
       symbol.silent = silent;
       if (silent) data.setItemGraphicEl(point.dataIndex, symbol);
+      setAliveRenderKey(symbol, `lollipop-symbol:${pointKey}`);
       group.add(symbol);
     }
 
@@ -553,6 +578,7 @@ function drawPoints(
       z2: layerZ.hit
     });
     data.setItemGraphicEl(point.dataIndex, hitCircle);
+    setAliveRenderKey(hitCircle, `lollipop-hit:${pointKey}`);
     group.add(hitCircle);
 
     const hoverItem = {
@@ -629,9 +655,40 @@ function drawPointLabels(
       z2: layerZ.label
     });
     applyFadeEnterAnimation(label, readEnterAnimation(seriesModel, point.dataIndex));
+    setAliveRenderKey(label, `lollipop-label:${lollipopPointKey(point)}`);
     addHoverElement(hoverItemsByDataIndex.get(point.dataIndex), label);
     group.add(label);
   });
+}
+
+function lollipopPointKey(point: LollipopPoint): string {
+  return point.id || point.category || point.name || `item-${point.dataIndex}`;
+}
+
+function settleExistingPointEnterAnimations(element: GraphicElement, pointIds: Set<string>): void {
+  const aliveKey = typeof element.__aliveRenderKey === 'string' ? element.__aliveRenderKey : '';
+  const pointKey = lollipopPointKeyFromAliveKey(aliveKey);
+  if (pointKey && pointIds.has(pointKey)) {
+    element.stopAnimation?.(undefined, true);
+  }
+  graphicChildren(element).forEach((child) => settleExistingPointEnterAnimations(child, pointIds));
+}
+
+function lollipopPointKeyFromAliveKey(aliveKey: string): string {
+  const prefixes = [
+    'lollipop-stem:',
+    'lollipop-symbol:',
+    'lollipop-hit:',
+    'lollipop-label:'
+  ];
+  const prefix = prefixes.find((item) => aliveKey.startsWith(item));
+  return prefix ? aliveKey.slice(prefix.length) : '';
+}
+
+function graphicChildren(element: GraphicElement): GraphicElement[] {
+  if (typeof element.childrenRef === 'function') return element.childrenRef().slice();
+  if (typeof element.children === 'function') return element.children().slice();
+  return [];
 }
 
 function readStemStyle(seriesModel: LollipopSeriesModel, itemModel: EChartsModel): Record<string, unknown> {
@@ -775,14 +832,9 @@ function applyCircleEnterAnimation(element: GraphicElement, radius: number, anim
   if (typeof animatable.animate !== 'function') return;
 
   const shape = animatable.shape || {};
-  const style = animatable.style || {};
-  const opacity = finiteNumber(style.opacity, 1);
   shape.r = 0;
-  style.opacity = 0;
   animatable.shape = shape;
-  animatable.style = style;
   animateGraphicProperty(animatable, 'shape', animation, { r: radius });
-  animateGraphicProperty(animatable, 'style', animation, { opacity });
 }
 
 function applyFadeEnterAnimation(element: GraphicElement, animation: EnterAnimationConfig): void {

@@ -218,7 +218,7 @@ function normalizeItems(data: unknown[], options: LollipopLayoutOptions): Normal
     const record = isPlainObject(item) ? item : {};
 
     normalized.push({
-      id: stringifyName(record.id ?? `${category}-${dataIndex}`),
+      id: stringifyName(record.id ?? (category || name || `item-${dataIndex}`)),
       name,
       category,
       categoryValue,

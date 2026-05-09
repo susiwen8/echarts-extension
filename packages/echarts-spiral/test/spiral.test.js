@@ -56,6 +56,15 @@ test('demo uses a one-by-one spiral-path enter stagger instead of ring-like burs
   assert.match(demoRunner, /spiral: \{[\s\S]*enterAnimation: \{ duration: 180, stagger: 80, easing: 'cubicOut' \}/);
 });
 
+test('defers hover highlighting until the spiral enter animation has finished', () => {
+  const source = readFileSync(new URL('../src/spiral.ts', import.meta.url), 'utf8');
+
+  assert.equal(source.includes('enabled: () => this.__spiralEntering !== true'), true);
+  assert.equal(source.includes('startSpiralEnterGate(this, renderToken, enterTracker.totalDuration, hoverItems)'), true);
+  assert.equal(source.includes('trackEnterAnimation(enterTracker, animation)'), true);
+  assert.equal(source.includes('silenceSpiralHoverElements(hoverItems)'), true);
+});
+
 test('normalizes object and tuple rows into named spiral data points', () => {
   const points = normalizeSpiralData([
     { stage: 'Alpha', score: 42 },

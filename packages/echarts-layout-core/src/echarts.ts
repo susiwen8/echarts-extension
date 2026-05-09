@@ -1,4 +1,4 @@
-import { createArcBezierShape, createArcPath, pathToString } from './arc.js';
+import { createArcBezierShape, createArcShape } from './arc.js';
 import { normalizeGraphData } from './data.js';
 import {
   fisheyeTransform,
@@ -104,6 +104,7 @@ interface EChartsHost {
   graphic: {
     Group: new () => GraphicGroup;
     Circle: new (options: GraphicElementOptions) => GraphicElement;
+    Arc?: new (options: GraphicElementOptions) => GraphicElement;
     Line: new (options: GraphicElementOptions) => GraphicElement;
     BezierCurve: new (options: GraphicElementOptions) => GraphicElement;
     Text: new (options: GraphicElementOptions) => GraphicElement;
@@ -710,9 +711,9 @@ function createEdgeElement(
   const animation = syncEnterAnimationEnd(readEdgeAnimation(seriesModel, edge, edgeIndex), enterAnimationEnd);
   const edgeKey = `edge:${edge.id || `${edge.source}->${edge.target}`}:${edgeIndex}`;
   if (layoutType === 'arc') {
-    const path = createArcPath([source.x, source.y], [target.x, target.y]);
-    if (echarts.graphic.makePath) {
-      const edgeElement = echarts.graphic.makePath(pathToString(path), {
+    if (echarts.graphic.Arc) {
+      const edgeElement = new echarts.graphic.Arc({
+        shape: createArcShape([source.x, source.y], [target.x, target.y]),
         style: cloneRecord(style)
       });
       setAliveRenderKey(edgeElement, edgeKey);

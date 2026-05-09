@@ -1,5 +1,5 @@
 import * as echarts from 'echarts/lib/echarts';
-import { clearAliveRender, installElementHover, renderAlive } from '@echarts-extension/layout-core';
+import { clearAliveRender, installElementHover, renderAlive, setAliveRenderKey } from '@echarts-extension/layout-core';
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
 import { DEFAULT_RING_COLORS, resolveNestedCircleLayout } from './layout.js';
@@ -69,6 +69,7 @@ interface GraphicElementOptions {
   shape?: Record<string, unknown>;
   style?: Record<string, unknown>;
   silent?: boolean;
+  z2?: number;
 }
 
 interface EChartsHost {
@@ -104,6 +105,11 @@ interface EnterAnimationConfig {
 type AnimationTargetKey = 'shape' | 'style';
 
 const echartsHost = echarts as unknown as EChartsHost;
+const layerZ = {
+  ring: 0,
+  title: 200,
+  label: 300
+} as const;
 const optionKeys = [
   'padding',
   'center',
@@ -198,8 +204,8 @@ echartsHost.extendChartView({
       });
       const layout = resolveNestedCircleLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
-      const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
-        drawNestedCircle(echartsHost, targetGroup, targetSeriesModel, layout, rect)
+      const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel, isUpdate) => (
+        drawNestedCircle(echartsHost, targetGroup, targetSeriesModel, layout, rect, isUpdate)
       ));
       this.__hoverController = installElementHover(hoverItems, {
         zrender: api.getZr?.()
@@ -251,7 +257,8 @@ function drawNestedCircle(
   group: GraphicGroup,
   seriesModel: NestedCircleSeriesModel,
   layout: NestedCircleLayoutResult,
-  rect: ViewRect
+  rect: ViewRect,
+  isUpdate: boolean
 ): ElementHoverItem[] {
   const data = seriesModel.getData();
   const chartGroup = new echartsInstance.graphic.Group();
@@ -263,15 +270,17 @@ function drawNestedCircle(
   for (let index = layout.rings.length - 1; index >= 0; index--) {
     const ring = layout.rings[index];
     const itemModel = getRingItemModel(data, ring);
+    const z2 = ringZ2(index);
     const circleEl = new echartsInstance.graphic.Circle({
       shape: {
         cx: ring.x,
         cy: ring.y,
         r: ring.outerRadius
       },
-      style: readRingStyle(data, seriesModel, itemModel, ring, index)
+      style: readRingStyle(data, seriesModel, itemModel, ring, index),
+      z2
     });
-    applyCircleEnterAnimation(circleEl, ring.outerRadius, readEnterAnimation(seriesModel, index));
+    applyCircleEnterAnimation(circleEl, ring.outerRadius, isUpdate ? disabledEnterAnimation() : readEnterAnimation(seriesModel, index));
 
     if (ring.dataIndex >= 0 && ring.dataIndex < data.count()) {
       data.setItemLayout(ring.dataIndex, [ring.x, ring.y]);
@@ -281,11 +290,12 @@ function drawNestedCircle(
       hoverItemsByDataIndex.set(ring.dataIndex, hoverItem);
     }
 
+    setAliveRenderKey(circleEl, `nested-circle-ring:${ring.id}`);
     chartGroup.add(circleEl);
   }
 
-  drawRingTitles(echartsInstance, chartGroup, seriesModel, data, layout.rings, hoverItemsByDataIndex);
-  drawLabels(echartsInstance, chartGroup, seriesModel, layout.labels, hoverItemsByDataIndex);
+  drawRingTitles(echartsInstance, chartGroup, seriesModel, data, layout.rings, hoverItemsByDataIndex, isUpdate);
+  drawLabels(echartsInstance, chartGroup, seriesModel, layout.labels, hoverItemsByDataIndex, isUpdate);
 
   group.add(chartGroup);
   return hoverItems;
@@ -297,9 +307,10 @@ function drawRingTitles(
   seriesModel: NestedCircleSeriesModel,
   data: SeriesData,
   rings: NestedCircleRing[],
-  hoverItemsByDataIndex: Map<number, ElementHoverItem>
+  hoverItemsByDataIndex: Map<number, ElementHoverItem>,
+  isUpdate: boolean
 ): void {
-  rings.forEach((ring) => {
+  rings.forEach((ring, ringIndex) => {
     const itemModel = getRingItemModel(data, ring);
     const seriesLabelModel = seriesModel.getModel('titleLabel');
     const itemLabelModel = itemModel?.getModel('titleLabel');
@@ -331,9 +342,11 @@ function drawRingTitles(
         align: 'center',
         verticalAlign: 'middle'
       },
-      silent: true
+      silent: true,
+      z2: layerZ.title + ringZ2(ringIndex)
     });
-    applyFadeEnterAnimation(titleEl, readEnterAnimation(seriesModel, ring.dataIndex));
+    applyFadeEnterAnimation(titleEl, isUpdate ? disabledEnterAnimation() : readEnterAnimation(seriesModel, ring.dataIndex));
+    setAliveRenderKey(titleEl, `nested-circle-title:${ring.id}`);
     addHoverElement(hoverItemsByDataIndex.get(ring.dataIndex), titleEl);
     group.add(titleEl);
   });
@@ -344,7 +357,8 @@ function drawLabels(
   group: GraphicGroup,
   seriesModel: NestedCircleSeriesModel,
   labels: NestedCircleLabel[],
-  hoverItemsByDataIndex: Map<number, ElementHoverItem>
+  hoverItemsByDataIndex: Map<number, ElementHoverItem>,
+  isUpdate: boolean
 ): void {
   const seriesLabelModel = seriesModel.getModel('label');
   if (!seriesLabelModel.get('show')) return;
@@ -374,12 +388,18 @@ function drawLabels(
         align: 'center',
         verticalAlign: 'middle'
       },
-      silent: true
+      silent: true,
+      z2: layerZ.label + ringZ2(label.ringIndex)
     });
-    applyFadeEnterAnimation(labelEl, readEnterAnimation(seriesModel, label.dataIndex));
+    applyFadeEnterAnimation(labelEl, isUpdate ? disabledEnterAnimation() : readEnterAnimation(seriesModel, label.dataIndex));
+    setAliveRenderKey(labelEl, `nested-circle-label:${label.id}`);
     addHoverElement(hoverItemsByDataIndex.get(label.dataIndex), labelEl);
     group.add(labelEl);
   });
+}
+
+function ringZ2(ringIndex: number): number {
+  return layerZ.ring - ringIndex;
 }
 
 function getRingItemModel(data: SeriesData, ring: NestedCircleRing): EChartsModel | null {

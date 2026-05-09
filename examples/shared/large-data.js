@@ -643,6 +643,7 @@
     const optionStart = now();
     const option = definition.createOption(payload, seed);
     applyLargeControlValues(caseName, option, renderContext);
+    applyLargeAddDataAnimation(option, renderContext);
     applyLargeInteractionDefaults(option);
     const optionEnd = now();
     return {
@@ -678,6 +679,7 @@
     const controlState = createLargeControlState(controls);
     let customOption = null;
     const demoApi = getDemoApi();
+    let panel = null;
     const controlsPanel = createLargeControlsPanel(chartElement, controls, controlState, {
       onChange(control) {
         customOption = null;
@@ -693,12 +695,18 @@
         state.replayKey += 1;
         run({ replayKey: state.replayKey });
       },
+      onAddData() {
+        customOption = null;
+        state.count = clampCount(state.count + 1, definition.maxCount);
+        syncPerfCountControl(panel, state.count);
+        run({ addDataKey: state.count });
+      },
       onJsonApply(option) {
         customOption = option;
         run({ customOption });
       }
     });
-    const panel = mountPerfPanel(chartElement, definition, state, () => {
+    panel = mountPerfPanel(chartElement, definition, state, () => {
       customOption = null;
       run();
     }, controlsPanel);
@@ -929,7 +937,7 @@
     const optionValue = readFirstTargetValue(option, largeControl.targets);
     largeControl.largeTargetsPresent = optionValue !== undefined;
 
-    if (optionValue !== undefined) {
+    if (optionValue !== undefined && !isAnimationTimingControl(largeControl)) {
       largeControl.defaultValue = normalizeControlDefault(control, optionValue);
     }
 
@@ -941,6 +949,15 @@
     }
 
     return largeControl;
+  }
+
+  function isAnimationTimingControl(control) {
+    return (control.targets || []).some((target) => (
+      target.endsWith('enterAnimation.duration') ||
+      target.endsWith('enterAnimation.stagger') ||
+      target.endsWith('edgeAnimation.duration') ||
+      target.endsWith('edgeAnimation.stagger')
+    ));
   }
 
   function normalizeControlDefault(control, value) {
@@ -1000,6 +1017,19 @@
     return typeof demoApi.applyDemoInteractionDefaults === 'function'
       ? demoApi.applyDemoInteractionDefaults(option)
       : option;
+  }
+
+  function applyLargeAddDataAnimation(option, renderContext = {}) {
+    if (!option || renderContext.addDataKey == null) return option;
+    option.animation = true;
+    const seriesList = Array.isArray(option.series) ? option.series : [option.series].filter(Boolean);
+    seriesList.forEach((seriesOption) => {
+      if (!seriesOption || typeof seriesOption !== 'object') return;
+      seriesOption.animation = true;
+      if (seriesOption.animationDurationUpdate == null) seriesOption.animationDurationUpdate = 120;
+      if (seriesOption.animationEasingUpdate == null) seriesOption.animationEasingUpdate = 'cubicOut';
+    });
+    return option;
   }
 
   function readFirstTargetValue(target, paths) {
@@ -1473,6 +1503,21 @@
       .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
       .join('');
     target.dataset.overBudget = result.overBudget ? 'true' : 'false';
+  }
+
+  function syncPerfCountControl(panel, count) {
+    if (!panel) return;
+    const select = panel.querySelector('[data-perf-count]');
+    const label = panel.querySelector('[data-perf-count-label]');
+    const value = String(count);
+    if (select && !Array.from(select.options).some((option) => option.value === value)) {
+      const option = root.document.createElement('option');
+      option.value = value;
+      option.textContent = formatNumber(count);
+      select.append(option);
+    }
+    if (select) select.value = value;
+    if (label) label.textContent = formatNumber(count);
   }
 
   function waitForFinished(chart) {

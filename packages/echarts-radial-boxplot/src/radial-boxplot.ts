@@ -1,5 +1,5 @@
 import * as echarts from 'echarts/lib/echarts';
-import { clearAliveRender, installElementHover, renderAlive } from '@echarts-extension/layout-core';
+import { clearAliveRender, installElementHover, renderAlive, setAliveRenderKey } from '@echarts-extension/layout-core';
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
 import { resolveRadialBoxplotLayout } from './layout.js';
@@ -83,8 +83,10 @@ interface EChartsHost {
   List: new (dimensions: unknown, host: RadialBoxplotSeriesModel) => SeriesData;
   graphic: {
     Group: new () => GraphicGroup;
+    Arc?: new (options: GraphicElementOptions) => GraphicElement;
     Circle: new (options: GraphicElementOptions) => GraphicElement;
     Line: new (options: GraphicElementOptions) => GraphicElement;
+    Sector?: new (options: GraphicElementOptions) => GraphicElement;
     Polygon: new (options: GraphicElementOptions) => GraphicElement;
     Polyline: new (options: GraphicElementOptions) => GraphicElement;
     Text: new (options: GraphicElementOptions) => GraphicElement;
@@ -290,8 +292,8 @@ echartsHost.extendChartView({
       });
       const layout = resolveRadialBoxplotLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
-      const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
-        drawRadialBoxplot(echartsHost, targetGroup, targetSeriesModel, layout, rect)
+      const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel, isUpdate) => (
+        drawRadialBoxplot(echartsHost, targetGroup, targetSeriesModel, layout, rect, isUpdate)
       ));
       this.__hoverController = installElementHover(hoverItems, {
         zrender: api.getZr?.()
@@ -343,7 +345,8 @@ function drawRadialBoxplot(
   group: GraphicGroup,
   seriesModel: RadialBoxplotSeriesModel,
   layout: RadialBoxplotLayoutResult,
-  rect: ViewRect
+  rect: ViewRect,
+  isUpdate: boolean
 ): ElementHoverItem[] {
   const chartGroup = new echartsInstance.graphic.Group();
   const hoverItems: ElementHoverItem[] = [];
@@ -353,7 +356,7 @@ function drawRadialBoxplot(
 
   drawGrid(echartsInstance, chartGroup, seriesModel, layout);
   drawBoxes(echartsInstance, chartGroup, seriesModel, layout, hoverItems, hoverItemsByDataIndex);
-  drawWhiskers(echartsInstance, chartGroup, seriesModel, layout, hoverItemsByDataIndex);
+  drawWhiskers(echartsInstance, chartGroup, seriesModel, layout, hoverItemsByDataIndex, isUpdate);
   drawHitAreas(echartsInstance, chartGroup, seriesModel, layout, rect, hoverItemsByDataIndex);
 
   group.add(chartGroup);
@@ -394,7 +397,7 @@ function drawGrid(
     });
 
     layout.radialTicks.forEach((tick) => {
-      group.add(new echartsInstance.graphic.Circle({
+      const circle = new echartsInstance.graphic.Circle({
         shape: {
           cx: layout.centerX,
           cy: layout.centerY,
@@ -406,7 +409,9 @@ function drawGrid(
         },
         silent: true,
         z2: layerZ.axis
-      }));
+      });
+      setAliveRenderKey(circle, `radial-boxplot-radial-tick:${tick.value}`);
+      group.add(circle);
     });
   }
 
@@ -421,7 +426,7 @@ function drawGrid(
     layout.angleLabels.forEach((label) => {
       const inner = polarPoint(layout.centerX, layout.centerY, Math.max(layout.innerRadius - 2, 0), label.angle);
       const outer = polarPoint(layout.centerX, layout.centerY, layout.outerRadius, label.angle);
-      group.add(new echartsInstance.graphic.Line({
+      const line = new echartsInstance.graphic.Line({
         shape: {
           x1: inner.x,
           y1: inner.y,
@@ -431,14 +436,16 @@ function drawGrid(
         style,
         silent: true,
         z2: layerZ.axis
-      }));
+      });
+      setAliveRenderKey(line, `radial-boxplot-angle-line:${label.value}`);
+      group.add(line);
     });
   }
 
   if (radialAxisVisible && radialLabelVisible) {
     layout.radialTicks.forEach((tick) => {
       const point = polarPoint(layout.centerX, layout.centerY, tick.radius, layout.startAngle);
-      group.add(new echartsInstance.graphic.Text({
+      const label = new echartsInstance.graphic.Text({
         style: {
           x: point.x + 8,
           y: point.y,
@@ -451,7 +458,9 @@ function drawGrid(
         },
         silent: true,
         z2: layerZ.axis
-      }));
+      });
+      setAliveRenderKey(label, `radial-boxplot-radial-label:${tick.value}`);
+      group.add(label);
     });
   }
 
@@ -459,7 +468,7 @@ function drawGrid(
     layout.angleLabels.forEach((label) => {
       const rotate = angleLabelModel.get('rotate');
       const shouldRotate = rotate === true || rotate === 'tangential';
-      group.add(new echartsInstance.graphic.Text({
+      const text = new echartsInstance.graphic.Text({
         style: {
           x: label.x,
           y: label.y,
@@ -475,7 +484,9 @@ function drawGrid(
         originY: label.y,
         silent: true,
         z2: layerZ.axis
-      }));
+      });
+      setAliveRenderKey(text, `radial-boxplot-angle-label:${label.value}`);
+      group.add(text);
     });
   }
 }
@@ -492,12 +503,13 @@ function drawBoxes(
   layout.boxes.forEach((box, index) => {
     const itemModel = data.getItemModel(box.dataIndex);
     const style = readBoxStyle(data, seriesModel, itemModel, box);
-    const boxElement = createPathOrPolygon(echartsInstance, box.boxPath, box.boxPoints, {
+    const boxElement = createSectorOrPolygon(echartsInstance, layout, box, {
       fill: style.fill,
       stroke: style.stroke,
       lineWidth: style.lineWidth,
       opacity: style.opacity
     }, true, layerZ.box);
+    setAliveRenderKey(boxElement, `radial-boxplot-box:${radialBoxplotBoxKey(box)}`);
     const hoverItem = createHoverItem(boxElement);
     hoverItems.push(hoverItem);
     hoverItemsByDataIndex.set(box.dataIndex, hoverItem);
@@ -510,7 +522,8 @@ function drawWhiskers(
   group: GraphicGroup,
   seriesModel: RadialBoxplotSeriesModel,
   layout: RadialBoxplotLayoutResult,
-  hoverItemsByDataIndex: Map<number, ElementHoverItem>
+  hoverItemsByDataIndex: Map<number, ElementHoverItem>,
+  isUpdate: boolean
 ): void {
   const whiskerStyle = readLineStyle(seriesModel.getModel('whiskerLineStyle'), {
     stroke: '#111111',
@@ -525,8 +538,13 @@ function drawWhiskers(
   const capStyle = readLineStyle(seriesModel.getModel('capLineStyle'), whiskerStyle);
 
   layout.boxes.forEach((box, index) => {
-    const animation = readEnterAnimation(seriesModel, index);
-    [box.lowerWhisker, box.upperWhisker].forEach((lineShape) => {
+    const animation = isUpdate ? disabledEnterAnimation() : readEnterAnimation(seriesModel, index);
+    const boxKey = radialBoxplotBoxKey(box);
+    const whiskerLines: Array<[string, RadialBoxplotBox['lowerWhisker']]> = [
+      ['lower', box.lowerWhisker],
+      ['upper', box.upperWhisker]
+    ];
+    whiskerLines.forEach(([kind, lineShape]) => {
       const line = new echartsInstance.graphic.Line({
         shape: { ...lineShape },
         style: whiskerStyle,
@@ -534,20 +552,26 @@ function drawWhiskers(
         z2: layerZ.whisker
       });
       applyLineEnterAnimation(line, animation);
+      setAliveRenderKey(line, `radial-boxplot-whisker:${boxKey}:${kind}`);
       addHoverElement(hoverItemsByDataIndex.get(box.dataIndex), line);
       group.add(line);
     });
 
-    [box.minCapPath, box.maxCapPath].forEach((path, capIndex) => {
-      const points = capIndex === 0 ? box.minCapPoints : box.maxCapPoints;
-      const cap = createPathOrPolyline(echartsInstance, path, points, capStyle, true, layerZ.whisker);
+    const caps: Array<[string, number]> = [
+      ['min', box.minRadius],
+      ['max', box.maxRadius]
+    ];
+    caps.forEach(([kind, radius]) => {
+      const cap = createArcOrPolyline(echartsInstance, layout, box.capStartAngle, box.capEndAngle, radius, capStyle, true, layerZ.whisker);
       applyPathEnterAnimation(cap, 'style', 'strokePercent', animation);
+      setAliveRenderKey(cap, `radial-boxplot-cap:${boxKey}:${kind}`);
       addHoverElement(hoverItemsByDataIndex.get(box.dataIndex), cap);
       group.add(cap);
     });
 
-    const median = createPathOrPolyline(echartsInstance, box.medianPath, box.medianPoints, medianStyle, true, layerZ.median);
+    const median = createArcOrPolyline(echartsInstance, layout, box.capStartAngle, box.capEndAngle, box.medianRadius, medianStyle, true, layerZ.median);
     applyPathEnterAnimation(median, 'style', 'strokePercent', animation);
+    setAliveRenderKey(median, `radial-boxplot-median:${boxKey}`);
     addHoverElement(hoverItemsByDataIndex.get(box.dataIndex), median);
     group.add(median);
   });
@@ -566,27 +590,41 @@ function drawHitAreas(
     if (box.dataIndex < 0 || box.dataIndex >= data.count()) return;
 
     data.setItemLayout(box.dataIndex, [box.medianX + rect.x, box.medianY + rect.y]);
-    const hitArea = createPathOrPolygon(echartsInstance, box.boxPath, box.boxPoints, {
+    const hitArea = createSectorOrPolygon(echartsInstance, layout, box, {
       fill: 'rgba(0,0,0,0)',
       stroke: 'rgba(0,0,0,0)',
       opacity: 0
     }, false, layerZ.hit);
     data.setItemGraphicEl(box.dataIndex, hitArea);
+    setAliveRenderKey(hitArea, `radial-boxplot-hit:${radialBoxplotBoxKey(box)}`);
     addHoverElement(hoverItemsByDataIndex.get(box.dataIndex), hitArea);
     group.add(hitArea);
   });
 }
 
-function createPathOrPolygon(
+function radialBoxplotBoxKey(box: RadialBoxplotBox): string {
+  return String(box.id || box.categoryValue || box.name || box.dataIndex);
+}
+
+function createSectorOrPolygon(
   echartsInstance: EChartsHost,
-  path: string,
-  points: Array<[number, number]>,
+  layout: RadialBoxplotLayoutResult,
+  box: RadialBoxplotBox,
   style: Record<string, unknown>,
   silent: boolean,
   z2: number
 ): GraphicElement {
-  if (echartsInstance.graphic.makePath) {
-    return echartsInstance.graphic.makePath(path, {
+  if (echartsInstance.graphic.Sector) {
+    return new echartsInstance.graphic.Sector({
+      shape: {
+        cx: layout.centerX,
+        cy: layout.centerY,
+        r0: box.q1Radius,
+        r: box.q3Radius,
+        startAngle: toZrenderAngle(box.startAngle),
+        endAngle: toZrenderAngle(box.endAngle),
+        clockwise: layout.clockwise
+      },
       style,
       silent,
       z2
@@ -595,7 +633,7 @@ function createPathOrPolygon(
 
   return new echartsInstance.graphic.Polygon({
     shape: {
-      points
+      points: box.boxPoints
     },
     style,
     silent,
@@ -603,16 +641,26 @@ function createPathOrPolygon(
   });
 }
 
-function createPathOrPolyline(
+function createArcOrPolyline(
   echartsInstance: EChartsHost,
-  path: string,
-  points: Array<[number, number]>,
+  layout: RadialBoxplotLayoutResult,
+  startAngle: number,
+  endAngle: number,
+  radius: number,
   style: Record<string, unknown>,
   silent: boolean,
   z2: number
 ): GraphicElement {
-  if (echartsInstance.graphic.makePath) {
-    return echartsInstance.graphic.makePath(path, {
+  if (echartsInstance.graphic.Arc) {
+    return new echartsInstance.graphic.Arc({
+      shape: {
+        cx: layout.centerX,
+        cy: layout.centerY,
+        r: radius,
+        startAngle: toZrenderAngle(startAngle),
+        endAngle: toZrenderAngle(endAngle),
+        clockwise: layout.clockwise
+      },
       style: {
         ...style,
         fill: null
@@ -624,7 +672,7 @@ function createPathOrPolyline(
 
   return new echartsInstance.graphic.Polyline({
     shape: {
-      points
+      points: arcPointsForFallback(layout.centerX, layout.centerY, radius, startAngle, endAngle, layout.clockwise)
     },
     style: {
       ...style,
@@ -632,6 +680,34 @@ function createPathOrPolyline(
     },
     silent,
     z2
+  });
+}
+
+function toZrenderAngle(angle: number): number {
+  return -angle * Math.PI / 180;
+}
+
+function arcPointsForFallback(
+  centerX: number,
+  centerY: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  clockwise: boolean
+): Array<[number, number]> {
+  let sweep = endAngle - startAngle;
+  if (clockwise) {
+    while (sweep > 0) sweep -= 360;
+  } else {
+    while (sweep < 0) sweep += 360;
+  }
+  const steps = Math.max(4, Math.ceil(Math.abs(sweep) / 10));
+  return Array.from({ length: steps + 1 }, (_, index) => {
+    const angle = (startAngle + sweep * index / steps) * Math.PI / 180;
+    return [
+      centerX + Math.cos(angle) * radius,
+      centerY - Math.sin(angle) * radius
+    ];
   });
 }
 

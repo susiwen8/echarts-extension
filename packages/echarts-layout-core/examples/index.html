@@ -103,6 +103,8 @@
     .layout-card__tools {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
       gap: 8px;
     }
 
@@ -133,6 +135,18 @@
       color: #163f9f;
     }
 
+    .layout-card__button--primary {
+      border-color: #315fc0;
+      background: #3f6fd8;
+      color: #ffffff;
+    }
+
+    .layout-card__button--primary:hover {
+      border-color: #214aa3;
+      color: #ffffff;
+      background: #315fc0;
+    }
+
     .layout-card__event {
       overflow: hidden;
       padding: 8px 16px;
@@ -143,6 +157,10 @@
       line-height: 1.35;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .layout-card__visual {
+      height: 286px;
     }
 
     .layout-card svg {

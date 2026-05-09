@@ -12,6 +12,11 @@
   const viewportZoomStep = 1.12;
   const minViewportScale = 0.45;
   const maxViewportScale = 4;
+  const shortestAnimationDuration = 120;
+  const addDataPalette = ['#2454a6', '#248f6a', '#c77725', '#9c4f97', '#5f6fb4', '#c4554d', '#4b8f8c'];
+  const addDataCategories = ['Growth', 'Platform', 'Insights', 'Research', 'Operations'];
+  const addDataStages = ['New', 'Returning', 'Dormant'];
+  const addDataTeams = ['Design', 'Engineering', 'Operations', 'Support'];
   const defaultEmphasisItemStyle = {
     shadowBlur: 12,
     shadowColor: 'rgba(23, 32, 51, 0.24)',
@@ -690,37 +695,42 @@
         rangeControl('eventFontSize', 'Event label size', 'series.0.eventLabel.fontSize', 24, 12, 42, 1),
         checkboxControl('eventLabelShow', 'Event labels', 'series.0.eventLabel.show', true)
       ],
-      option: () => ({
-        animation: true,
-        backgroundColor: '#202124',
-        series: [
-          {
-            type: 'sunriseSunset',
-            enterAnimation: { duration: 860, stagger: 90, easing: 'cubicOut' },
-            sunrise: '05:12',
-            sunset: '18:39',
-            moonrise: '22:08',
-            moonset: '07:59',
-            currentTime: '2026-05-05 10:47:33',
-            title: 'Until sunset',
-            remainingText: '07:51:27',
-            updatedText: 'Updated 10:46',
-            padding: 150,
-            moonStartRatio: 0.28,
-            moonEndRatio: 0.72,
-            backgroundStyle: { color: '#202124' },
-            dayLineStyle: { color: '#ffa72b' },
-            moonLineStyle: { color: '#5a91f2' },
-            dayAreaStyle: { color: '#ffa72b', opacity: 0.2 },
-            sunIcon: cloneJsonValue(sunriseSunsetSunIcon),
-            moonIcon: cloneJsonValue(sunriseSunsetMoonIcon),
-            titleLabel: { fontSize: 38, fontWeight: 650 },
-            remainingLabel: { fontSize: 66, fontWeight: 300 },
-            updatedLabel: { fontSize: 24 },
-            eventLabel: { fontSize: 24 }
-          }
-        ]
-      })
+      option: (data) => {
+        const current = currentSunriseSunsetData(data);
+        return {
+          animation: true,
+          backgroundColor: '#202124',
+          series: [
+            {
+              type: 'sunriseSunset',
+              enterAnimation: { duration: 860, stagger: 90, easing: 'cubicOut' },
+              data: Array.isArray(data.sunriseSunset) ? data.sunriseSunset : undefined,
+              sunrise: current.sunrise,
+              sunset: current.sunset,
+              moonrise: current.moonrise,
+              moonset: current.moonset,
+              currentTime: current.currentTime,
+              updatedAt: current.updatedAt,
+              title: current.title,
+              remainingText: current.remainingText,
+              updatedText: current.updatedText,
+              padding: 150,
+              moonStartRatio: 0.28,
+              moonEndRatio: 0.72,
+              backgroundStyle: { color: '#202124' },
+              dayLineStyle: { color: '#ffa72b' },
+              moonLineStyle: { color: '#5a91f2' },
+              dayAreaStyle: { color: '#ffa72b', opacity: 0.2 },
+              sunIcon: cloneJsonValue(sunriseSunsetSunIcon),
+              moonIcon: cloneJsonValue(sunriseSunsetMoonIcon),
+              titleLabel: { fontSize: 38, fontWeight: 650 },
+              remainingLabel: { fontSize: 66, fontWeight: 300 },
+              updatedLabel: { fontSize: 24 },
+              eventLabel: { fontSize: 24 }
+            }
+          ]
+        };
+      }
     },
     lollipop: {
       controls: [
@@ -1005,17 +1015,27 @@
   }
 
   function rangeControl(id, label, targets, defaultValue, min, max, step, mapValue) {
+    const normalizedTargets = normalizeTargets(targets);
     return {
       id,
       label,
       type: 'range',
-      targets: normalizeTargets(targets),
-      defaultValue,
+      targets: normalizedTargets,
+      defaultValue: isAnimationTimingTarget(normalizedTargets) ? min : defaultValue,
       min,
       max,
       step,
       mapValue
     };
+  }
+
+  function isAnimationTimingTarget(targets) {
+    return targets.some((target) => (
+      target.endsWith('enterAnimation.duration') ||
+      target.endsWith('enterAnimation.stagger') ||
+      target.endsWith('edgeAnimation.duration') ||
+      target.endsWith('edgeAnimation.stagger')
+    ));
   }
 
   function checkboxControl(id, label, targets, defaultValue) {
@@ -1111,6 +1131,7 @@
     if (!entry) return null;
     const option = entry.option(data);
     applyControlValues(option, entry.controls || [], controlValues || {}, context);
+    applyDataAppendAnimation(option, context);
     return applyDemoInteractionDefaults(option);
   }
 
@@ -1218,9 +1239,10 @@
       textColor: '#647085',
       maskColor: 'rgba(255, 255, 255, 0.82)'
     });
-    const data = await loadExampleData(exampleName);
+    const data = cloneExampleData(await loadExampleData(exampleName));
     chart.hideLoading();
     const state = createControlState(entry.controls || []);
+    const addDataState = createAddDataState(exampleName);
     let customOption = null;
     let replayKey = 0;
     const controlsPanel = createControlsPanel(entry.controls || [], state, {
@@ -1237,6 +1259,11 @@
       onReplay() {
         replayKey += 1;
         render({ replayKey });
+      },
+      onAddData() {
+        customOption = null;
+        const addDataInfo = addExampleData(exampleName, data, addDataState);
+        render({ addDataKey: addDataState.count, addDataInfo });
       },
       onJsonApply(option) {
         customOption = option;
@@ -1301,6 +1328,421 @@
     return option;
   }
 
+  function createAddDataState(exampleName) {
+    return {
+      exampleName,
+      count: 0
+    };
+  }
+
+  function addExampleData(exampleName, data, state = createAddDataState(exampleName)) {
+    if (!data || typeof data !== 'object') return { added: false, count: state.count || 0 };
+    const index = advanceAddDataState(state);
+    const added = appendExampleData(exampleName, data, index);
+    return {
+      added,
+      count: state.count,
+      exampleName
+    };
+  }
+
+  function appendExampleData(exampleName, data, index) {
+    if (['radial', 'concentric', 'grid', 'mds', 'arc'].includes(exampleName)) {
+      appendGraphExampleData(exampleName, data, index);
+      return true;
+    }
+
+    if (exampleName === 'radial-area') return appendRadialAreaData(data, index);
+    if (exampleName === 'radial-boxplot') return appendRadialBoxplotData(data, index);
+    if (exampleName === 'venn-hollow') return appendHollowVennData(data, index);
+    if (exampleName === 'venn-bubble') return appendBubbleVennData(data, index);
+    if (exampleName === 'pack-bubble') return appendPackBubbleData(data, index);
+    if (exampleName === 'circle-packing') return appendCirclePackingData(data, index);
+    if (exampleName === 'nested-circle') return appendNestedCircleData(data, index);
+    if (exampleName === 'mosaic') return appendMosaicData(data, index);
+    if (exampleName === 'voronoi-treemap') return appendVoronoiTreemapData(data, index);
+    if (exampleName === 'subway') return appendSubwayData(data, index);
+    if (exampleName === 'flame') return appendFlameData(data, index);
+    if (exampleName === 'sunrise-sunset') return appendSunriseSunsetData(data, index);
+    if (exampleName === 'lollipop') return appendLollipopData(data, index);
+    if (exampleName === 'beeswarm') return appendBeeswarmData(data, index);
+    if (exampleName === 'spiral') return appendSpiralData(data, index);
+    if (exampleName === 'vector-field') return appendVectorFieldData(data, index);
+    return false;
+  }
+
+  function countExampleDataItems(exampleName, data) {
+    if (!data || typeof data !== 'object') return 0;
+    if (['radial', 'concentric', 'grid', 'mds', 'arc'].includes(exampleName)) {
+      return graphNodes(graphDataForExample(exampleName, data)).length;
+    }
+    if (exampleName === 'radial-area') return arrayLength(data.radialArea);
+    if (exampleName === 'radial-boxplot') return arrayLength(data.radialBoxplot);
+    if (exampleName === 'venn-hollow') return arrayLength(data.hollowVenn);
+    if (exampleName === 'venn-bubble') return arrayLength(data.bubbleVenn);
+    if (exampleName === 'pack-bubble') return arrayLength(data.packBubble);
+    if (exampleName === 'circle-packing') return countTreeItems(data.circlePacking);
+    if (exampleName === 'nested-circle') return (data.nestedCircle || []).reduce((total, ring) => total + 1 + arrayLength(ring.children), 0);
+    if (exampleName === 'mosaic') return arrayLength(data.mosaic);
+    if (exampleName === 'voronoi-treemap') return countTreeItems(data.voronoiTreemap);
+    if (exampleName === 'subway') return (data.subway || []).reduce((total, route) => total + arrayLength(route.stations), 0);
+    if (exampleName === 'flame') return countTreeItems(data.flame);
+    if (exampleName === 'sunrise-sunset') return arrayLength(data.sunriseSunset);
+    if (exampleName === 'lollipop') return arrayLength(data.lollipop);
+    if (exampleName === 'beeswarm') return arrayLength(data.beeswarm);
+    if (exampleName === 'spiral') return arrayLength(data.spiral);
+    if (exampleName === 'vector-field') return arrayLength(data.wind);
+    return 0;
+  }
+
+  function cloneExampleData(data) {
+    return cloneJsonValue(data || {});
+  }
+
+  function applyDataAppendAnimation(option, context = {}) {
+    if (!option || context.addDataKey == null) return option;
+    if (option.animation !== false) option.animation = true;
+    const seriesList = Array.isArray(option.series) ? option.series : [option.series].filter(Boolean);
+    seriesList.forEach((seriesOption) => {
+      if (!seriesOption || typeof seriesOption !== 'object') return;
+      if (seriesOption.animation !== false) seriesOption.animation = true;
+      if (seriesOption.animationDurationUpdate == null) seriesOption.animationDurationUpdate = shortestAnimationDuration;
+      if (seriesOption.animationEasingUpdate == null) seriesOption.animationEasingUpdate = 'cubicOut';
+    });
+    return option;
+  }
+
+  function advanceAddDataState(state) {
+    state.count = Math.max(0, Math.trunc(finiteNumber(Number(state.count), 0))) + 1;
+    return state.count;
+  }
+
+  function appendGraphExampleData(exampleName, data, index) {
+    const graph = graphDataForExample(exampleName, data) || (data.graph = { data: [], links: [] });
+    const nodes = ensureGraphNodes(graph);
+    const edges = ensureGraphEdges(graph);
+    const id = `added-${exampleName}-${index}`;
+    const parent = chooseGraphAppendParent(exampleName, nodes, index);
+    const parentId = parent ? String(parent.id ?? parent.name ?? 0) : null;
+    nodes.push({
+      id,
+      name: `Added ${index}`,
+      value: 4 + (index % 9),
+      itemStyle: { color: addDataColor(index) }
+    });
+    if (parentId) edges.push({ source: parentId, target: id });
+  }
+
+  function chooseGraphAppendParent(exampleName, nodes, index) {
+    if (!nodes.length) return null;
+    if (exampleName === 'arc') return nodes[nodes.length - 1];
+    return nodes[(index * 3) % nodes.length];
+  }
+
+  function appendRadialAreaData(data, index) {
+    const list = ensureArrayData(data, 'radialArea');
+    const previous = list[list.length - 1] || {};
+    const nextDate = nextMonthDate(previous.date, list.length);
+    const avg = Math.round(54 + Math.sin((list.length + index) * 0.52) * 16 + (index % 5) * 2);
+    list.push({
+      date: nextDate.toISOString(),
+      avg,
+      min: avg - 8 - (index % 4),
+      max: avg + 9 + (index % 5),
+      minmin: avg - 14 - (index % 3),
+      maxmax: avg + 15 + (index % 4)
+    });
+    return true;
+  }
+
+  function appendRadialBoxplotData(data, index) {
+    const list = ensureArrayData(data, 'radialBoxplot');
+    const median = 10 + (index * 3) % 15;
+    list.push({
+      name: `Added ${index}`,
+      min: Math.max(0, median - 9),
+      q1: median - 4,
+      median,
+      q3: median + 5,
+      max: median + 10,
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendHollowVennData(data, index) {
+    const list = ensureArrayData(data, 'hollowVenn');
+    const setName = `Added ${index}`;
+    const baseSet = list.find((item) => Array.isArray(item.sets) && item.sets.length === 1)?.sets?.[0] || 'A';
+    list.push({
+      name: setName,
+      sets: [setName],
+      value: 42 + (index % 38),
+      itemStyle: { color: addDataColor(index) }
+    });
+    list.push({
+      name: `${baseSet}&${setName}`,
+      sets: [baseSet, setName],
+      value: 8 + (index % 18)
+    });
+    return true;
+  }
+
+  function appendBubbleVennData(data, index) {
+    const list = ensureArrayData(data, 'bubbleVenn');
+    list.push({
+      name: `Added ${index}`,
+      value: 18 + (index * 11) % 86,
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendPackBubbleData(data, index) {
+    const list = ensureArrayData(data, 'packBubble');
+    const category = addDataCategories[(index - 1) % addDataCategories.length];
+    list.push({
+      name: `Added ${index}`,
+      value: 12 + (index * 17) % 72,
+      category,
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendCirclePackingData(data, index) {
+    const root = data.circlePacking || (data.circlePacking = { name: 'Product Suite', children: [] });
+    const group = ensureTreeGroup(root, index);
+    group.children.push({
+      name: `Added ${index}`,
+      value: 10 + (index * 7) % 34,
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendNestedCircleData(data, index) {
+    const list = ensureArrayData(data, 'nestedCircle');
+    list.push({
+      id: `added-nested-circle-${index}`,
+      name: `Added ${index}`,
+      children: [],
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendMosaicData(data, index) {
+    const list = ensureArrayData(data, 'mosaic');
+    list.push({
+      channel: `Added ${index}`,
+      stage: addDataStages[(index - 1) % addDataStages.length],
+      users: 8 + (index * 9) % 38,
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendVoronoiTreemapData(data, index) {
+    const root = data.voronoiTreemap || (data.voronoiTreemap = { name: 'Product Portfolio', children: [] });
+    const group = ensureTreeGroup(root, index);
+    group.children.push({
+      name: `Added ${index}`,
+      value: 8 + (index * 5) % 42,
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendSubwayData(data, index) {
+    const routes = ensureArrayData(data, 'subway');
+    if (!routes.length) {
+      routes.push({ id: 'line-added', name: 'Line Added', color: addDataColor(index), stations: [], waypoints: [] });
+    }
+    const route = routes[(index - 1) % routes.length];
+    if (!Array.isArray(route.stations)) route.stations = [];
+    if (!Array.isArray(route.waypoints)) route.waypoints = [];
+    const previous = route.stations[route.stations.length - 1] || { coord: [60, 120] };
+    const previousCoord = Array.isArray(previous.coord) ? previous.coord : [60, 120];
+    const id = `${route.id || 'line'}-added-${index}`;
+    const coord = [
+      finiteNumber(Number(previousCoord[0]), 60) + 70,
+      finiteNumber(Number(previousCoord[1]), 120) + ((index % 3) - 1) * 34
+    ];
+    route.stations.push({
+      id,
+      name: `Added ${index}`,
+      coord,
+      labelPosition: index % 2 ? 'right' : 'bottom'
+    });
+    route.waypoints.push([id, coord[0], coord[1]]);
+    return true;
+  }
+
+  function appendFlameData(data, index) {
+    const root = data.flame || (data.flame = { name: 'root', children: [] });
+    const group = ensureTreeGroup(root, index);
+    group.children.push({
+      name: `added-${index}`,
+      value: 6 + (index * 5) % 30
+    });
+    return true;
+  }
+
+  function appendSunriseSunsetData(data, index) {
+    const list = ensureArrayData(data, 'sunriseSunset');
+    const date = `2026-05-${pad2(5 + index)}`;
+    const sunrise = 5 * 60 + 8 + (index % 8);
+    const sunset = 18 * 60 + 32 + (index % 18);
+    const currentTime = 9 * 60 + 45 + (index * 37) % 360;
+    list.unshift({
+      name: date,
+      value: index,
+      sunrise: formatClockMinutes(sunrise),
+      sunset: formatClockMinutes(sunset),
+      moonrise: formatClockMinutes(21 * 60 + 40 + (index * 9) % 90),
+      moonset: formatClockMinutes(6 * 60 + 50 + (index * 13) % 70),
+      currentTime: `${date} ${formatClockMinutes(currentTime)}:00`,
+      updatedAt: `${date} ${formatClockMinutes(currentTime)}:00`,
+      remainingText: formatDurationSeconds(Math.max(0, (sunset - currentTime) * 60)),
+      updatedText: `Updated ${formatClockMinutes(currentTime)}`,
+      title: currentTime < sunset ? 'Until sunset' : 'After sunset'
+    });
+    return true;
+  }
+
+  function appendLollipopData(data, index) {
+    const list = ensureArrayData(data, 'lollipop');
+    const insertIndex = list.length ? (index * 3) % (list.length + 1) : 0;
+    list.splice(insertIndex, 0, {
+      id: `added-lollipop-${index}`,
+      country: `Added ${index}`,
+      population: 90 + (index * 41) % 520,
+      itemStyle: { color: '#2db5ff' }
+    });
+    return true;
+  }
+
+  function appendBeeswarmData(data, index) {
+    const list = ensureArrayData(data, 'beeswarm');
+    const team = addDataTeams[(index - 1) % addDataTeams.length];
+    list.push({
+      team,
+      score: 45 + (index * 7) % 42,
+      name: `${team.charAt(0)}-${String(index).padStart(2, '0')}`,
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendSpiralData(data, index) {
+    const list = ensureArrayData(data, 'spiral');
+    list.push({
+      name: `Added ${index}`,
+      value: 28 + (index * 13) % 82
+    });
+    return true;
+  }
+
+  function appendVectorFieldData(data, index) {
+    const list = ensureArrayData(data, 'wind');
+    const cols = 17;
+    const position = list.length;
+    const col = position % cols;
+    const row = Math.floor(position / cols);
+    list.push({
+      longitude: Number((col * 0.25).toFixed(3)),
+      latitude: Number((45 + row * 0.25).toFixed(3)),
+      u: Number((Math.cos((col + index) * 0.4) * 2.2).toFixed(4)),
+      v: Number((Math.sin((row + index) * 0.32) * 2.4).toFixed(4))
+    });
+    return true;
+  }
+
+  function graphDataForExample(exampleName, data) {
+    if (exampleName === 'radial') return data.radialGraph || data.graph;
+    if (exampleName === 'concentric') return data.concentricGraph || data.graph;
+    if (exampleName === 'grid') return data.gridGraph || data.graph;
+    if (exampleName === 'mds') return data.mdsGraph || data.graph;
+    return data.graph;
+  }
+
+  function ensureGraphNodes(graph) {
+    if (Array.isArray(graph.nodes)) return graph.nodes;
+    if (!Array.isArray(graph.data)) graph.data = [];
+    return graph.data;
+  }
+
+  function ensureGraphEdges(graph) {
+    if (Array.isArray(graph.edges)) return graph.edges;
+    if (!Array.isArray(graph.links)) graph.links = [];
+    return graph.links;
+  }
+
+  function graphNodes(graph) {
+    if (!graph || typeof graph !== 'object') return [];
+    return Array.isArray(graph.nodes) ? graph.nodes : Array.isArray(graph.data) ? graph.data : [];
+  }
+
+  function ensureArrayData(data, key) {
+    if (!Array.isArray(data[key])) data[key] = [];
+    return data[key];
+  }
+
+  function ensureTreeGroup(root, index) {
+    if (!Array.isArray(root.children)) root.children = [];
+    if (!root.children.length) {
+      root.children.push({
+        name: 'Added Group',
+        itemStyle: { color: addDataColor(index) },
+        children: []
+      });
+    }
+    const group = root.children[(index - 1) % root.children.length];
+    if (!Array.isArray(group.children)) group.children = [];
+    return group;
+  }
+
+  function countTreeItems(node) {
+    if (!node || typeof node !== 'object') return 0;
+    return 1 + (Array.isArray(node.children)
+      ? node.children.reduce((total, child) => total + countTreeItems(child), 0)
+      : 0);
+  }
+
+  function currentSunriseSunsetData(data) {
+    const fallback = {
+      sunrise: '05:12',
+      sunset: '18:39',
+      moonrise: '22:08',
+      moonset: '07:59',
+      currentTime: '2026-05-05 10:47:33',
+      updatedAt: '2026-05-05 10:47:33',
+      title: 'Until sunset',
+      remainingText: '07:51:27',
+      updatedText: 'Updated 10:46'
+    };
+    const item = Array.isArray(data?.sunriseSunset) && data.sunriseSunset.length ? data.sunriseSunset[0] : {};
+    return {
+      ...fallback,
+      ...(item && typeof item === 'object' ? item : {})
+    };
+  }
+
+  function nextMonthDate(value, offset) {
+    const date = new Date(value || Date.UTC(2000, offset, 1));
+    if (Number.isNaN(date.getTime())) return new Date(Date.UTC(2000, offset, 1));
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1));
+  }
+
+  function addDataColor(index) {
+    return addDataPalette[(index - 1) % addDataPalette.length];
+  }
+
+  function arrayLength(value) {
+    return Array.isArray(value) ? value.length : 0;
+  }
+
   function createControlsPanel(controls, state, handlers) {
     if (!document.createElement) return null;
 
@@ -1313,6 +1755,12 @@
     title.textContent = 'Options';
     const actions = document.createElement('div');
     actions.className = 'demo-controls__actions';
+    if (typeof handlers.onAddData === 'function') {
+      const addDataButton = controlButton('添加数据');
+      addDataButton.classList.add('demo-control-button--primary');
+      addDataButton.addEventListener('click', handlers.onAddData);
+      actions.append(addDataButton);
+    }
     const replayButton = controlButton('Replay');
     replayButton.addEventListener('click', handlers.onReplay);
     const resetButton = controlButton('Reset');
@@ -2088,6 +2536,10 @@
   namespace.createDemoOption = createDemoOption;
   namespace.applyControlValues = applyControlValues;
   namespace.applyDemoInteractionDefaults = applyDemoInteractionDefaults;
+  namespace.createAddDataState = createAddDataState;
+  namespace.addExampleData = addExampleData;
+  namespace.countExampleDataItems = countExampleDataItems;
+  namespace.cloneExampleData = cloneExampleData;
   namespace.createControlsPanel = createControlsPanel;
   namespace.mountControlsPanel = mountControlsPanel;
   namespace.syncControlElements = syncControlElements;

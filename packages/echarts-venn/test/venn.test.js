@@ -72,6 +72,22 @@ test('computes hollow three-set Venn circles and region labels', () => {
   assert.ok(center.y > a.y && center.y < c.y);
 });
 
+test('computes hollow circles for newly added base sets', () => {
+  const result = layoutHollowVenn([
+    ...hollowData,
+    { name: 'Added 1', sets: ['Added 1'], value: 42 },
+    { name: 'A&Added 1', sets: ['A', 'Added 1'], value: 8 }
+  ], {
+    width: 720,
+    height: 500,
+    padding: 24
+  });
+
+  assert.equal(result.circles.length, 4);
+  assert.ok(result.circles.some((circle) => circle.name === 'Added 1'));
+  assert.ok(result.labels.some((label) => label.name === 'A&Added 1'));
+});
+
 test('computes deterministic bubble Venn circles sized by value inside the viewport', () => {
   const first = layoutBubbleVenn(bubbleData, {
     width: 640,

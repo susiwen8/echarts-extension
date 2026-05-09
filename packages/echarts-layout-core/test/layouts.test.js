@@ -1096,6 +1096,78 @@ test('does not animate arc edge connections when chart animation is disabled', (
   assert.equal(edgeEls[0].animations.length, 0);
 });
 
+test('updates existing arc edge geometry when appended data reflows the layout', () => {
+  const host = createFakeEChartsHost();
+  installGraphLayout(host, {
+    chartType: 'arc',
+    layoutType: 'arc'
+  });
+
+  const view = { group: new host.graphic.Group() };
+  const api = createFakeApi(host);
+  const baseOption = {
+    ...sampleGraph,
+    animation: false,
+    edgeAnimation: false,
+    layout: {
+      nodeSep: 12,
+      nodeSize: 20
+    }
+  };
+
+  host.chartView.render.call(view, createFakeSeriesModel(baseOption), null, api);
+
+  const firstEdge = view.group.children[0].children[0];
+  const initialGeometry = arcEdgeGeometry(firstEdge);
+
+  host.chartView.render.call(
+    view,
+    createFakeSeriesModel({
+      ...baseOption,
+      nodes: [
+        ...baseOption.nodes,
+        { id: 'e', value: 1 }
+      ],
+      edges: [
+        ...baseOption.edges,
+        { source: 'd', target: 'e' }
+      ]
+    }),
+    null,
+    api
+  );
+
+  const updatedFirstEdge = view.group.children[0].children[0];
+  const updatedGeometry = arcEdgeGeometry(updatedFirstEdge);
+
+  assert.equal(updatedFirstEdge, firstEdge);
+  assert.notDeepEqual(updatedGeometry, initialGeometry);
+  assert.deepEqual(updatedGeometry, {
+    cx: 136,
+    cy: 120,
+    r: 16,
+    startAngle: Math.PI,
+    endAngle: 0,
+    clockwise: true
+  });
+});
+
+function arcEdgeGeometry(element) {
+  if (Number.isFinite(element.shape?.cx)) {
+    return {
+      cx: element.shape.cx,
+      cy: element.shape.cy,
+      r: element.shape.r,
+      startAngle: element.shape.startAngle,
+      endAngle: element.shape.endAngle,
+      clockwise: element.shape.clockwise
+    };
+  }
+  return {
+    path: element.path
+  };
+}
+
 function createFakeEChartsHost() {
   class Group {
     constructor(options = {}) {
@@ -1110,6 +1182,10 @@ function createFakeEChartsHost() {
     removeAll() {
       this.removeAllCalls = (this.removeAllCalls || 0) + 1;
       this.children = [];
+    }
+
+    childrenRef() {
+      return this.children;
     }
   }
 
@@ -1235,6 +1311,7 @@ function createFakeEChartsHost() {
     },
     graphic: {
       Group,
+      Arc: Element,
       Circle: Element,
       Line: Element,
       BezierCurve: Element,

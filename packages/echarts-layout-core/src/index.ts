@@ -2,6 +2,7 @@ export {
   computeArcLayout,
   createArcBezierShape,
   createArcPath,
+  createArcShape,
   pathToString
 } from './arc.js';
 export { normalizeGraphData } from './data.js';
