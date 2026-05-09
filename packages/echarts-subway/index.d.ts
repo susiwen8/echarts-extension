@@ -1,6 +1,22 @@
 import 'echarts';
 
 type SubwayLabelPosition = 'top' | 'bottom' | 'left' | 'right';
+type SubwayLineType = 'solid' | 'dashed' | 'dotted' | number[];
+type SubwayRouteStatus = 'open' | 'planned' | 'construction' | string;
+
+interface SubwayLineStyleOption {
+  color?: string;
+  width?: number;
+  opacity?: number;
+  cornerRadius?: number;
+  cap?: 'round' | 'butt' | 'square';
+  join?: 'round' | 'bevel' | 'miter';
+  type?: SubwayLineType;
+  dashArray?: number[] | string;
+  lineDash?: number[];
+  dashOffset?: number;
+  lineDashOffset?: number;
+}
 
 interface SubwayStationItem {
   id?: string | number;
@@ -49,14 +65,24 @@ interface SubwayRouteItem {
   stations?: Array<SubwayStationItem | SubwayStationRow>;
   waypoints?: SubwayWaypoint[];
   cornerRadius?: number;
-  lineStyle?: {
-    color?: string;
-    width?: number;
-    opacity?: number;
-    cornerRadius?: number;
-    cap?: 'round' | 'butt' | 'square';
-    join?: 'round' | 'bevel' | 'miter';
-  };
+  status?: SubwayRouteStatus;
+  segments?: Array<{
+    from?: string | number;
+    to?: string | number;
+    source?: string | number;
+    target?: string | number;
+    start?: string | number;
+    end?: string | number;
+    segmentIndex?: number;
+    index?: number;
+    startIndex?: number;
+    endIndex?: number;
+    fromIndex?: number;
+    toIndex?: number;
+    status?: SubwayRouteStatus;
+    lineStyle?: SubwayLineStyleOption;
+  }>;
+  lineStyle?: SubwayLineStyleOption;
   label?: Record<string, unknown>;
   [key: string]: unknown;
 }
@@ -97,13 +123,7 @@ declare module 'echarts/types/dist/echarts' {
     preserveAspectRatio?: boolean;
     colors?: string[];
 
-    lineStyle?: {
-      width?: number;
-      opacity?: number;
-      cornerRadius?: number;
-      cap?: 'round' | 'butt' | 'square';
-      join?: 'round' | 'bevel' | 'miter';
-    };
+    lineStyle?: SubwayLineStyleOption;
     stationStyle?: {
       color?: string;
       opacity?: number;

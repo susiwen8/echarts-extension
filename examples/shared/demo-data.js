@@ -180,7 +180,8 @@
           { id: 'market', name: 'Market', coord: [150, 220], labelPosition: 'top' },
           { id: 'central', name: 'Central', coord: [250, 220] },
           { id: 'harbor', name: 'Harbor', coord: [350, 220], labelPosition: 'bottom' },
-          { id: 'airport', name: 'Airport', coord: [470, 120], labelPosition: 'right' }
+          { id: 'airport', name: 'Airport', coord: [470, 120], labelPosition: 'right' },
+          { id: 'terminal', name: 'Terminal', coord: [540, 120], labelPosition: 'right' }
         ],
         waypoints: [
           ['lake', 60, 280],
@@ -188,7 +189,11 @@
           ['central', 250, 220],
           ['harbor', 350, 220],
           [470, 220],
-          ['airport', 470, 120]
+          ['airport', 470, 120],
+          ['terminal', 540, 120]
+        ],
+        segments: [
+          { from: 'harbor', to: 'airport', status: 'construction' }
         ]
       },
       {
@@ -223,6 +228,40 @@
           ['central', 250, 220],
           ['garden', 390, 310]
         ]
+      },
+      {
+        id: 'line4',
+        name: 'Express',
+        color: '#00a6a6',
+        stations: [
+          { id: 'harbor', name: 'Harbor', coord: [350, 220] },
+          { id: 'airport', name: 'Airport', coord: [470, 120] },
+          { id: 'tech', name: 'Tech Park', coord: [560, 70], labelPosition: 'right' }
+        ],
+        waypoints: [
+          ['harbor', 350, 220],
+          [470, 220],
+          ['airport', 470, 120],
+          ['tech', 560, 70]
+        ]
+      },
+      {
+        id: 'line5',
+        name: 'Future Line',
+        color: '#8e44ad',
+        status: 'planned',
+        stations: [
+          { id: 'future-west', name: 'Future West', coord: [90, 390], labelPosition: 'left' },
+          { id: 'civic', name: 'Civic', coord: [300, 360], labelPosition: 'bottom' },
+          { id: 'future-east', name: 'Future East', coord: [520, 330], labelPosition: 'right' }
+        ],
+        waypoints: [
+          ['future-west', 90, 390],
+          [190, 390],
+          ['civic', 300, 360],
+          [410, 330],
+          ['future-east', 520, 330]
+        ]
       }
     ],
     flame: {
@@ -252,6 +291,21 @@
         }
       ]
     },
+    sunriseSunset: [
+      {
+        name: '2026-05-05',
+        value: 0,
+        sunrise: '05:12',
+        sunset: '18:39',
+        moonrise: '22:08',
+        moonset: '07:59',
+        currentTime: '2026-05-05 10:47:33',
+        updatedAt: '2026-05-05 10:47:33',
+        remainingText: '07:51:27',
+        updatedText: 'Updated 10:46',
+        title: 'Until sunset'
+      }
+    ],
     lollipop: [
       { country: 'India', population: 1441, itemStyle: { color: '#2db5ff' } },
       { country: 'China', population: 1425, itemStyle: { color: '#2db5ff' } },

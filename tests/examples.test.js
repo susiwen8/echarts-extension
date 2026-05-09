@@ -205,6 +205,128 @@ test('chart examples expose interactive option controls', () => {
   assert.equal(typeof namespace.applyControlValues, 'function');
 });
 
+test('chart example animation timing controls default to their shortest values', () => {
+  const namespace = loadDemoNamespace();
+  const nonShortestDefaults = [];
+
+  for (const [exampleName, entry] of Object.entries(namespace.registry)) {
+    for (const control of entry.controls || []) {
+      if (isAnimationTimingControl(control) && control.defaultValue !== control.min) {
+        nonShortestDefaults.push(`${exampleName}:${control.id}=${control.defaultValue}/${control.min}`);
+      }
+    }
+  }
+
+  const largeNamespace = loadLargeDataNamespace({ withDemoRunner: true });
+  for (const caseName of Object.keys(largeNamespace.cases)) {
+    const prepared = largeNamespace.createLargeOption(caseName, 1000);
+    const controls = largeNamespace.createLargeControls(caseName, prepared.option);
+    for (const control of controls) {
+      if (isAnimationTimingControl(control) && control.defaultValue !== control.min) {
+        nonShortestDefaults.push(`large:${caseName}:${control.id}=${control.defaultValue}/${control.min}`);
+      }
+    }
+  }
+
+  assert.deepEqual(nonShortestDefaults, []);
+
+  const lollipopState = namespace.createControlState(namespace.registry.lollipop.controls);
+  const lollipopOption = namespace.createDemoOption('lollipop', namespace.data, lollipopState);
+  assert.equal(lollipopOption.series[0].enterAnimation.duration, 120);
+  assert.equal(lollipopOption.series[0].enterAnimation.stagger, 0);
+
+  const arcState = namespace.createControlState(namespace.registry.arc.controls);
+  const arcOption = namespace.createDemoOption('arc', namespace.data, arcState);
+  assert.equal(arcOption.series[0].edgeAnimation.duration, 120);
+  assert.equal(arcOption.series[0].edgeAnimation.stagger, 0);
+});
+
+test('chart examples append data through the shared add-data action with animated updates', () => {
+  const namespace = loadDemoNamespace();
+  const missingAppend = [];
+  const missingAnimation = [];
+
+  for (const exampleName of Object.keys(namespace.registry)) {
+    const data = namespace.cloneExampleData(namespace.data);
+    const appendState = namespace.createAddDataState(exampleName);
+    const beforeCount = namespace.countExampleDataItems(exampleName, data);
+    const result = namespace.addExampleData(exampleName, data, appendState);
+    const afterCount = namespace.countExampleDataItems(exampleName, data);
+    const option = namespace.createDemoOption(exampleName, data, {}, {
+      addDataKey: appendState.count
+    });
+    const series = Array.isArray(option.series) ? option.series : [option.series].filter(Boolean);
+
+    if (!result?.added || afterCount <= beforeCount) {
+      missingAppend.push(exampleName);
+    }
+
+    series.forEach((seriesOption, seriesIndex) => {
+      if (seriesOption.animationDurationUpdate == null || seriesOption.animationEasingUpdate == null) {
+        missingAnimation.push(`${exampleName}:series.${seriesIndex}`);
+      }
+    });
+  }
+
+  assert.deepEqual(missingAppend, []);
+  assert.deepEqual(missingAnimation, []);
+});
+
+test('arc demo add-data extends the arc sequence from the previous last node', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const appendState = namespace.createAddDataState('arc');
+  const beforeLastNode = data.graph.data.at(-1);
+
+  namespace.addExampleData('arc', data, appendState);
+
+  const addedNode = data.graph.data.at(-1);
+  const addedEdge = data.graph.links.at(-1);
+  assert.equal(addedNode.id, 'added-arc-1');
+  assert.equal(addedEdge.source, beforeLastNode.id);
+  assert.equal(addedEdge.target, addedNode.id);
+});
+
+test('nested circle demo add-data adds a new circle ring', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const appendState = namespace.createAddDataState('nested-circle');
+  const beforeRingCount = data.nestedCircle.length;
+
+  namespace.addExampleData('nested-circle', data, appendState);
+
+  assert.equal(data.nestedCircle.length, beforeRingCount + 1);
+  assert.equal(data.nestedCircle.at(-1).name, 'Added 1');
+});
+
+test('lollipop demo add-data can insert new data before the end', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const appendState = namespace.createAddDataState('lollipop');
+
+  namespace.addExampleData('lollipop', data, appendState);
+
+  const addedIndex = data.lollipop.findIndex((item) => item.country === 'Added 1');
+  assert.ok(addedIndex >= 0, 'lollipop add-data should insert a visible item');
+  assert.ok(addedIndex < data.lollipop.length - 1, 'lollipop add-data should exercise non-tail insertion');
+});
+
+test('subway demo data covers planned, construction, parallel, and regular interchange cases', () => {
+  const namespace = loadDemoNamespace();
+  const routes = namespace.cloneExampleData(namespace.data).subway;
+
+  assert.ok(routes.some((route) => route.status === 'planned'), 'subway demo should include a planned dashed route');
+  assert.ok(
+    routes.some((route) => (route.segments || []).some((segment) => segment.status === 'construction')),
+    'subway demo should include a construction extension segment'
+  );
+  assert.ok(hasSharedStationSegment(routes), 'subway demo should include a shared parallel station segment');
+  assert.ok(
+    stationRouteCount(routes, 'central') >= 3 && !stationHasSharedSegment(routes, 'central'),
+    'subway demo should include a non-shared Central interchange that stays circular'
+  );
+});
+
 test('large data examples expose per-chart million-row performance options', () => {
   const namespace = loadLargeDataNamespace();
   const caseNames = Object.keys(namespace.cases).sort();
@@ -251,6 +373,19 @@ test('large data examples expose per-chart million-row performance options', () 
     assert.equal(prepared.option.largeDataPerf.renderCount, prepared.payload.renderCount);
     assert.equal(prepared.option.largeDataPerf.sampleMode, prepared.payload.sampleMode);
   }
+});
+
+test('large data examples can animate add-data updates without disabling large render flags', () => {
+  const namespace = loadLargeDataNamespace();
+  const prepared = namespace.createLargeOption('lollipop', 1000, 0, {
+    addDataKey: 1
+  });
+
+  assert.equal(prepared.option.animation, true);
+  assert.equal(prepared.option.series[0].animation, true);
+  assert.equal(prepared.option.series[0].large, true);
+  assert.equal(prepared.option.series[0].animationDurationUpdate, 120);
+  assert.equal(prepared.option.series[0].animationEasingUpdate, 'cubicOut');
 });
 
 test('large data performance helper records whether a run is initial or update', () => {
@@ -614,12 +749,19 @@ test('sunrise sunset time slider updates do not replay enter animation', () => {
 
 test('layout core svg example wires zoom hover and click interactions', () => {
   const script = readFileSync(path.join(root, 'packages/echarts-layout-core/examples/layout-core-example.js'), 'utf8');
+  const html = readFileSync(path.join(root, 'packages/echarts-layout-core/examples/index.html'), 'utf8');
 
   assert.match(script, /attachLayoutInteractions/);
+  assert.match(script, /appendLayoutData/);
+  assert.match(script, /animateLayoutUpdate/);
+  assert.match(script, /添加数据/);
   assert.match(script, /addEventListener\('wheel'/);
   assert.match(script, /addEventListener\('click'/);
   assert.match(script, /layout-node/);
   assert.match(script, /layout-card__event/);
+  assert.match(script, /duration:\s*120/);
+  assert.doesNotMatch(script, /duration:\s*(520|620)/);
+  assert.match(html, /layout-card__button--primary/);
 });
 
 function readLocalReferences(content) {
@@ -666,6 +808,52 @@ function exists(filePath) {
   } catch {
     return false;
   }
+}
+
+function isAnimationTimingControl(control) {
+  if (control?.type !== 'range') return false;
+  return (control.targets || []).some((target) => (
+    target.endsWith('enterAnimation.duration') ||
+    target.endsWith('enterAnimation.stagger') ||
+    target.endsWith('edgeAnimation.duration') ||
+    target.endsWith('edgeAnimation.stagger')
+  ));
+}
+
+function hasSharedStationSegment(routes) {
+  const seen = new Set();
+  return routes.some((route) => routeStationSegments(route).some((segment) => {
+    const key = segment.slice().sort().join('|');
+    if (seen.has(key)) return true;
+    seen.add(key);
+    return false;
+  }));
+}
+
+function stationHasSharedSegment(routes, stationId) {
+  const counts = new Map();
+  routes.forEach((route) => {
+    routeStationSegments(route)
+      .filter((segment) => segment.includes(stationId))
+      .forEach((segment) => {
+        const key = segment.slice().sort().join('|');
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+  });
+  return Array.from(counts.values()).some((count) => count > 1);
+}
+
+function stationRouteCount(routes, stationId) {
+  return routes.filter((route) => (route.stations || []).some((station) => station.id === stationId)).length;
+}
+
+function routeStationSegments(route) {
+  const stationIds = new Set((route.stations || []).map((station) => station.id));
+  const points = route.waypoints || (route.stations || []).map((station) => [station.id]);
+  const stationPath = points
+    .map((point) => Array.isArray(point) ? point[0] : point.id ?? point.stationId)
+    .filter((id) => stationIds.has(id));
+  return stationPath.slice(1).map((stationId, index) => [stationPath[index], stationId]);
 }
 
 function loadDemoNamespace() {

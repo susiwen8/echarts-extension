@@ -346,6 +346,9 @@ const subwayRoutes = [
       ['jiubao', 500, 130],
       [560, 130],
       ['linping', 560, 70]
+    ],
+    segments: [
+      { from: 'jiubao', to: 'linping', status: 'construction' }
     ]
   },
   {
@@ -398,6 +401,24 @@ const subwayRoutes = [
       ['qianjiang', 405, 330],
       ['jinjiang', 360, 365],
       ['fuxing', 330, 420]
+    ]
+  },
+  {
+    id: 'line7',
+    name: '规划线',
+    color: '#8e44ad',
+    status: 'planned',
+    stations: [
+      { id: 'future-west', name: '规划西', coord: [155, 360], labelPosition: 'left' },
+      { id: 'civic', name: '市民中心', coord: [385, 305] },
+      { id: 'airport', name: '机场', coord: [600, 210], labelPosition: 'right' }
+    ],
+    waypoints: [
+      ['future-west', 155, 360],
+      [235, 360],
+      ['civic', 385, 305],
+      [500, 260],
+      ['airport', 600, 210]
     ]
   }
 ];
