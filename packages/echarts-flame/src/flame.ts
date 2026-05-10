@@ -189,9 +189,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[flame] render failed', error);
-      }
+      console.error('[flame] render failed', error);
     }
   },
 
@@ -516,3 +514,26 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawFlame,
+  drawLabels,
+  readNodeStyle,
+  formatLabel,
+  ellipsize,
+  createLegendVisualProvider,
+  collectDataNames,
+  readRawItemStyle,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyRectEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  finiteNumber,
+  asRecord,
+  createHoverItem,
+  addHoverElement
+};

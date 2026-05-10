@@ -242,8 +242,8 @@ function orderByCategory(items: NormalizedItem[], categories: string[]): Normali
   return items
     .filter((item) => order.has(item.category))
     .sort((left, right) => {
-      const leftOrder = order.get(left.category) ?? Number.MAX_SAFE_INTEGER;
-      const rightOrder = order.get(right.category) ?? Number.MAX_SAFE_INTEGER;
+      const leftOrder = order.get(left.category) as number;
+      const rightOrder = order.get(right.category) as number;
       return leftOrder - rightOrder || left.dataIndex - right.dataIndex;
     });
 }
@@ -255,8 +255,8 @@ function resolveValueExtent(
 ): { min: number; max: number } {
   const values = items.map((item) => item.value).filter(Number.isFinite);
   values.push(baseline);
-  let min = finiteNumber(options.min, values.length ? Math.min(...values) : 0);
-  let max = finiteNumber(options.max, values.length ? Math.max(...values) : 1);
+  let min = finiteNumber(options.min, Math.min(...values));
+  let max = finiteNumber(options.max, Math.max(...values));
 
   if (Math.abs(max - min) < EPSILON) {
     min -= 1;
@@ -269,6 +269,10 @@ function resolveValueExtent(
     if (options.max == null) max = nice.max;
   }
 
+  return normalizeFinalExtent(min, max);
+}
+
+function normalizeFinalExtent(min: number, max: number): { min: number; max: number } {
   if (max < min) [min, max] = [max, min];
   if (Math.abs(max - min) < EPSILON) max = min + 1;
   return { min, max };
@@ -446,3 +450,30 @@ function clamp(value: number, min: number, max: number): number {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  normalizeItems,
+  resolveCategories,
+  orderByCategory,
+  resolveValueExtent,
+  normalizeFinalExtent,
+  createTicks,
+  projectCategory,
+  projectValue,
+  createPlotRect,
+  normalizePadding,
+  readPaddingOption,
+  readField,
+  niceExtent,
+  niceStep,
+  normalizeDimensions,
+  normalizeCategories,
+  readFieldOption,
+  firstBoolean,
+  unique,
+  stringifyName,
+  finiteNumber,
+  cleanNumber,
+  clamp,
+  isPlainObject
+};

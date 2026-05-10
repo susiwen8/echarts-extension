@@ -8,7 +8,7 @@ import 'echarts-radial-area';
 import {
   layoutRadialArea,
   resolveRadialAreaLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const seasonalData = [
   { month: 'January', value: 50, min: 42, max: 64 },

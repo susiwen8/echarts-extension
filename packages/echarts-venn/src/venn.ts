@@ -186,9 +186,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[venn] render failed', error);
-      }
+      console.error('[venn] render failed', error);
     }
   },
 
@@ -599,3 +597,31 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawVenn,
+  drawHollowVenn,
+  drawBubbleVenn,
+  drawLabels,
+  addCircleElementBySet,
+  addLabelHoverElement,
+  collectRelatedCircleElements,
+  findDataIndexForCircle,
+  readHollowCircleStyle,
+  readBubbleCircleStyle,
+  formatLabel,
+  createLegendVisualProvider,
+  collectDataNames,
+  finiteNumber,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  asRecord,
+  createHoverItem,
+  addHoverElement
+};

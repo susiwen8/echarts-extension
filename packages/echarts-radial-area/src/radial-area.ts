@@ -287,9 +287,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[radialArea] render failed', error);
-      }
+      console.error('[radialArea] render failed', error);
     }
   },
 
@@ -821,3 +819,33 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawRadialArea,
+  drawGrid,
+  drawAreas,
+  drawLine,
+  drawSymbols,
+  createValueAreaPoints,
+  pointsToTuples,
+  readAreaStyle,
+  readLineStyle,
+  readLineDash,
+  readPointStyle,
+  formatAxisLabel,
+  polarPoint,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyPathEnterAnimation,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  asRecord,
+  nestedOptionValue,
+  finiteNumber,
+  createHoverItem,
+  addHoverElement
+};

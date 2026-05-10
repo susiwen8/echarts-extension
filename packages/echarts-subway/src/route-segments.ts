@@ -67,35 +67,37 @@ export function resolveSharedSegmentOffsets(routes: RouteSegmentRoute[]): Map<st
 
   const offsets = new Map<string, RouteSegmentOffset>();
 
-  groups.forEach((group) => {
-    const entries = uniqueSegmentEntries(group.entries);
-    if (entries.length <= 1) return;
-
-    const dx = group.end.x - group.start.x;
-    const dy = group.end.y - group.start.y;
-    const length = Math.hypot(dx, dy);
-    if (!length) return;
-
-    const spacing = Math.max(...entries.map((entry) => entry.lineWidth), 1) + PARALLEL_GAP;
-    const normalX = -dy / length;
-    const normalY = dx / length;
-
-    entries
-      .sort((left, right) => left.routeId.localeCompare(right.routeId) || left.segmentIndex - right.segmentIndex)
-      .forEach((entry, rank) => {
-        const distance = (rank - (entries.length - 1) / 2) * spacing;
-        offsets.set(routeSegmentOffsetKey(entry.routeId, entry.segmentIndex), {
-          routeId: entry.routeId,
-          segmentIndex: entry.segmentIndex,
-          count: entries.length,
-          rank,
-          offsetX: normalX * distance,
-          offsetY: normalY * distance
-        });
-      });
-  });
+  groups.forEach((group) => assignSegmentGroupOffsets(offsets, group));
 
   return offsets;
+}
+
+function assignSegmentGroupOffsets(offsets: Map<string, RouteSegmentOffset>, group: SegmentGroup): void {
+  const entries = uniqueSegmentEntries(group.entries);
+  if (entries.length <= 1) return;
+
+  const dx = group.end.x - group.start.x;
+  const dy = group.end.y - group.start.y;
+  const length = Math.hypot(dx, dy);
+  if (!length) return;
+
+  const spacing = Math.max(...entries.map((entry) => entry.lineWidth), 1) + PARALLEL_GAP;
+  const normalX = -dy / length;
+  const normalY = dx / length;
+
+  entries
+    .sort((left, right) => left.routeId.localeCompare(right.routeId) || left.segmentIndex - right.segmentIndex)
+    .forEach((entry, rank) => {
+      const distance = (rank - (entries.length - 1) / 2) * spacing;
+      offsets.set(routeSegmentOffsetKey(entry.routeId, entry.segmentIndex), {
+        routeId: entry.routeId,
+        segmentIndex: entry.segmentIndex,
+        count: entries.length,
+        rank,
+        offsetX: normalX * distance,
+        offsetY: normalY * distance
+      });
+    });
 }
 
 function uniqueSegmentEntries(entries: SegmentEntry[]): SegmentEntry[] {
@@ -140,3 +142,14 @@ function samePoint(start: RouteSegmentPoint, end: RouteSegmentPoint): boolean {
 function isDrawablePoint(point: RouteSegmentPoint): boolean {
   return Number.isFinite(point.x) && Number.isFinite(point.y);
 }
+
+export const __test__ = {
+  assignSegmentGroupOffsets,
+  uniqueSegmentEntries,
+  canonicalSegmentKey,
+  canonicalSegmentPoints,
+  pointKey,
+  roundCoordinate,
+  samePoint,
+  isDrawablePoint
+};

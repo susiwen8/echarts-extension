@@ -87,14 +87,14 @@ function assignConcentricRadii(levels: ConcentricLevel[], options: LayoutOptions
         for (let i = 0; i < level.nodeSizes.length - 1; i++) {
           requiredDistance = Math.max(requiredDistance, (level.nodeSizes[i] + level.nodeSizes[i + 1]) / 2);
         }
-        const dcos = Math.cos(level.dTheta || 0) - 1;
-        const dsin = Math.sin(level.dTheta || 0);
+        const dcos = Math.cos(level.dTheta) - 1;
+        const dsin = Math.sin(level.dTheta);
         const denominator = Math.sqrt(dcos * dcos + dsin * dsin);
         radius = Math.max(radius, denominator > 0 ? requiredDistance / denominator : 0);
       }
       level.r = radius;
       const nextLevel = levels[index + 1];
-      if (nextLevel) radius += ((level.maxNodeSize || 0) + (nextLevel.maxNodeSize || 0)) / 2;
+      if (nextLevel) radius += (level.maxNodeSize + nextLevel.maxNodeSize) / 2;
     });
   } else {
     let radius = 0;
@@ -102,13 +102,13 @@ function assignConcentricRadii(levels: ConcentricLevel[], options: LayoutOptions
     for (let index = 1; index < levels.length; index++) {
       const previous = levels[index - 1];
       const current = levels[index];
-      radius += Math.max(1, ((previous.maxNodeSize || 0) + (current.maxNodeSize || 0)) / 2);
+      radius += Math.max(1, (previous.maxNodeSize + current.maxNodeSize) / 2);
       current.r = radius;
     }
   }
 
   if (options.equidistant) {
-    const gap = Math.max(...levels.map((level, index) => index === 0 ? level.r || 0 : (level.r || 0) - (levels[index - 1].r || 0)), 0);
+    const gap = Math.max(...levels.map((level, index) => index === 0 ? level.r : level.r - levels[index - 1].r), 0);
     levels.forEach((level, index) => {
       level.r = index * gap;
     });
@@ -116,11 +116,11 @@ function assignConcentricRadii(levels: ConcentricLevel[], options: LayoutOptions
 
   const maxHalf = Math.min(width || Infinity, height || Infinity) / 2;
   if (Number.isFinite(maxHalf) && maxHalf > 0) {
-    const largest = Math.max(...levels.map((level) => (level.r || 0) + (level.maxNodeSize || 0) / 2), 0);
+    const largest = Math.max(...levels.map((level) => level.r + level.maxNodeSize / 2), 0);
     if (largest > maxHalf) {
       const scale = maxHalf / largest;
       levels.forEach((level) => {
-        level.r = (level.r || 0) * scale;
+        level.r *= scale;
       });
     }
   }

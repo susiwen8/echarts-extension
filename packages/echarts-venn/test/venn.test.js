@@ -9,8 +9,8 @@ import {
   layoutBubbleVenn,
   layoutHollowVenn,
   resolveVennLayout
-} from '../lib/src/layout.js';
-import '../lib/index.js';
+} from '../src/layout.ts';
+import '../index.ts';
 
 echarts.use([SVGRenderer]);
 

@@ -35,7 +35,7 @@ export function computeRadialLayout(input: GraphData, options: LayoutOptions = {
   const radii = focusDistances.map((distance) => distance * unitRadius);
   const idealDistances = radialIdealDistanceMatrix(graph, distances, radii, unitRadius, options);
   const positions = runMDS(idealDistances, 2, linkDistance);
-  const focusPosition = positions[focusIndex] || [0, 0];
+  const focusPosition = positions[focusIndex];
 
   graph.nodes.forEach((node, index) => {
     node.x = positions[index][0] - focusPosition[0];
@@ -331,10 +331,8 @@ function preventRadialOverlap(graph: LayoutGraph, radii: number[], focusIndex: n
           node.x += tx * projected;
           node.y += ty * projected;
           const nextLength = Math.hypot(node.x, node.y);
-          if (nextLength > 0) {
-            node.x = (node.x / nextLength) * radii[index];
-            node.y = (node.y / nextLength) * radii[index];
-          }
+          node.x = (node.x / nextLength) * radii[index];
+          node.y = (node.y / nextLength) * radii[index];
           moved = moved || Math.abs(projected) > 1e-3;
         }
       } else {
@@ -373,3 +371,16 @@ function maxFinite(values: number[]) {
   });
   return max;
 }
+
+export const __test__ = {
+  computeFastRadialLayout,
+  focusShortestPaths,
+  radialIdealDistanceMatrix,
+  runRadialIterations,
+  applyRadialFallbacks,
+  sortRingAngles,
+  preventRadialOverlap,
+  replaceFocusInfinity,
+  resolveMaxRadius,
+  maxFinite
+};

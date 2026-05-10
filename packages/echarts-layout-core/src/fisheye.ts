@@ -426,3 +426,19 @@ function finiteNumber(value: unknown, fallback: number): number {
 function asRecord(value: unknown): Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
+
+export const __test__ = {
+  applyGenericFisheyeTargets,
+  resetGenericFisheyeTargets,
+  resolveTargetBaseline,
+  resolveTargetElements,
+  shouldSkipElement,
+  updateFisheyeLens,
+  setFisheyeElementTransform,
+  readElementRect,
+  eventPoint,
+  pointInRect,
+  resolveFisheyeNumber,
+  finiteNumber,
+  asRecord
+};

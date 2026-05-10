@@ -5,12 +5,12 @@ import { test } from 'vitest';
 import * as echarts from 'echarts/lib/echarts';
 import { SVGRenderer } from 'echarts/renderers';
 
-import '../lib/index.js';
+import '../index.ts';
 import {
   createDemoPackBubbleData,
   layoutPackBubble,
   resolvePackBubbleLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 echarts.use([SVGRenderer]);
 

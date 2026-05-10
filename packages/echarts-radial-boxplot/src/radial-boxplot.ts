@@ -299,9 +299,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[radialBoxplot] render failed', error);
-      }
+      console.error('[radialBoxplot] render failed', error);
     }
   },
 
@@ -877,3 +875,34 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawRadialBoxplot,
+  drawGrid,
+  drawBoxes,
+  drawWhiskers,
+  drawHitAreas,
+  radialBoxplotBoxKey,
+  createSectorOrPolygon,
+  createArcOrPolyline,
+  toZrenderAngle,
+  arcPointsForFallback,
+  readBoxStyle,
+  readLineStyle,
+  readLineDash,
+  formatAxisLabel,
+  polarPoint,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyPathEnterAnimation,
+  applyLineEnterAnimation,
+  animateGraphicProperty,
+  asRecord,
+  nestedOptionValue,
+  finiteNumber,
+  createHoverItem,
+  addHoverElement
+};

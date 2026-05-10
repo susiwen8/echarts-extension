@@ -216,9 +216,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[packBubble] render failed', error);
-      }
+      console.error('[packBubble] render failed', error);
     }
   },
 
@@ -395,7 +393,7 @@ function wrapText(text: string, maxWidth: number, fontSize: number, radius: numb
         current = word;
       }
     });
-    if (current) lines.push(current);
+    lines.push(current);
   } else {
     for (let index = 0; index < text.length; index += maxChars) {
       lines.push(text.slice(index, index + maxChars));
@@ -590,3 +588,28 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawPackBubble,
+  drawLabels,
+  readCircleStyle,
+  formatLabel,
+  wrapText,
+  createLegendVisualProvider,
+  collectDataNames,
+  finiteNumber,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  trackEnterAnimation,
+  startPackBubbleEnterGate,
+  clearPackBubbleEnterGate,
+  asRecord,
+  createHoverItem,
+  addHoverElement
+};

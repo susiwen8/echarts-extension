@@ -6,7 +6,7 @@ import {
   flattenCirclePackingData,
   layoutCirclePacking,
   resolveCirclePackingLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const portfolio = {
   name: 'Portfolio',

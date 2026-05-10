@@ -5,7 +5,7 @@ import { test } from 'vitest';
 import {
   layoutFlame,
   resolveFlameLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const profile = {
   name: 'root',

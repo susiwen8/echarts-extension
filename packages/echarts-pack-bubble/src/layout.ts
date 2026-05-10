@@ -793,3 +793,35 @@ export function createDemoPackBubbleData(): PackBubbleDataItem[] {
     }))
     .concat(extra);
 }
+
+export const __test__ = {
+  shouldUseFastPack,
+  layoutPackedCircles,
+  layoutFastGrid,
+  resolveFastGridOrigin,
+  normalizeItems,
+  resolveCategoryColor,
+  createWorkingCircles,
+  sortWorkingCircles,
+  packFrontChain,
+  resolveCollisions,
+  recenterCircles,
+  placeTangent,
+  intersects,
+  square,
+  findBestFrontChainNode,
+  scoreFrontChainNode,
+  fitCircles,
+  resolveFitOffset,
+  measureBounds,
+  resolveInnerRect,
+  resolvePadding,
+  resolveCenter,
+  resolvePosition,
+  readField,
+  assignDefined,
+  clamp,
+  positiveNumber,
+  finiteNumber,
+  isPlainObject
+};

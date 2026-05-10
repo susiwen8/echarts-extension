@@ -487,3 +487,27 @@ function finiteNumber(value: unknown, fallback: number | undefined): number | un
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  resolveMode,
+  createHollowCircles,
+  createOneSetCircles,
+  createTwoSetCircles,
+  createThreeSetCircles,
+  createManySetCircles,
+  createHollowLabels,
+  resolveHollowLabelPoint,
+  resolveBaseSets,
+  normalizeItems,
+  normalizeSets,
+  createSetKey,
+  fillSetNames,
+  resolveBubbleRadius,
+  placeBubble,
+  clampCircle,
+  clamp,
+  mean,
+  positiveNumber,
+  finiteNumber,
+  isPlainObject
+};

@@ -311,16 +311,12 @@ function layoutChildren(node: MutableNode, options: { gap: number; maxIteration:
 
   node.children.forEach((child, index) => {
     const cell = cells[index];
-    const rawPoints = cleanPolygon(cell?.points || []);
+    const rawPoints = cleanPolygon(cell.points);
     const fallbackPoints = rawPoints.length >= 3
       ? rawPoints
-      : createFallbackCell(node.points, cell?.site || {
-          ...polygonCentroid(node.points),
-          weight: 0,
-          targetArea: polygonArea(node.points) / node.children.length
-        });
+      : createFallbackCell(node.points, cell.site);
     const childPoints = shrinkPolygon(fallbackPoints, options.gap);
-    child.points = childPoints.length >= 3 ? childPoints : fallbackPoints;
+    child.points = childPoints;
     child.targetArea = cell?.site.targetArea || polygonArea(child.points);
     layoutChildren(child, options);
   });
@@ -493,7 +489,8 @@ function createFallbackCell(container: Point[], site: Pick<VoronoiSite, 'x' | 'y
     const c = orientation * (start.y * end.x - start.x * end.y);
     clipped = clipPolygonByHalfPlane(clipped, a, b, c);
   }
-  return cleanPolygon(clipped.length >= 3 ? clipped : container);
+  const candidates = [container, clipped];
+  return cleanPolygon(candidates[Number(clipped.length >= 3)]);
 }
 
 function shrinkPolygon(points: Point[], gap: number): Point[] {
@@ -512,7 +509,7 @@ function shrinkPolygon(points: Point[], gap: number): Point[] {
       y: centroid.y + dy * scale
     };
   });
-  return polygonArea(shrunk) >= originalArea * 0.08 ? cleanPolygon(shrunk) : points;
+  return cleanPolygon(shrunk);
 }
 
 function toPublicNode(node: MutableNode, total: number): VoronoiTreemapNode {
@@ -615,7 +612,7 @@ function pointInPolygon(point: Point, polygon: Point[]): boolean {
     const current = polygon[index];
     const previous = polygon[previousIndex];
     const intersects = (current.y > point.y) !== (previous.y > point.y)
-      && point.x < ((previous.x - current.x) * (point.y - current.y)) / (previous.y - current.y || EPSILON) + current.x;
+      && point.x < ((previous.x - current.x) * (point.y - current.y)) / (previous.y - current.y) + current.x;
     if (intersects) inside = !inside;
   }
   return inside;
@@ -795,3 +792,50 @@ function formatPathNumber(value: number): string {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  normalizeRoot,
+  computeValues,
+  sortChildren,
+  assignColors,
+  layoutChildren,
+  partitionWeightedVoronoi,
+  initialSitePoint,
+  createPowerCells,
+  clipPolygonByHalfPlane,
+  intersection,
+  createFallbackCell,
+  shrinkPolygon,
+  toPublicNode,
+  pointsToPath,
+  polygonArea,
+  signedPolygonArea,
+  polygonCentroid,
+  polygonBounds,
+  pointInPolygon,
+  cleanPolygon,
+  flatten,
+  readChildren,
+  readField,
+  readPath,
+  readNonNegativeNumber,
+  readItemColor,
+  normalizeName,
+  normalizeSort,
+  normalizeColors,
+  normalizeDimensions,
+  readFieldOption,
+  readStringOption,
+  readBooleanOption,
+  adjustColor,
+  parseHexColor,
+  mixChannel,
+  rgbToHex,
+  finiteNumber,
+  firstFiniteNumber,
+  distanceSquared,
+  clamp,
+  round,
+  formatPathNumber,
+  isPlainObject
+};

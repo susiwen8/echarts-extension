@@ -530,3 +530,26 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 function asRecord(value: unknown): Record<string, unknown> {
   return isPlainObject(value) ? value : {};
 }
+
+export const __test__ = {
+  normalizeRoutes,
+  normalizeRoute,
+  normalizeStation,
+  parseArrayStation,
+  normalizePathPoint,
+  parseArrayPathPoint,
+  mergeStations,
+  collectRawPoints,
+  computeExtent,
+  createProjector,
+  readCoord,
+  autoLabelPosition,
+  normalizeLabelPosition,
+  normalizeOptionalId,
+  normalizeId,
+  normalizeName,
+  finiteNumber,
+  firstBoolean,
+  isPlainObject,
+  asRecord
+};

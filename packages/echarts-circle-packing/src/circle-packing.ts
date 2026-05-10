@@ -205,9 +205,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[circlePacking] render failed', error);
-      }
+      console.error('[circlePacking] render failed', error);
     }
   },
 
@@ -409,7 +407,7 @@ function wrapText(text: string, maxWidth: number, fontSize: number, radius: numb
         current = word;
       }
     });
-    if (current) lines.push(current);
+    lines.push(current);
   } else {
     for (let index = 0; index < text.length; index += maxChars) {
       lines.push(text.slice(index, index + maxChars));
@@ -579,3 +577,28 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readInitialDataOptions,
+  readLayoutOption,
+  drawCirclePacking,
+  drawLabels,
+  readNodeStyle,
+  formatLabel,
+  wrapText,
+  createLegendVisualProvider,
+  collectDataNames,
+  readRawItemStyle,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  finiteNumber,
+  isPlainObject,
+  asRecord,
+  createHoverItem,
+  addHoverElement
+};

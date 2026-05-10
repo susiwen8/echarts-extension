@@ -284,9 +284,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[beeswarm] render failed', error);
-      }
+      console.error('[beeswarm] render failed', error);
     }
   },
 
@@ -804,3 +802,29 @@ function finiteNumber(value: unknown, fallback: number): number {
   }
   return fallback;
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawBeeswarm,
+  drawAxes,
+  drawTickLine,
+  drawValueAxisLabels,
+  drawCategoryAxisLabels,
+  drawPoints,
+  drawPointLabels,
+  readPointStyle,
+  readLineStyle,
+  readLineDash,
+  formatAxisLabel,
+  formatLabel,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  addHoverElement,
+  asRecord,
+  finiteNumber
+};

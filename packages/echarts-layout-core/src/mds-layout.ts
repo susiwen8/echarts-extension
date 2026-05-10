@@ -120,6 +120,16 @@ export function runMDS(distances: number[][], dimension = 2, fallbackDistance = 
   );
 
   const eigen = jacobiEigenDecomposition(matrix);
+  return projectMDS(matrix, eigen, dimension, fallbackDistance);
+}
+
+function projectMDS(
+  matrix: number[][],
+  eigen: Array<{ value: number; vector: number[] }>,
+  dimension: number,
+  fallbackDistance: number
+): number[][] {
+  const n = matrix.length;
   if (!eigen.length) return fallbackCircle(n, fallbackDistance);
 
   const positive = eigen.filter((item) => item.value > 1e-9).slice(0, dimension);
@@ -211,3 +221,13 @@ function mean(values: number[]) {
   if (!values.length) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
+
+export const __test__ = {
+  preventMDSOverlap,
+  deterministicPairAngle,
+  recenterNodes,
+  projectMDS,
+  jacobiEigenDecomposition,
+  fallbackCircle,
+  mean
+};

@@ -277,9 +277,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[subway] render failed', error);
-      }
+      console.error('[subway] render failed', error);
     }
   },
 
@@ -344,7 +342,7 @@ function drawSubway(
   const stationGroup = new echartsInstance.graphic.Group();
   layout.stations.forEach((station, stationIndex) => {
     const stationElements = drawStation(echartsInstance, stationGroup, seriesModel, layout, station, stationIndex, segmentOffsets);
-    if (stationElements.length) stationElementsById.set(station.id, stationElements);
+    stationElementsById.set(station.id, stationElements);
   });
   chartGroup.add(stationGroup);
 
@@ -1428,3 +1426,73 @@ function asRecord(value: unknown): Record<string, unknown> {
 function hasOwn(value: Record<string, unknown>, key: string): boolean {
   return Object.prototype.hasOwnProperty.call(value, key);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  readRoutes,
+  drawSubway,
+  drawRoute,
+  drawRoutePath,
+  getSubwayRoutePathCtor,
+  offsetRoutePoint,
+  drawStation,
+  createCircleStationMarker,
+  createCapsuleStationMarker,
+  resolveStationMarkerGeometry,
+  findParallelStationRouteGroup,
+  collectStationRouteDirections,
+  normalizeRouteDirection,
+  areParallelDirections,
+  drawStationLabels,
+  drawRouteLabels,
+  createRouteDrawStyle,
+  readRouteStyle,
+  readRouteCornerRadius,
+  resolveRouteSegmentStyleOverrides,
+  setSegmentStyleOverrideRange,
+  findRouteStationPointIndex,
+  normalizeSegmentEndpointId,
+  readSegmentIndex,
+  readRouteStatus,
+  readRouteLineDash,
+  firstLineDash,
+  readLineDash,
+  readDashArray,
+  isDashedRouteStatus,
+  firstDefined,
+  firstFiniteNumber,
+  createRouteDrawStyleKey,
+  readStationStyle,
+  getLabelPoint,
+  createStationLabel,
+  createLabelElement,
+  labelPositionCandidates,
+  labelOffsetCandidates,
+  getRouteClearance,
+  uniqueSortedNumbers,
+  createRouteObstacles,
+  totalRouteCollisionScore,
+  segmentIntersectsInflatedRect,
+  segmentIntersectsRect,
+  recordLabelRect,
+  readLabelRect,
+  isFiniteRect,
+  totalCollisionArea,
+  collisionArea,
+  formatStationLabel,
+  formatRouteLabel,
+  createSubwayHoverItems,
+  addMappedElements,
+  uniqueGraphicElements,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyPathEnterAnimation,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  finiteNumber,
+  asRecord,
+  hasOwn
+};

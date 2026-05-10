@@ -4,7 +4,7 @@ import { test } from 'vitest';
 import {
   layoutNestedCircle,
   resolveNestedCircleLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const roadmapData = [
   {

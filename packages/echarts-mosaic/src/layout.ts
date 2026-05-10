@@ -154,7 +154,7 @@ export function layoutMosaic(data: unknown[], options: MosaicLayoutOptions = {})
   let cursorX = padding;
 
   activeXCategories.forEach((xCategory) => {
-    const columnTotal = xTotals[xCategory] || 0;
+    const columnTotal = xTotals[xCategory];
     const columnWidth = availableWidth * (columnTotal / grandTotal);
     const columnCells = yCategories
       .map((yCategory) => cells.find((cell) => cell.xCategory === xCategory && cell.yCategory === yCategory))
@@ -172,8 +172,8 @@ export function layoutMosaic(data: unknown[], options: MosaicLayoutOptions = {})
         yCategory: cell.yCategory,
         value: cell.value,
         total: grandTotal,
-        percent: grandTotal > 0 ? cell.value / grandTotal : 0,
-        columnPercent: columnTotal > 0 ? cell.value / columnTotal : 0,
+        percent: cell.value / grandTotal,
+        columnPercent: cell.value / columnTotal,
         dataIndex: cell.dataIndex,
         x: cursorX,
         y: cursorY,
@@ -275,7 +275,7 @@ function resolveCategories(
     : unique(cells.map((cell) => cell[key]));
 
   if (sort === true || sort === 'value') {
-    return [...categories].sort((left, right) => (totals[right] || 0) - (totals[left] || 0) || left.localeCompare(right));
+    return [...categories].sort((left, right) => totals[right] - totals[left] || left.localeCompare(right));
   }
   if (sort === 'name') return [...categories].sort((left, right) => left.localeCompare(right));
   return categories;
@@ -329,3 +329,17 @@ function finiteNumber(value: unknown, fallback: number | undefined): number | un
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  normalizeItems,
+  mergeCells,
+  readField,
+  resolveCategories,
+  sumBy,
+  unique,
+  normalizeExplicitCategories,
+  normalizeCategory,
+  positiveNumber,
+  finiteNumber,
+  isPlainObject
+};

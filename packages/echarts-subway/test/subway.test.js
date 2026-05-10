@@ -3,13 +3,13 @@ import { readFileSync } from 'node:fs';
 import * as echarts from 'echarts';
 import { test } from 'vitest';
 
-import '../lib/index.js';
+import '../index.ts';
 import {
   layoutSubway,
   resolveSubwayLayout
-} from '../lib/src/layout.js';
-import { createRoundedRoutePath } from '../lib/src/route-path.js';
-import { resolveSharedSegmentOffsets, routeSegmentOffsetKey } from '../lib/src/route-segments.js';
+} from '../src/layout.ts';
+import { createRoundedRoutePath } from '../src/route-path.ts';
+import { resolveSharedSegmentOffsets, routeSegmentOffsetKey } from '../src/route-segments.ts';
 
 const sampleRoutes = [
   {

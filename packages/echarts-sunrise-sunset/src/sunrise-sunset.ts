@@ -279,9 +279,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[sunriseSunset] render failed', error);
-      }
+      console.error('[sunriseSunset] render failed', error);
     }
   },
 
@@ -1377,3 +1375,49 @@ function asRecord(value: unknown): Record<string, unknown> {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  readSource,
+  drawSunriseSunset,
+  drawBackground,
+  drawHeader,
+  drawSky,
+  createArcProgressClip,
+  createArcFutureClip,
+  drawEvents,
+  drawEvent,
+  drawSunIcon,
+  drawMoonIcon,
+  finishIconGroup,
+  addCustomIcon,
+  resolveCustomIcon,
+  normalizeIconSource,
+  resolveIconSize,
+  resolveIconOffset,
+  createText,
+  addPolygon,
+  addPolyline,
+  pointsToTuples,
+  setClipRect,
+  readLineStyle,
+  readStyleValue,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyPathEnterAnimation,
+  applyFadeEnterAnimation,
+  applyClipRectEnterAnimation,
+  animateGraphicProperty,
+  applyIconMotion,
+  hasIconMotion,
+  shouldForceIconGroup,
+  isAliveRenderUpdate,
+  resolveAnimationTarget,
+  formatHeaderText,
+  finiteNumber,
+  clampPercent,
+  asRecord,
+  isPlainObject
+};

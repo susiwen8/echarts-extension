@@ -211,9 +211,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[voronoiTreemap] render failed', error);
-      }
+      console.error('[voronoiTreemap] render failed', error);
     }
   },
 
@@ -579,3 +577,27 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawVoronoiTreemap,
+  drawLabels,
+  readNodeStyle,
+  formatLabel,
+  wrapText,
+  trimLines,
+  createLegendVisualProvider,
+  collectDataNames,
+  readRawItemStyle,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  pointBounds,
+  finiteNumber,
+  asRecord,
+  createHoverItem,
+  addHoverElement
+};

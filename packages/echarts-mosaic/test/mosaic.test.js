@@ -5,7 +5,7 @@ import { test } from 'vitest';
 import {
   layoutMosaic,
   resolveMosaicLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const sampleData = [
   { category: 'North', segment: 'A', value: 30 },

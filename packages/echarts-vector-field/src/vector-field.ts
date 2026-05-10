@@ -194,9 +194,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[vectorField] render failed', error);
-      }
+      console.error('[vectorField] render failed', error);
     }
   },
 
@@ -423,3 +421,18 @@ const DEFAULT_COLORS = [
   '#dc2626',
   '#0891b2'
 ];
+
+export const __test__ = {
+  readLayoutOption,
+  drawVectorField,
+  createArrowElement,
+  resolveArrowStyle,
+  resolveEnterAnimation,
+  animateEnter,
+  enableHover,
+  resolveAnimationValue,
+  disabledAnimation,
+  formatPathNumber,
+  asRecord,
+  finiteNumber
+};

@@ -284,9 +284,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[lollipop] render failed', error);
-      }
+      console.error('[lollipop] render failed', error);
     }
   },
 
@@ -880,3 +878,36 @@ function finiteNumber(value: unknown, fallback: number): number {
 function asRecord(value: unknown): Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawLollipop,
+  drawAxes,
+  drawValueAxisLabels,
+  drawCategoryAxisLabels,
+  drawPoints,
+  drawMergedStems,
+  drawPointLabels,
+  lollipopPointKey,
+  settleExistingPointEnterAnimations,
+  lollipopPointKeyFromAliveKey,
+  graphicChildren,
+  readStemStyle,
+  readPointStyle,
+  readLineStyle,
+  readLineDash,
+  formatAxisLabel,
+  formatLabel,
+  pathNumber,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyStemEnterAnimation,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  addHoverElement,
+  finiteNumber,
+  asRecord
+};

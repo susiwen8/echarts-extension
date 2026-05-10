@@ -430,3 +430,26 @@ function clamp(value: number, min: number, max: number): number {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  layoutLabelsForRing,
+  layoutCenterLabels,
+  distributeAngles,
+  spreadAngles,
+  placeLabelPoint,
+  normalizeAngle,
+  resolveInnerCircleRadius,
+  resolveTitleDistance,
+  resolveOuterCenter,
+  resolveRadius,
+  normalizeRings,
+  normalizeRing,
+  normalizeChildren,
+  arrayToRing,
+  resolveName,
+  createEmptyRing,
+  parsePercent,
+  finiteNumber,
+  clamp,
+  isPlainObject
+};

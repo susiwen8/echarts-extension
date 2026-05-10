@@ -5,7 +5,7 @@ import { test } from 'vitest';
 import {
   layoutLollipop,
   resolveLollipopLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const populationData = [
   { country: 'India', population: 1441 },

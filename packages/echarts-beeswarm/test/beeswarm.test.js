@@ -5,7 +5,7 @@ import { test } from 'vitest';
 import {
   layoutBeeswarm,
   resolveBeeswarmLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const samples = [
   { group: 'A', value: 5.0, name: 'A0' },

@@ -5,7 +5,7 @@ import { test } from 'vitest';
 import {
   layoutSunriseSunset,
   resolveSunriseSunsetLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const referenceTimes = {
   sunrise: '05:12',

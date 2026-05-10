@@ -8,7 +8,7 @@ import 'echarts-radial-boxplot';
 import {
   layoutRadialBoxplot,
   resolveRadialBoxplotLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const continents = [
   { name: 'Oceania', min: 1, q1: 8, median: 13, q3: 21, max: 24 },

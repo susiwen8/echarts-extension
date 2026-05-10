@@ -211,9 +211,7 @@ echartsHost.extendChartView({
         zrender: api.getZr?.()
       });
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[nestedCircle] render failed', error);
-      }
+      console.error('[nestedCircle] render failed', error);
     }
   },
 
@@ -458,12 +456,12 @@ function wrapText(value: string, maxChars: number): string {
     if (word.length > maxChars) {
       const wrapped = wrapLongWord(word, maxChars);
       lines.push(...wrapped.slice(0, -1));
-      current = wrapped[wrapped.length - 1] || '';
+      current = wrapped[wrapped.length - 1];
     } else {
       current = word;
     }
   });
-  if (current) lines.push(current);
+  lines.push(current);
   return lines.join('\n');
 }
 
@@ -619,3 +617,29 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   if (!item.triggerElements) item.triggerElements = [];
   item.triggerElements.push(element);
 }
+
+export const __test__ = {
+  readLayoutOption,
+  drawNestedCircle,
+  drawRingTitles,
+  drawLabels,
+  ringZ2,
+  getRingItemModel,
+  readRingStyle,
+  formatLabel,
+  wrapText,
+  wrapLongWord,
+  createLegendVisualProvider,
+  collectDataNames,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyCircleEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  finiteNumber,
+  asRecord,
+  createHoverItem,
+  addHoverElement
+};

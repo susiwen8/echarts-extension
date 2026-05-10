@@ -5,7 +5,7 @@ import {
   layoutVectorField,
   normalizeVectorFieldData,
   resolveVectorFieldLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const windSample = [
   { longitude: 0.125, latitude: 45.125, u: -2.3278859, v: -2.0757618 },

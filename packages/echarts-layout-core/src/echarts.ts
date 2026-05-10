@@ -352,33 +352,31 @@ export function installGraphLayout(echarts: unknown, config: InstallGraphLayoutC
         this.__graphRenderSignature = undefined;
 
         const layout = computeGraphLayout(layoutType, graphOption, layoutOptions);
-        if (this.__renderToken !== renderToken) return;
-        const aliveRender = renderAlive<GraphSeriesModel, GraphRenderState>(
-          this,
-          echartsHost,
-          group,
-          seriesModel,
-          (targetGroup, targetSeriesModel) => ({
-            payload: drawGraph(echartsHost, targetGroup, targetSeriesModel, layoutType, layout, viewport, fisheye)
-          })
-        );
-        if (!aliveRender.payload) return;
-        const renderState = mapGraphRenderState(aliveRender.payload, aliveRender.mapElement);
-        this.__graphHoverController = installGraphHover(renderState, api);
-        this.__graphRenderState = renderState;
-        this.__graphRenderSignature = renderSignature;
-        this.__fisheyeSignature = fisheyeSignature;
-        if (fisheye) {
-          this.__fisheyeController = installFisheye(api, renderState, fisheye);
-          scheduleInitialFisheyePreview(this, renderState, fisheye, renderState.enterAnimationEnd);
+        if (!shouldAbortGraphRender(this, renderToken)) {
+          const aliveRender = renderAlive<GraphSeriesModel, GraphRenderState>(
+            this,
+            echartsHost,
+            group,
+            seriesModel,
+            (targetGroup, targetSeriesModel) => ({
+              payload: drawGraph(echartsHost, targetGroup, targetSeriesModel, layoutType, layout, viewport, fisheye)
+            })
+          );
+          const renderState = mapGraphRenderState(aliveRender.payload as GraphRenderState, aliveRender.mapElement);
+          this.__graphHoverController = installGraphHover(renderState, api);
+          this.__graphRenderState = renderState;
+          this.__graphRenderSignature = renderSignature;
+          this.__fisheyeSignature = fisheyeSignature;
+          if (fisheye) {
+            this.__fisheyeController = installFisheye(api, renderState, fisheye);
+            scheduleInitialFisheyePreview(this, renderState, fisheye, renderState.enterAnimationEnd);
+          }
         }
       } catch (error) {
         this.__fisheyeSignature = undefined;
         this.__graphRenderState = undefined;
         this.__graphRenderSignature = undefined;
-        if (typeof console !== 'undefined') {
-          console.error(`[${chartType}] layout failed`, error);
-        }
+        console.error(`[${chartType}] layout failed`, error);
       }
     },
 
@@ -694,6 +692,10 @@ function mapGraphRenderState(
     })),
     lens: mapElement(renderState.lens)
   };
+}
+
+function shouldAbortGraphRender(view: GraphChartView, renderToken: object): boolean {
+  return view.__renderToken !== renderToken;
 }
 
 function createEdgeElement(
@@ -1449,7 +1451,7 @@ function getLabelPoint(node: PublicLayoutNode, position: string, offset: number)
 }
 
 function placeLabels(renderNodes: RenderNode[], layoutType: string, viewport: Rect): Map<string, PlacedLabel> {
-  const labels = renderNodes.filter((item) => item.labelSpec);
+  const labels = renderNodes.filter((item): item is RenderNode & { labelSpec: LabelSpec } => item.labelSpec != null);
   const placed = new Map<string, PlacedLabel>();
   if (!labels.length) return placed;
 
@@ -1466,10 +1468,13 @@ function placeLabels(renderNodes: RenderNode[], layoutType: string, viewport: Re
     })
     .forEach((item) => {
       const spec = item.labelSpec;
-      if (!spec) return;
 
       const candidates = createLabelCandidates(spec, layoutType, center);
-      let best: PlacedLabel | null = null;
+      let best: PlacedLabel = {
+        spec,
+        point: candidates[0],
+        box: textBoxFromLabelPoint(spec, candidates[0])
+      };
       let bestScore = Infinity;
 
       for (const point of candidates) {
@@ -1485,7 +1490,6 @@ function placeLabels(renderNodes: RenderNode[], layoutType: string, viewport: Re
         if (overlap === 0 && outside === 0) break;
       }
 
-      if (!best) return;
       if (outsideArea(best.box, labelViewport) > 0) {
         best = clampPlacedLabel(best, labelViewport);
       }
@@ -1999,3 +2003,49 @@ function isLabelPosition(value: unknown): value is LabelPosition {
 function asRecord(value: unknown): Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
+
+export const __test__ = {
+  stableSerialize,
+  readGraphOption,
+  readLayoutOptions,
+  createGraphRenderSignature,
+  omitFisheyeOption,
+  drawGraph,
+  mapGraphRenderState,
+  shouldAbortGraphRender,
+  formatNodeValue,
+  installGraphHover,
+  isGraphHoverTarget,
+  createHoverAdjacency,
+  applyEdgeHover,
+  applyNodeHover,
+  applyHoverStyles,
+  resetGraphHover,
+  applyEdgeHoverStyle,
+  applyGraphElementStyle,
+  transitionGraphicStyle,
+  createStyleTransitionTarget,
+  styleTransitionFallbackValue,
+  updateFisheyeRenderState,
+  applyFisheye,
+  resetFisheye,
+  updateFisheyeEdge,
+  createLabelSpec,
+  getLabelPoint,
+  placeLabels,
+  clampPlacedLabel,
+  graphCenter,
+  readEnterAnimation,
+  applyEdgeConnectionAnimation,
+  applyNodeEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  setGraphicShape,
+  setGraphicStyle,
+  replaceGraphicStyle,
+  removeMissingStyleKeys,
+  setGraphicIgnore,
+  createValueNodeSizeResolver,
+  readNodeValue,
+  toNumericValue
+};

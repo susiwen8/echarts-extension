@@ -32,7 +32,7 @@ for (const packageName of packageNamesWithExamples()) {
 
 console.log(`Built GitHub Pages example artifact at ${path.relative(rootDir, outputDir)}`);
 
-async function copyRequired(source, destination = source) {
+export async function copyRequired(source, destination = source) {
   const sourcePath = path.join(rootDir, source);
   const destinationPath = path.join(outputDir, destination);
 
@@ -44,7 +44,7 @@ async function copyRequired(source, destination = source) {
   await cp(sourcePath, destinationPath, { recursive: true, filter: shouldCopy });
 }
 
-function packageNamesWithExamples() {
+export function packageNamesWithExamples() {
   return readdirSync(packagesDir)
     .filter((entry) => {
       const packageDir = path.join(packagesDir, entry);
@@ -55,7 +55,7 @@ function packageNamesWithExamples() {
     .sort();
 }
 
-function packageHasBuild(packageName) {
+export function packageHasBuild(packageName) {
   const packageJson = JSON.parse(
     readFileSync(path.join(packagesDir, packageName, 'package.json'), 'utf8')
   );
@@ -63,7 +63,7 @@ function packageHasBuild(packageName) {
   return Boolean(packageJson.scripts?.build);
 }
 
-async function writeRootRedirect() {
+export async function writeRootRedirect() {
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -83,6 +83,6 @@ async function writeRootRedirect() {
   await writeFile(path.join(outputDir, 'index.html'), html);
 }
 
-function shouldCopy(sourcePath) {
+export function shouldCopy(sourcePath) {
   return path.basename(sourcePath) !== '.DS_Store';
 }

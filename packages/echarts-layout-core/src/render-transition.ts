@@ -366,7 +366,7 @@ function findCurrentMatch(
   usedCurrent: Set<AliveGraphicElement>
 ): AliveGraphicElement | undefined {
   const key = transitionKey(nextChild, index);
-  const keyedMatch = key ? keyedCurrent.get(key) : undefined;
+  const keyedMatch = keyedCurrent.get(key);
   if (keyedMatch && !usedCurrent.has(keyedMatch)) return keyedMatch;
   if (hasExplicitTransitionKey(nextChild)) return undefined;
 
@@ -493,7 +493,7 @@ function collectDisplayables(element: AliveGraphicElement): AliveGraphicElement[
   if (isGroup(element)) {
     return childrenOf(element as AliveGraphicGroup).flatMap((child) => collectDisplayables(child));
   }
-  return asRecord(element.style) ? [element] : [];
+  return element.style != null && typeof element.style === 'object' && !Array.isArray(element.style) ? [element] : [];
 }
 
 function remapHoverItems(items: ElementHoverItem[], elementMap: Map<AliveGraphicElement, AliveGraphicElement>): ElementHoverItem[] {
@@ -639,3 +639,44 @@ function asRecord(value: unknown): Record<string, unknown> {
 function finiteNumber(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
+
+export const __test__ = {
+  setAliveRenderKey,
+  createSeriesModelProxy,
+  createDataProxy,
+  isAnimationPath,
+  dataGraphicKey,
+  resolveAliveTransitionOptions,
+  readModelValue,
+  readStringModelValue,
+  reconcileGroup,
+  createKeyedElementMap,
+  findCurrentMatch,
+  transitionElement,
+  transitionClipPath,
+  addEnteringChild,
+  removeLeavingChild,
+  fadeElementTree,
+  collectDisplayables,
+  remapHoverItems,
+  remapHoverElements,
+  applyCapturedGraphicBindings,
+  mapElement,
+  stampImplicitKeys,
+  stampElement,
+  transitionKey,
+  sameElementKind,
+  hasExplicitTransitionKey,
+  elementKind,
+  isGroup,
+  childrenOf,
+  getClipPath,
+  elementTarget,
+  animationProps,
+  applyElementTarget,
+  setStyle,
+  removeMissingKeys,
+  cloneRecord,
+  asRecord,
+  finiteNumber
+};

@@ -323,3 +323,12 @@ function isHoverEntering(element: HoverGraphicElement): boolean {
 function finiteNumber(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
+
+export const __test__ = {
+  applyHoverItem,
+  asRecord,
+  cloneStyle,
+  createTransitionTarget,
+  removeMissingStyleKeys,
+  resetHoverItems
+};

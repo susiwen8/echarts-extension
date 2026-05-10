@@ -6,7 +6,7 @@ import {
   layoutSpiral,
   normalizeSpiralData,
   resolveSpiralLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const sampleData = [
   { name: 'Acquire', value: 34 },
@@ -59,7 +59,8 @@ test('demo uses a one-by-one spiral-path enter stagger instead of ring-like burs
 test('defers hover highlighting until the spiral enter animation has finished', () => {
   const source = readFileSync(new URL('../src/spiral.ts', import.meta.url), 'utf8');
 
-  assert.equal(source.includes('enabled: () => this.__spiralEntering !== true'), true);
+  assert.equal(source.includes('createSpiralHoverOptions(this, api)'), true);
+  assert.equal(source.includes('enabled: () => view.__spiralEntering !== true'), true);
   assert.equal(source.includes('startSpiralEnterGate(this, renderToken, enterTracker.totalDuration, hoverItems)'), true);
   assert.equal(source.includes('trackEnterAnimation(enterTracker, animation)'), true);
   assert.equal(source.includes('silenceSpiralHoverElements(hoverItems)'), true);

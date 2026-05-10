@@ -718,3 +718,41 @@ function clamp(value: number, min: number, max: number): number {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Object.prototype.toString.call(value) === '[object Object]';
 }
+
+export const __test__ = {
+  normalizeItems,
+  resolveCategories,
+  orderByCategory,
+  resolveValueExtent,
+  createBox,
+  createAngleLabels,
+  sectorPath,
+  arcPath,
+  sectorPoints,
+  arcPoints,
+  signedSweep,
+  createRadialTicks,
+  niceExtent,
+  niceNumber,
+  projectRadius,
+  pointFromPolar,
+  labelPlacement,
+  tangentialTextRotation,
+  readField,
+  parseCenter,
+  parseRadius,
+  clampRadius,
+  normalizeDimensions,
+  normalizeCategories,
+  unique,
+  readTuple,
+  readFieldOption,
+  readRadiusOption,
+  firstBoolean,
+  finiteNumber,
+  roundNumber,
+  formatNumber,
+  stringifyName,
+  clamp,
+  isPlainObject
+};

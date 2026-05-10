@@ -6,7 +6,7 @@ import {
   flattenVoronoiTreemapData,
   layoutVoronoiTreemap,
   resolveVoronoiTreemapLayout
-} from '../lib/src/layout.js';
+} from '../src/layout.ts';
 
 const sampleHierarchy = {
   name: 'Portfolio',

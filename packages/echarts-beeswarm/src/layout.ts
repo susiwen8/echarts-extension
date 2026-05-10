@@ -238,8 +238,8 @@ function orderByCategory(items: NormalizedItem[], categories: string[]): Normali
   return items
     .filter((item) => order.has(item.category))
     .sort((left, right) => {
-      const leftOrder = order.get(left.category) ?? Number.MAX_SAFE_INTEGER;
-      const rightOrder = order.get(right.category) ?? Number.MAX_SAFE_INTEGER;
+      const leftOrder = order.get(left.category) as number;
+      const rightOrder = order.get(right.category) as number;
       return leftOrder - rightOrder || left.dataIndex - right.dataIndex;
     });
 }
@@ -260,6 +260,10 @@ function resolveValueExtent(items: NormalizedItem[], options: BeeswarmLayoutOpti
     if (options.max == null) max = nice.max;
   }
 
+  return normalizeFinalExtent(min, max);
+}
+
+function normalizeFinalExtent(min: number, max: number): { min: number; max: number } {
   if (max < min) [min, max] = [max, min];
   if (Math.abs(max - min) < EPSILON) max = min + 1;
   return { min, max };
@@ -400,7 +404,7 @@ function chooseSwarmOffset(
   placed: PlacedPoint[]
 ): number {
   const candidates = createOffsetCandidates(maxOffset, Math.max(1, Math.min(minDistance, Math.max(radius, 1))));
-  let fallback = candidates[0] ?? 0;
+  let fallback = 0;
   let fallbackScore = Number.POSITIVE_INFINITY;
 
   for (const candidate of candidates) {
@@ -631,3 +635,39 @@ function clamp(value: number, min: number, max: number): number {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  normalizeItems,
+  resolveCategories,
+  orderByCategory,
+  resolveValueExtent,
+  normalizeFinalExtent,
+  createTicks,
+  createTick,
+  createCategoryLabel,
+  layoutPoints,
+  chooseSwarmOffset,
+  createOffsetCandidates,
+  collisionScore,
+  maxRadius,
+  projectCategory,
+  projectValueToX,
+  projectValueToY,
+  createPlotRect,
+  normalizePadding,
+  readPaddingOption,
+  readField,
+  niceExtent,
+  niceStep,
+  normalizeDimensions,
+  normalizeCategories,
+  readFieldOption,
+  readOrient,
+  firstBoolean,
+  unique,
+  stringifyName,
+  finiteNumber,
+  cleanNumber,
+  clamp,
+  isPlainObject
+};

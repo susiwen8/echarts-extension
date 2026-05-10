@@ -197,7 +197,7 @@ export function layoutCirclePacking(data: unknown, options: CirclePackingLayoutO
   assignDataIndices(root);
   computeLocalPacking(root, options);
   assignColors(root, colors, rootVisible ? 0 : 1);
-  const scale = root.localRadius > EPSILON ? radius / root.localRadius : 1;
+  const scale = radius / root.localRadius;
   assignPositions(root, center, scale);
 
   const rootValue = Math.max(root.value, EPSILON);
@@ -791,3 +791,41 @@ function finiteNumber(value: unknown, fallback: number | undefined): number | un
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  normalizeRoot,
+  computeValues,
+  sortChildren,
+  assignDataIndices,
+  computeLocalPacking,
+  packFrontChain,
+  resolveCollisions,
+  recenterCircles,
+  placeTangent,
+  intersects,
+  createFrontChainNode,
+  findBestFrontChainNode,
+  scoreFrontChainNode,
+  assignColors,
+  assignPositions,
+  toPublicNode,
+  flatten,
+  flattenPublic,
+  measureBounds,
+  resolvePadding,
+  resolveRawPadding,
+  resolveInnerRect,
+  resolveRadius,
+  resolveCenter,
+  resolvePosition,
+  readChildren,
+  readField,
+  normalizeField,
+  normalizeSort,
+  assignDefined,
+  square,
+  clamp,
+  readNonNegativeNumber,
+  finiteNumber,
+  isPlainObject
+};

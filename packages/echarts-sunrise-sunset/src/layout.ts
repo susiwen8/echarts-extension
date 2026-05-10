@@ -320,11 +320,11 @@ function createArcPoints(
   geometry: ArcGeometry,
   startProgress: number,
   endProgress: number,
-  fixedSteps?: number
+  fixedSteps = ARC_SEGMENT_STEPS
 ): SunriseSunsetPoint[] {
   const start = clamp(startProgress, 0, 1);
   const end = clamp(endProgress, start, 1);
-  const steps = Math.max(2, fixedSteps ?? Math.ceil(Math.abs(end - start) * ARC_SEGMENT_STEPS));
+  const steps = Math.max(2, fixedSteps);
   const points: SunriseSunsetPoint[] = [];
 
   for (let index = 0; index <= steps; index += 1) {
@@ -438,8 +438,7 @@ function parseTime(value: unknown, baseTime: number | undefined, fallback: numbe
     const hour = Number(dateMatch[4] || 0);
     const minute = Number(dateMatch[5] || 0);
     const second = Number(dateMatch[6] || 0);
-    const timestamp = new Date(year, month - 1, day, hour, minute, second).getTime();
-    return Number.isFinite(timestamp) ? timestamp : fallback;
+    return new Date(year, month - 1, day, hour, minute, second).getTime();
   }
 
   const timestamp = new Date(text).getTime();
@@ -495,3 +494,30 @@ function clamp(value: number, min: number, max: number): number {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value != null && typeof value === 'object' && !Array.isArray(value);
 }
+
+export const __test__ = {
+  layoutResolvedSunriseSunset,
+  resolveEvents,
+  resolveDayCycle,
+  resolveMoonCycle,
+  createArcLayout,
+  createArcPoints,
+  createAreaPoints,
+  createMotionPoints,
+  pointOnArc,
+  pointsToPath,
+  pointsToAreaPath,
+  readDataOption,
+  definedEventOption,
+  parseTime,
+  localDayStart,
+  localTime,
+  formatDuration,
+  formatUpdatedText,
+  formatTimeLabel,
+  pad2,
+  formatNumber,
+  finiteNumber,
+  clamp,
+  isPlainObject
+};

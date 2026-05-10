@@ -3,7 +3,8 @@ import { test } from 'vitest';
 
 import * as echarts from 'echarts/lib/echarts';
 import { SVGRenderer } from 'echarts/renderers';
-import { renderAlive } from '@echarts-extension/layout-core';
+import { renderAlive, setAliveRenderKey } from '@echarts-extension/layout-core';
+import { __test__ as transitionInternals } from '../packages/echarts-layout-core/src/render-transition.ts';
 
 import 'echarts-radial';
 import 'echarts-concentric';
@@ -77,6 +78,42 @@ class FakeCircle {
     Object.assign(this.shape, target.shape || {});
     Object.assign(this.style, target.style || {});
     config?.done?.();
+  }
+}
+
+class NoAttrCircle {
+  type = 'circle';
+
+  constructor(shape, style) {
+    this.shape = shape;
+    this.style = style;
+  }
+}
+
+class ChildrenOnlyGroup {
+  isGroup = true;
+  type = 'group';
+  #children = [];
+
+  add(element) {
+    element.parent = this;
+    this.#children.push(element);
+  }
+
+  remove(element) {
+    this.#children = this.#children.filter((child) => child !== element);
+    element.parent = null;
+  }
+
+  removeAll() {
+    this.#children.forEach((child) => {
+      child.parent = null;
+    });
+    this.#children = [];
+  }
+
+  children() {
+    return this.#children;
   }
 }
 
@@ -352,6 +389,132 @@ test('custom chart packages keep existing graphic elements alive across option u
     assert.ok(before.length > 0, `${name} should render display elements`);
     assert.ok(shared.length > 0, `${name} should update existing elements instead of redrawing the tree`);
   }
+});
+
+test('alive render internals cover proxy, matching, removal, and style fallback branches', () => {
+  const captured = [];
+  assert.equal(transitionInternals.createSeriesModelProxy(null, true, captured), null);
+
+  const modelWithValues = {
+    flag: 'bound',
+    get: 'not-a-function',
+    getData: 'also-not-a-function',
+    method() {
+      return this.flag;
+    }
+  };
+  const valueProxy = transitionInternals.createSeriesModelProxy(modelWithValues, true, captured);
+  assert.equal(valueProxy.get, 'not-a-function');
+  assert.equal(valueProxy.getData, 'also-not-a-function');
+  assert.equal(valueProxy.flag, 'bound');
+  assert.equal(valueProxy.method(), 'bound');
+
+  const reads = [];
+  const data = {
+    getName(index) {
+      return index === 0 ? 'named' : '';
+    },
+    setItemGraphicEl(index, element) {
+      this.bound = { index, element };
+    },
+    helper() {
+      return this;
+    }
+  };
+  const animatedModel = {
+    get(path) {
+      reads.push(path);
+      return path === 'animationDuration' ? 12 : path === 'animationEasing' ? 'linear' : true;
+    },
+    getData() {
+      return data;
+    }
+  };
+  const initialProxy = transitionInternals.createSeriesModelProxy(animatedModel, false, []);
+  assert.equal(initialProxy.get('enterAnimation'), true);
+  const initialData = initialProxy.getData();
+  const firstElement = { type: 'circle' };
+  initialData.setItemGraphicEl(0, firstElement);
+  assert.equal(data.bound.element, firstElement);
+  assert.equal(initialData.helper(), data);
+
+  const updateProxy = transitionInternals.createSeriesModelProxy(animatedModel, true, captured);
+  assert.equal(updateProxy.get('enterAnimation'), false);
+  assert.equal(updateProxy.get(['edgeAnimation']), false);
+  assert.equal(updateProxy.get(['other']), true);
+  const updateData = updateProxy.getData();
+  assert.equal(updateProxy.getData(), updateData);
+  const updateElement = { type: 'rect' };
+  updateData.setItemGraphicEl(1, updateElement);
+  assert.equal(captured.length, 1);
+  assert.equal(updateElement.anid, 'data-index:1');
+
+  const directCache = new WeakMap();
+  assert.equal(transitionInternals.createDataProxy(null, true, [], directCache), null);
+  assert.equal(transitionInternals.createDataProxy({ setItemGraphicEl: 'x' }, true, [], directCache).setItemGraphicEl, 'x');
+  assert.equal(transitionInternals.createDataProxy({ label: 'plain' }, true, [], directCache).label, 'plain');
+
+  assert.deepEqual(transitionInternals.resolveAliveTransitionOptions({ get: 'x' }, { duration: 3 }), {
+    duration: 3,
+    easing: 'cubicOut'
+  });
+  assert.deepEqual(transitionInternals.resolveAliveTransitionOptions({ get: (path) => path === 'animation' ? false : undefined }, { easing: 'quadIn' }), {
+    duration: 0,
+    easing: 'quadIn'
+  });
+  assert.deepEqual(transitionInternals.resolveAliveTransitionOptions(animatedModel, {}), {
+    duration: 12,
+    easing: 'linear'
+  });
+  assert.equal(transitionInternals.readModelValue({}, 'animation'), undefined);
+
+  const currentA = new FakeCircle({ cx: 0 }, { opacity: 1 });
+  const currentB = new FakeCircle({ cx: 1 }, { opacity: 1 });
+  const currentGroup = new FakeGroup();
+  currentGroup.add(currentA);
+  currentGroup.add(currentB);
+  const keyed = transitionInternals.createKeyedElementMap([currentA, currentB]);
+  assert.equal(
+    transitionInternals.findCurrentMatch({ type: 'circle' }, 0, [currentA], new Map(), new Set()),
+    currentA
+  );
+  const used = new Set([currentA]);
+  assert.equal(
+    transitionInternals.findCurrentMatch({ type: 'circle' }, 0, [currentA, currentB], keyed, used),
+    currentB
+  );
+  const explicit = { type: 'circle' };
+  transitionInternals.setAliveRenderKey(explicit, 'missing');
+  assert.equal(transitionInternals.findCurrentMatch(explicit, 0, [currentA], keyed, new Set()), undefined);
+
+  const parent = new FakeGroup();
+  const leaving = { type: 'path', parent };
+  parent.add(leaving);
+  transitionInternals.removeLeavingChild(parent, leaving, { duration: 0, easing: 'linear', elementMap: new Map() });
+  assert.equal(leaving.parent, null);
+  const parentWithoutRemove = {};
+  const leavingWithoutRemove = { type: 'path', parent: parentWithoutRemove };
+  transitionInternals.removeLeavingChild(parentWithoutRemove, leavingWithoutRemove, { duration: 0, easing: 'linear', elementMap: new Map() });
+  assert.equal(leavingWithoutRemove.parent, parentWithoutRemove);
+  const otherParent = {};
+  const alreadyDetached = { type: 'path', parent: otherParent };
+  transitionInternals.removeLeavingChild(parentWithoutRemove, alreadyDetached, { duration: 0, easing: 'linear', elementMap: new Map() });
+  assert.equal(alreadyDetached.parent, otherParent);
+  const bindingData = { setItemGraphicEl() { this.called = true; } };
+  transitionInternals.applyCapturedGraphicBindings([{ data: bindingData, dataIndex: 0, element: null }], new Map());
+  assert.equal(bindingData.called, undefined);
+
+  const childrenOnly = new ChildrenOnlyGroup();
+  childrenOnly.add({ type: 'rect', style: { opacity: 1 } });
+  assert.equal(transitionInternals.childrenOf(childrenOnly).length, 1);
+  assert.deepEqual(transitionInternals.childrenOf({}), []);
+  assert.deepEqual(transitionInternals.collectDisplayables({ type: 'line' }), []);
+
+  const plainStyle = { style: { opacity: 1 } };
+  transitionInternals.setStyle(plainStyle, { opacity: 0.4 });
+  assert.equal(plainStyle.style.opacity, 0.4);
+  assert.equal(transitionInternals.elementKind({}), 'Object');
+  assert.equal(transitionInternals.elementKind(Object.create(null)), 'element');
 });
 
 test('subway add-data updates the route path to reach the appended station', () => {
@@ -700,6 +863,114 @@ test('alive render reads ECharts update animation settings when enabled', () => 
   assert.equal(circle.animateToCalls.length, 1);
   assert.equal(circle.animateToCalls[0].config.duration, 120);
   assert.equal(circle.animateToCalls[0].config.easing, 'linear');
+});
+
+test('alive render covers defensive proxy, key, child, and clip-path fallbacks', () => {
+  setAliveRenderKey(null, 'missing');
+  setAliveRenderKey('not-object', 'missing');
+
+  const emptyView = {};
+  const emptyGroup = new FakeGroup();
+  renderAlive(emptyView, fakeHost, emptyGroup, null, (targetGroup, model, isUpdate) => {
+    assert.equal(model, null);
+    assert.equal(isUpdate, false);
+    targetGroup.add(new FakeCircle({ cx: 0, cy: 0, r: 1 }, { opacity: 1 }));
+  });
+
+  const view = {};
+  const group = new FakeGroup();
+  const boundData = {
+    getName(index) {
+      return index === 0 ? '' : `item-${index}`;
+    },
+    setItemGraphicEl(index, element) {
+      this.bound = { index, element };
+    }
+  };
+  const seriesModel = {
+    get(path) {
+      if (Array.isArray(path) && path[0] === 'enterAnimation') return true;
+      if (path === 'animationDuration') return 0;
+      return undefined;
+    },
+    getData() {
+      return boundData;
+    },
+    marker() {
+      return this;
+    }
+  };
+
+  renderAlive(view, fakeHost, group, seriesModel, (targetGroup, renderModel, isUpdate) => {
+    assert.equal(renderModel.marker(), seriesModel);
+    assert.equal(renderModel.__aliveRenderUpdating, false);
+    const first = new FakeCircle({ cx: 1, cy: 1, r: 2 }, { opacity: 1, unused: true });
+    renderModel.getData().setItemGraphicEl(0, first);
+    targetGroup.add(first);
+    targetGroup.add(new FakeGroup());
+    targetGroup.add(new FakeCircle({ cx: 2, cy: 2, r: 2 }, null));
+    return undefined;
+  });
+  const first = group.childrenRef()[0];
+  first.getClipPath = () => first.clip;
+  first.setClipPath = (clip) => {
+    first.clip = clip;
+  };
+  first.removeClipPath = () => {
+    first.clip = null;
+  };
+  first.clip = new FakeCircle({ cx: 0, cy: 0, r: 1 }, { opacity: 0.4 });
+
+  renderAlive(view, fakeHost, group, seriesModel, (targetGroup, renderModel, isUpdate) => {
+    assert.equal(isUpdate, true);
+    assert.equal(renderModel.__aliveRenderUpdating, true);
+    assert.equal(renderModel.get(['enterAnimation']), false);
+    const next = new FakeCircle({ cx: 10, cy: 10, r: 4 }, { opacity: 0.5 });
+    next.getClipPath = () => new FakeGroup();
+    renderModel.getData().setItemGraphicEl(0, next);
+    targetGroup.add(next);
+    const explicit = new FakeCircle({ cx: 20, cy: 20, r: 3 }, { opacity: 0.7 });
+    setAliveRenderKey(explicit, 'new-explicit');
+    targetGroup.add(explicit);
+    return {
+      hoverItems: [{ elements: [next, next, null] }],
+      payload: { updated: true }
+    };
+  }, {
+    duration: 0,
+    easing: ''
+  });
+
+  assert.equal(group.childrenRef().length, 2);
+  assert.equal(first.clip?.isGroup, true);
+  assert.equal(boundData.bound.index, 0);
+  assert.equal(boundData.bound.element, first);
+});
+
+test('alive render reconciles children APIs, removal without displayables, and direct style assignment', () => {
+  const view = {};
+  const group = new ChildrenOnlyGroup();
+  const first = new NoAttrCircle({ cx: 0, cy: 0, r: 3 }, { opacity: 1, removeMe: true });
+  const leavingGroup = new ChildrenOnlyGroup();
+  group.add(first);
+  group.add(leavingGroup);
+  view.__aliveRenderState = { rendered: true };
+
+  const result = renderAlive(view, {
+    graphic: { Group: ChildrenOnlyGroup }
+  }, group, {}, (targetGroup) => {
+    const next = new NoAttrCircle({ cx: 5, cy: 6, r: 7 }, { opacity: 0.4 });
+    targetGroup.add(next);
+    return [{ elements: [next] }];
+  }, {
+    duration: 0
+  });
+
+  assert.equal(result.hoverItems.length, 1);
+  assert.equal(group.children().length, 1);
+  assert.deepEqual(first.shape, { cx: 5, cy: 6, r: 7 });
+  assert.deepEqual(first.style, { opacity: 0.4 });
+  assert.equal(leavingGroup.parent, null);
 });
 
 function collectDisplayList(chart) {

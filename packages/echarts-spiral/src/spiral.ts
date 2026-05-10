@@ -244,16 +244,10 @@ echartsHost.extendChartView({
       const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
         drawSpiral(echartsHost, targetGroup, targetSeriesModel, layout, rect, enterTracker)
       ));
-      this.__hoverController = installElementHover(hoverItems, {
-        dimOpacity: 0.2,
-        enabled: () => this.__spiralEntering !== true,
-        zrender: api.getZr?.()
-      });
+      this.__hoverController = installElementHover(hoverItems, createSpiralHoverOptions(this, api));
       startSpiralEnterGate(this, renderToken, enterTracker.totalDuration, hoverItems);
     } catch (error) {
-      if (typeof console !== 'undefined') {
-        console.error('[spiral] render failed', error);
-      }
+      console.error('[spiral] render failed', error);
     }
   },
 
@@ -530,6 +524,14 @@ function enableHover(element: GraphicElement, itemModel: EChartsModel): void {
   );
 }
 
+function createSpiralHoverOptions(view: SpiralChartView, api: EChartsApi): ElementHoverOptions {
+  return {
+    dimOpacity: 0.2,
+    enabled: () => view.__spiralEntering !== true,
+    zrender: api.getZr?.()
+  };
+}
+
 function resolveAnimationValue(value: unknown, index: number, fallback: number): number {
   if (typeof value === 'function') {
     return finiteNumber((value as (dataIndex: number) => unknown)(index), fallback);
@@ -634,3 +636,29 @@ const DEFAULT_COLORS = [
   '#fb7185',
   '#dc2626'
 ];
+
+export const __test__ = {
+  resetAliveRenderForReplay,
+  readLayoutOption,
+  drawSpiral,
+  createSegmentElement,
+  createLabelElement,
+  readSegmentStyle,
+  scaledOpacity,
+  formatLabel,
+  resolveEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
+  enableHover,
+  createSpiralHoverOptions,
+  resolveAnimationValue,
+  disabledAnimation,
+  trackEnterAnimation,
+  startSpiralEnterGate,
+  clearSpiralEnterGate,
+  silenceSpiralHoverElements,
+  restoreSpiralHoverElements,
+  asRecord,
+  finiteNumber,
+  clamp
+};

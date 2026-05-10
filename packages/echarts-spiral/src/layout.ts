@@ -610,3 +610,31 @@ function stringifyName(value: unknown): string {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+
+export const __test__ = {
+  spiralCenterPoint,
+  distanceFromCenter,
+  sortPoints,
+  resolveValueExtent,
+  valueRatio,
+  readField,
+  resolveCenter,
+  readCoordinate,
+  readLength,
+  readCenterOption,
+  readLengthOption,
+  readSortOption,
+  readFieldOption,
+  normalizeDimensions,
+  labelAlignForAngle,
+  labelVerticalAlignForAngle,
+  readNumber,
+  finiteNumber,
+  firstFiniteNumber,
+  readBoolean,
+  clamp,
+  cleanNumber,
+  formatPathNumber,
+  stringifyName,
+  isPlainObject
+};

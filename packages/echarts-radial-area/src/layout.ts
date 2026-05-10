@@ -464,7 +464,7 @@ function createAngleLabels(
     ? domain.categories.map((category, index) => ({
       name: category,
       value: category,
-      ratio: domain.categories.length ? index / domain.categories.length : 0
+      ratio: index / domain.categories.length
     }))
     : points.map((point) => ({
       name: point.name,
@@ -674,3 +674,40 @@ function clamp(value: number, min: number, max: number): number {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Object.prototype.toString.call(value) === '[object Object]';
 }
+
+export const __test__ = {
+  normalizeItems,
+  resolveAngleDomain,
+  orderByAngle,
+  resolveValueExtent,
+  createPoint,
+  resolveAngleRatio,
+  createRangePolygon,
+  createAngleLabels,
+  createRadialTicks,
+  niceExtent,
+  niceNumber,
+  projectRadius,
+  pointFromPolar,
+  labelPlacement,
+  readField,
+  normalizeRange,
+  numericAngleValue,
+  inferAngleType,
+  parseCenter,
+  parseRadius,
+  clampRadius,
+  normalizeDimensions,
+  normalizeCategories,
+  unique,
+  readTuple,
+  readAngleType,
+  readFieldOption,
+  readRadiusOption,
+  firstBoolean,
+  finiteNumber,
+  roundNumber,
+  stringifyName,
+  clamp,
+  isPlainObject
+};

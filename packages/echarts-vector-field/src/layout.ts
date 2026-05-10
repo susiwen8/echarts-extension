@@ -332,3 +332,21 @@ function readName(raw: unknown, dataIndex: number): string {
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+
+export const __test__ = {
+  samplePoints,
+  inferDefaultMaxLength,
+  minPositiveStep,
+  extent,
+  normalizeExtent,
+  mapLinear,
+  clamp,
+  readExtent,
+  readNumberFromRecord,
+  readNumber,
+  finiteNumber,
+  readBoolean,
+  readString,
+  readName,
+  isPlainObject
+};

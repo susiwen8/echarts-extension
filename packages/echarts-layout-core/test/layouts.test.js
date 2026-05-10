@@ -11,7 +11,7 @@ import {
   normalizeGraphData,
   setElementHoverBaseStyle,
   setElementHoverEntering
-} from '../lib/index.js';
+} from '../src/index.ts';
 
 const sampleGraph = {
   nodes: [
@@ -190,6 +190,89 @@ test('can defer element hover while a chart-level gate is disabled', () => {
 
   assert.equal(active.style.opacity, 0.9);
   assert.equal(secondary.style.opacity, 0.12);
+});
+
+test('element hover covers defensive inputs and non-animatable style fallbacks', () => {
+  const host = createFakeEChartsHost();
+  const active = createPlainHoverElement({ opacity: 1 });
+  const secondary = createPlainHoverElement({ opacity: 0.8, stroke: '#111' });
+  const attrOnly = createPlainHoverElement({ opacity: 0.6 });
+  attrOnly.attr = function attr(keyOrObj, value) {
+    if (keyOrObj === 'style') this.style = value;
+    return this;
+  };
+
+  setElementHoverBaseStyle(null, { opacity: 0.5 });
+  setElementHoverEntering(null);
+  setElementHoverBaseStyle(secondary, null);
+  setElementHoverEntering(secondary, false);
+
+  assert.equal(installElementHover([{ elements: null }], { zrender: host.zr }), undefined);
+  const controller = installElementHover([
+    {
+      elements: [active, attrOnly, active, null],
+      triggerElements: [active]
+    },
+    {
+      elements: [secondary],
+      triggerElements: [secondary]
+    }
+  ], {
+    dimOpacity: NaN,
+    transitionDuration: 20,
+    transitionEasing: '',
+    zrender: host.zr
+  });
+
+  host.zr.emit('mousemove', { target: null });
+  active.trigger('mouseover');
+  assert.equal(secondary.style.opacity, 0.12);
+  assert.equal(attrOnly.style.opacity, 0.6);
+
+  host.zr.emit('mousemove', { target: { parent: active } });
+  assert.equal(secondary.style.opacity, 0.12);
+  host.zr.emit('mousemove', { target: null });
+  assert.equal(secondary.style.opacity, 0.8);
+
+  secondary.trigger('mouseover');
+  controller?.dispose();
+  assert.equal(active.style.opacity, 1);
+});
+
+test('element hover accepts callable trigger shims and custom easing', () => {
+  const host = createFakeEChartsHost();
+  const active = new host.graphic.Circle({
+    style: {
+      opacity: 1
+    }
+  });
+  const secondary = new host.graphic.Circle({
+    style: {
+      opacity: 0.8
+    }
+  });
+  const callableTrigger = function callableTrigger() {};
+
+  installElementHover([
+    {
+      elements: [active],
+      triggerElements: [active, callableTrigger]
+    },
+    {
+      elements: [secondary],
+      triggerElements: [secondary]
+    }
+  ], {
+    transitionEasing: 'linear',
+    zrender: host.zr
+  });
+
+  assert.equal(callableTrigger.cursor, 'pointer');
+  assert.equal(callableTrigger.silent, false);
+
+  active.trigger('mouseover');
+
+  assert.equal(lastAnimation(secondary)?.easing, 'linear');
 });
 
 function expectFinitePositions(nodes) {
@@ -1339,6 +1422,23 @@ function createFakeEChartsHost() {
   };
 
   return host;
+}
+
+function createPlainHoverElement(style) {
+  return {
+    style: { ...style },
+    handlers: {},
+    on(eventName, handler) {
+      if (!this.handlers[eventName]) this.handlers[eventName] = new Set();
+      this.handlers[eventName].add(handler);
+    },
+    trigger(eventName, payload = {}) {
+      this.handlers[eventName]?.forEach((handler) => handler({ target: this, ...payload }));
+    },
+    stopAnimation() {
+      this.stopped = true;
+    }
+  };
 }
 
 function createFakeSeriesModel(option) {

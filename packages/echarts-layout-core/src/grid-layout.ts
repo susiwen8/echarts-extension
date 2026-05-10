@@ -32,12 +32,21 @@ export function computeGridLayout(input: GraphData, options: LayoutOptions = {})
 
   graph.nodes.forEach((node) => {
     const cell = assignments.get(node.id);
-    if (!cell) return;
-    node.x = begin[0] + (cell.col + 0.5) * cellSize.width;
-    node.y = begin[1] + (cell.row + 0.5) * cellSize.height;
+    applyGridCell(node, cell, begin, cellSize);
   });
 
   return toPublicResult(graph);
+}
+
+function applyGridCell(
+  node: LayoutNode,
+  cell: GridCell | undefined,
+  begin: Point,
+  cellSize: { width: number; height: number }
+): void {
+  if (!cell) return;
+  node.x = begin[0] + (cell.col + 0.5) * cellSize.width;
+  node.y = begin[1] + (cell.row + 0.5) * cellSize.height;
 }
 
 function normalizeGridViewport(options: LayoutOptions): { width: number; height: number; center: Point } {
@@ -177,17 +186,19 @@ function createCenterFirstCells(dimensions: GridDimensions): GridCell[] {
     }
   }
 
-  return cells.sort((left, right) => {
-    const leftDistance = squaredDistance(left, centerRow, centerCol);
-    const rightDistance = squaredDistance(right, centerRow, centerCol);
-    if (leftDistance !== rightDistance) return leftDistance - rightDistance;
+  return cells.sort((left, right) => compareCenterFirstCells(left, right, centerRow, centerCol));
+}
 
-    const leftAngle = Math.atan2(left.row - centerRow, left.col - centerCol);
-    const rightAngle = Math.atan2(right.row - centerRow, right.col - centerCol);
-    if (leftAngle !== rightAngle) return leftAngle - rightAngle;
+function compareCenterFirstCells(left: GridCell, right: GridCell, centerRow: number, centerCol: number): number {
+  const leftDistance = squaredDistance(left, centerRow, centerCol);
+  const rightDistance = squaredDistance(right, centerRow, centerCol);
+  if (leftDistance !== rightDistance) return leftDistance - rightDistance;
 
-    return left.row - right.row || left.col - right.col;
-  });
+  const leftAngle = Math.atan2(left.row - centerRow, left.col - centerCol);
+  const rightAngle = Math.atan2(right.row - centerRow, right.col - centerCol);
+  if (leftAngle !== rightAngle) return leftAngle - rightAngle;
+
+  return left.row - right.row || left.col - right.col;
 }
 
 function readPinnedPositions(nodes: LayoutNode[], options: LayoutOptions): Map<string, GridCell> {
@@ -220,3 +231,18 @@ function squaredDistance(cell: GridCell, centerRow: number, centerCol: number): 
 function cellKey(cell: GridCell): string {
   return `${cell.row}:${cell.col}`;
 }
+
+export const __test__ = {
+  normalizeGridViewport,
+  resolveGridDimensions,
+  resolveGridCellSize,
+  resolveGridBegin,
+  applyGridCell,
+  assignGridCells,
+  createCenterFirstCells,
+  compareCenterFirstCells,
+  readPinnedPositions,
+  positiveInteger,
+  squaredDistance,
+  cellKey
+};
