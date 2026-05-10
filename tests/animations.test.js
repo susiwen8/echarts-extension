@@ -331,6 +331,68 @@ test('sunriseSunset time updates grow the day line and area on a stable trajecto
   assert.ok(after.dayFuture.clipWidth < before.dayFuture.clipWidth - 80);
 });
 
+test('sunriseSunset stacks the sun area above the moon line without showing moon area before moonrise', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 10:47:33',
+    padding: 72,
+    enterAnimation: false,
+    animationDurationUpdate: 0,
+    dayLineStyle: { color: '#ffa72b' },
+    moonLineStyle: { color: '#5a91f2' },
+    dayAreaStyle: { color: '#ffa72b', opacity: 0.2 },
+    moonAreaStyle: { color: '#5a91f2', opacity: 0.18 }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  chart.getZr().flush?.();
+  const geometry = sunriseSunsetGeometry(chart);
+  chart.dispose();
+
+  assert.ok(geometry.dayArea);
+  assert.ok(geometry.moonFull);
+  assert.equal(geometry.moonArea, null);
+  assert.ok(
+    geometry.dayArea.points.some((point) => samePoint(point, geometry.moonFull.points[Math.floor(geometry.moonFull.points.length / 2)])),
+    'sun area should use the moon arc as its lower boundary'
+  );
+});
+
+test('sunriseSunset clips the moon area to the moving moon position', () => {
+  const chart = createSsrChart();
+  const series = {
+    type: 'sunriseSunset',
+    sunrise: '05:12',
+    sunset: '18:39',
+    moonrise: '22:08',
+    moonset: '07:59',
+    currentTime: '2026-05-05 23:20:00',
+    padding: 72,
+    enterAnimation: false,
+    animationDurationUpdate: 0,
+    moonLineStyle: { color: '#5a91f2' },
+    moonAreaStyle: { color: '#5a91f2', opacity: 0.18 }
+  };
+
+  chart.setOption({ animation: true, series: [series] });
+  chart.getZr().flush?.();
+  const geometry = sunriseSunsetGeometry(chart);
+  chart.dispose();
+
+  assert.ok(geometry.moonArea);
+  assert.ok(geometry.moonSolid);
+  assert.ok(geometry.moonFull);
+  assert.ok(geometry.moonArea.pointCount > geometry.moonFull.pointCount);
+  assert.ok(geometry.moonArea.clipWidth > 10);
+  assert.ok(geometry.moonArea.clipWidth < geometry.moonArea.width);
+  assert.ok(Math.abs(geometry.moonArea.clipWidth - geometry.moonSolid.clipWidth) < 12);
+});
+
 test('sunriseSunset enter animation grows the day line and area with the sun icon', () => {
   const chart = createSsrChart();
   const series = {
@@ -634,6 +696,7 @@ function sunriseSunsetGeometry(chart) {
   const displayList = chart.getZr().storage.getDisplayList(true);
   return {
     dayArea: shapeStateForElement(displayList, (element) => element.z2 === -2 && element.style?.fill),
+    moonArea: shapeStateForElement(displayList, (element) => element.z2 === -3 && element.style?.fill),
     dayFuture: shapeStateForElement(displayList, (element) => element.z2 === 1 && element.style?.stroke === '#ffa72b'),
     daySolid: shapeStateForElement(displayList, (element) => element.z2 === 3 && element.style?.stroke === '#ffa72b'),
     moonFull: shapeStateForElement(displayList, (element) => element.z2 === 0 && element.style?.stroke === '#5a91f2'),
@@ -651,6 +714,7 @@ function shapeStateForElement(displayList, predicate) {
     y: rect.y,
     width: rect.width,
     height: rect.height,
+    points,
     pointCount: points.length,
     endX: Array.isArray(lastPoint) ? Math.round(lastPoint[0]) : undefined,
     percent: element?.shape?.percent,
@@ -662,6 +726,13 @@ function shapeStateForElement(displayList, predicate) {
     lineDash: element?.style?.lineDash,
     opacity: element?.style?.opacity
   } : null;
+}
+
+function samePoint(left, right) {
+  return Array.isArray(left)
+    && Array.isArray(right)
+    && Math.abs(left[0] - right[0]) < 0.001
+    && Math.abs(left[1] - right[1]) < 0.001;
 }
 
 function collectElementTree(chart) {

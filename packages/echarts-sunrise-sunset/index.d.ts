@@ -112,6 +112,7 @@ declare module 'echarts/types/dist/echarts' {
     dayLineStyle?: SunriseSunsetLineStyleOption;
     moonLineStyle?: SunriseSunsetLineStyleOption;
     dayAreaStyle?: SunriseSunsetAreaStyleOption;
+    moonAreaStyle?: SunriseSunsetAreaStyleOption;
     titleLabel?: SunriseSunsetLabelOption;
     remainingLabel?: SunriseSunsetLabelOption;
     updatedLabel?: SunriseSunsetLabelOption;

@@ -1,15 +1,15 @@
 <svg width="1260" height="795" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 1260 795">
 <rect width="1260" height="795" x="0" y="0" fill="none"></rect>
 <path d="M0 0l1260 0l0 795l-1260 0Z" fill="#202124" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
-<g clip-path="url(#zr12-c0)">
-<polygon points="216 640 239 610.9 262 582 285 553.6 308 525.8 331 498.9 354 473 377 448.5 400 425.3 423 403.9 446 384.2 469 366.5 492 350.8 515 337.4 538 326.2 561 317.5 584 311.1 607 307.3 630 306.1 653 307.3 676 311.1 699 317.5 722 326.2 745 337.4 768 350.8 791 366.5 814 384.2 837 403.9 860 425.3 883 448.5 906 473 929 498.9 952 525.8 975 553.6 998 582 1021 610.9 1044 640 1044 640 216 640" fill="rgb(255,167,43)" fill-opacity="0.2" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></polygon>
+<g clip-path="url(#zr0-c0)">
+<polygon points="216 640 239 610.9 262 582 285 553.6 308 525.8 331 498.9 354 473 377 448.5 400 425.3 423 403.9 446 384.2 469 366.5 492 350.8 515 337.4 538 326.2 561 317.5 584 311.1 607 307.3 630 306.1 653 307.3 676 311.1 699 317.5 722 326.2 745 337.4 768 350.8 791 366.5 814 384.2 837 403.9 860 425.3 883 448.5 906 473 929 498.9 952 525.8 975 553.6 998 582 1021 610.9 1044 640 1044 640 1021 640 998 640 975 640 952 640 929 640 906 640 883 640 860 640 837 640 814 640 791 613.9 768 586.7 745 561.5 722 539.3 699 521.1 676 507.7 653 499.3 630 496.4 607 499.3 584 507.7 561 521.1 538 539.3 515 561.5 492 586.7 469 613.9 446 640 423 640 400 640 377 640 354 640 331 640 308 640 285 640 262 640 239 640 216 640" fill="rgb(255,167,43)" fill-opacity="0.2" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></polygon>
 </g>
 <path d="M17.3 640L1242.7 640" fill="none" pointer-events="visible" stroke="#3f4245" stroke-width="1.2" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></path>
 <polyline points="447.8 640 458 627.5 468.1 615 478.2 602.8 488.3 590.9 498.4 579.3 508.6 568.2 518.7 557.6 528.8 547.7 538.9 538.5 549 530 559.2 522.4 569.3 515.6 579.4 509.9 589.5 505.1 599.6 501.3 609.8 498.6 619.9 496.9 630 496.4 640.1 496.9 650.2 498.6 660.4 501.3 670.5 505.1 680.6 509.9 690.7 515.6 700.8 522.4 711 530 721.1 538.5 731.2 547.7 741.3 557.6 751.4 568.2 761.6 579.3 771.7 590.9 781.8 602.8 791.9 615 802 627.5 812.2 640" fill="none" pointer-events="visible" stroke="#5a91f2" stroke-width="4" stroke-opacity="0.72" stroke-dasharray="6,7" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></polyline>
-<g clip-path="url(#zr12-c1)">
+<g clip-path="url(#zr0-c1)">
 <polyline points="216 640 239 610.9 262 582 285 553.6 308 525.8 331 498.9 354 473 377 448.5 400 425.3 423 403.9 446 384.2 469 366.5 492 350.8 515 337.4 538 326.2 561 317.5 584 311.1 607 307.3 630 306.1 653 307.3 676 311.1 699 317.5 722 326.2 745 337.4 768 350.8 791 366.5 814 384.2 837 403.9 860 425.3 883 448.5 906 473 929 498.9 952 525.8 975 553.6 998 582 1021 610.9 1044 640" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="5" stroke-opacity="0.42" stroke-dasharray="7,8" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" ecmeta_silent="true" class="zr-cls-0"></polyline>
 </g>
-<g clip-path="url(#zr12-c2)">
+<g clip-path="url(#zr0-c2)">
 <polyline points="216 640 239 610.9 262 582 285 553.6 308 525.8 331 498.9 354 473 377 448.5 400 425.3 423 403.9 446 384.2 469 366.5 492 350.8 515 337.4 538 326.2 561 317.5 584 311.1 607 307.3 630 306.1 653 307.3 676 311.1 699 317.5 722 326.2 745 337.4 768 350.8 791 366.5 814 384.2 837 403.9 860 425.3 883 448.5 906 473 929 498.9 952 525.8 975 553.6 998 582 1021 610.9 1044 640" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></polyline>
 </g>
 <path d="M133.2 670.9L137.3 670.9" fill="none" pointer-events="visible" stroke="#ffa72b" stroke-width="2" stroke-linecap="round" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
@@ -61,13 +61,13 @@
 <text dominant-baseline="central" text-anchor="middle" style="font-size:20.88px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:800;" x="1139.4" y="642.855" fill="#ffa72b">↓</text>
 <text dominant-baseline="central" text-anchor="end" style="font-size:36px;font-family:system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;font-weight:420;" x="1098" y="672.375" fill="#eef0f2">18:39</text>
 <defs >
-<clipPath id="zr12-c0">
+<clipPath id="zr0-c0">
 <path d="M216 0l344.3 0l0 795l-344.3 0Z" fill="#000" class="zr-cls-0"></path>
 </clipPath>
-<clipPath id="zr12-c1">
+<clipPath id="zr0-c1">
 <path d="M555.3 0l493.7 0l0 795l-493.7 0Z" fill="#000" class="zr-cls-0"></path>
 </clipPath>
-<clipPath id="zr12-c2">
+<clipPath id="zr0-c2">
 <path d="M211 0l354.3 0l0 795l-354.3 0Z" fill="#000" class="zr-cls-0"></path>
 </clipPath>
 </defs>

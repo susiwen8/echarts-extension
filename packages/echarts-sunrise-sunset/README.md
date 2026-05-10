@@ -46,7 +46,7 @@ You can pass values directly on the series or in `data`:
 - `padding`, `baselineY`, `dayArcHeight`, `moonArcHeight`: geometry controls.
 - `moonStartRatio`, `moonEndRatio`: moon arc anchors inside the day arc.
 - `sunIcon`, `moonIcon`: `path://...`, `image://...`, `false`, or an object with `path`, `image`, `size`, `offset`, and `style`.
-- `backgroundStyle`, `baselineStyle`, `dayLineStyle`, `moonLineStyle`, `dayAreaStyle`: styling.
+- `backgroundStyle`, `baselineStyle`, `dayLineStyle`, `moonLineStyle`, `dayAreaStyle`, `moonAreaStyle`: styling.
 - `titleLabel`, `remainingLabel`, `updatedLabel`, `eventLabel`: text controls.
 - `enterAnimation`: controls the moving sun/moon reveal animation.
 

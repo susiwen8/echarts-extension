@@ -225,6 +225,10 @@ echartsHost.extendSeriesModel({
       color: 'rgba(255, 167, 43, 0.2)',
       opacity: 1
     },
+    moonAreaStyle: {
+      color: 'rgba(90, 145, 242, 0.16)',
+      opacity: 1
+    },
     titleLabel: {
       show: true,
       color: '#f5f6f7',
@@ -448,6 +452,7 @@ function drawSky(
   const moonLineStyle = readLineStyle(seriesModel, 'moonLineStyle', '#5a91f2', 4, 0.72);
   const baselineStyle = readLineStyle(seriesModel, 'baselineStyle', '#3f4245', 1.2, 1);
   const dayAreaStyle = asRecord(seriesModel.get('dayAreaStyle'));
+  const moonAreaStyle = asRecord(seriesModel.get('moonAreaStyle'));
   const sunIcon = seriesModel.get('sunIcon');
   const moonIcon = seriesModel.get('moonIcon');
   const dayAreaAnimation = readEnterAnimation(seriesModel, 0);
@@ -458,8 +463,17 @@ function drawSky(
   const baselineAnimation = readEnterAnimation(seriesModel, 5);
   const forceMotionGroup = isAliveRenderUpdate(seriesModel);
 
-  if (layout.day.visible && layout.day.progress > 0 && layout.day.areaPoints.length >= 3) {
-    addPolygon(echartsInstance, group, layout.day.areaPoints, {
+  if (layout.moon.visible && layout.moon.progress > 0 && layout.moon.areaPoints.length >= 3) {
+    addPolygon(echartsInstance, group, layout.moon.areaPoints, {
+      fill: moonAreaStyle.color || 'rgba(90, 145, 242, 0.16)',
+      stroke: null,
+      opacity: finiteNumber(moonAreaStyle.opacity, 1)
+    }, true, -3, moonFullAnimation, 'sky:moon-area', createArcProgressClip(layout.moon.start, layout.moon.end, layout.height, layout.moon.progress, 0), moonSolidAnimation);
+  }
+
+  const dayAreaPoints = createStackedAreaPoints(layout.day.fullPoints, layout.moon.fullPoints, layout.baselineY);
+  if (layout.day.visible && layout.day.progress > 0 && dayAreaPoints.length >= 3) {
+    addPolygon(echartsInstance, group, dayAreaPoints, {
       fill: dayAreaStyle.color || 'rgba(255, 167, 43, 0.2)',
       stroke: null,
       opacity: finiteNumber(dayAreaStyle.opacity, 1)
@@ -624,6 +638,41 @@ function createArcFutureClip(
     width: Math.max(0, endX - currentX + padding * 2),
     height
   };
+}
+
+function createStackedAreaPoints(
+  upperPoints: SunriseSunsetPoint[],
+  lowerArcPoints: SunriseSunsetPoint[],
+  baselineY: number
+): SunriseSunsetPoint[] {
+  if (upperPoints.length < 2) return [];
+  const lowerPoints = upperPoints.map((point) => ({
+    x: point.x,
+    y: interpolateLowerBoundary(point.x, lowerArcPoints, baselineY)
+  }));
+  return [
+    ...upperPoints,
+    ...lowerPoints.reverse()
+  ];
+}
+
+function interpolateLowerBoundary(x: number, points: SunriseSunsetPoint[], fallbackY: number): number {
+  if (points.length < 2) return fallbackY;
+  const first = points[0];
+  const last = points[points.length - 1];
+  if (x < first.x || x > last.x) return fallbackY;
+
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1];
+    const next = points[index];
+    if (x < previous.x || x > next.x) continue;
+    const span = next.x - previous.x;
+    if (span <= 0) return previous.y;
+    const ratio = (x - previous.x) / span;
+    return previous.y + (next.y - previous.y) * ratio;
+  }
+
+  return fallbackY;
 }
 
 function drawEvents(
