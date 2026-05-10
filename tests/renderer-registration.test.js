@@ -522,6 +522,20 @@ test('captured renderer registrations cover lifecycle across the remaining custo
       }
     },
     {
+      path: '../packages/echarts-smith/src/smith.ts?registration',
+      option: {
+        data: [
+          { name: 'Matched', r: 1, x: 0 },
+          { name: 'Inductive', r: 1, x: 1, itemStyle: { color: '#2563eb' } },
+          { name: 'Capacitive', r: 0.5, x: -0.75 }
+        ],
+        label: { show: true, formatter: '{b} {c}' },
+        showSwrCircle: true,
+        grid: { label: { show: true } },
+        enterAnimation: { duration: 10, delay: 1, stagger: 1 }
+      }
+    },
+    {
       path: '../packages/echarts-venn/src/venn.ts?registration',
       option: {
         data: [

@@ -26,6 +26,7 @@ import 'echarts-lollipop';
 import 'echarts-beeswarm';
 import 'echarts-spiral';
 import 'echarts-vector-field';
+import 'echarts-smith';
 
 echarts.use([SVGRenderer]);
 
@@ -354,6 +355,19 @@ const aliveRenderCases = [
         { longitude: 0.375, latitude: 45.125, u: -2.4, v: -2.2 },
         { longitude: 0.125, latitude: 45.375, u: -2.1, v: -1.9 }
       ]
+    }
+  },
+  {
+    name: 'smith',
+    series: {
+      type: 'smith',
+      data: [
+        { name: 'Matched', r: 1, x: 0 },
+        { name: 'Inductive', r: 1, x: 1 },
+        { name: 'Capacitive', r: 0.5, x: -0.75 }
+      ],
+      lineStyle: { show: true },
+      label: { show: true }
     }
   }
 ];

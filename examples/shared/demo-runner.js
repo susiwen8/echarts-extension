@@ -977,6 +977,87 @@
           }
         ]
       })
+    },
+    smith: {
+      controls: [
+        ...commonChartControls('Smith Chart', [0]),
+        rangeControl('referenceImpedance', 'Reference ohms', 'series.0.referenceImpedance', 50, 25, 100, 1),
+        rangeControl('symbolSize', 'Point size', 'series.0.symbolSize', 9, 3, 22, 1),
+        rangeControl('lineWidth', 'Trace width', 'series.0.lineStyle.width', 2.2, 0, 7, 0.1),
+        rangeControl('lineOpacity', 'Trace opacity', 'series.0.lineStyle.opacity', 0.96, 0.1, 1, 0.02),
+        checkboxControl('swrShow', 'SWR circle', 'series.0.showSwrCircle', false),
+        rangeControl('swrIndex', 'SWR point', 'series.0.swrIndex', 1, 0, 6, 1),
+        checkboxControl('cursorShow', 'Cursor readout', 'series.0.cursor.show', true),
+        checkboxControl('labelShow', 'Point labels', 'series.0.label.show', false),
+        checkboxControl('gridLabels', 'Grid labels', 'series.0.grid.label.show', true),
+        rangeControl('enterDuration', 'Enter duration', 'series.0.enterAnimation.duration', 620, 120, 1800, 20),
+        rangeControl('enterStagger', 'Enter stagger', 'series.0.enterAnimation.stagger', 46, 0, 180, 2)
+      ],
+      option: (data) => {
+        const smithData = Array.isArray(data.smith) ? data.smith : [];
+        return {
+          animation: true,
+          backgroundColor: '#ffffff',
+          title: title('Smith Chart'),
+          series: [
+            {
+              type: 'smith',
+              top: 66,
+              width: '88%',
+              height: '82%',
+              padding: 24,
+              referenceImpedance: 50,
+              resistanceField: 'resistance',
+              reactanceField: 'reactance',
+              resistanceValues: [0, 0.2, 0.5, 1, 2, 4, 10],
+              reactanceValues: [-10, -4, -2, -1, -0.5, -0.2, 0.2, 0.5, 1, 2, 4, 10],
+              data: smithData,
+              symbolSize: 9,
+              showSwrCircle: false,
+              swrIndex: 1,
+              enterAnimation: { duration: 620, stagger: 46, easing: 'cubicOut' },
+              grid: {
+                label: {
+                  show: true,
+                  color: '#111827',
+                  fontSize: 12,
+                  resistanceFormatter: '{ohms}',
+                  reactanceFormatter: '{ohms}j'
+                },
+                unitCircle: { lineStyle: { color: '#303030', width: 1.35 } },
+                axisLine: { lineStyle: { color: '#303030', width: 1 } },
+                resistanceLine: { lineStyle: { color: '#353535', width: 1, opacity: 0.9 } },
+                reactanceLine: { lineStyle: { color: '#353535', width: 1, opacity: 0.9 } }
+              },
+              swrStyle: { color: '#f97316', width: 1.3, opacity: 0.86, type: 'dashed' },
+              lineStyle: { show: true, color: '#2563eb', width: 2.2, opacity: 0.96 },
+              itemStyle: { color: '#2563eb', borderColor: '#ffffff', borderWidth: 1.6, opacity: 0.96 },
+              label: { show: false, color: '#0f172a', fontSize: 12, fontWeight: 650, formatter: '{b}' },
+              cursor: {
+                show: true,
+                lineStyle: { color: '#111111', width: 1.2, opacity: 1, type: 'dashed' },
+                tooltip: {
+                  show: true,
+                  backgroundColor: '#000000',
+                  color: '#ffffff',
+                  fontSize: 14,
+                  lineHeight: 22,
+                  padding: [10, 12],
+                  borderRadius: 4
+                }
+              },
+              emphasis: {
+                itemStyle: {
+                  opacity: 1,
+                  borderWidth: 2.4,
+                  shadowBlur: 9,
+                  shadowColor: 'rgba(37, 99, 235, 0.28)'
+                }
+              }
+            }
+          ]
+        };
+      }
     }
   };
 
@@ -1367,6 +1448,7 @@
     if (exampleName === 'lollipop') return appendLollipopData(data, index);
     if (exampleName === 'beeswarm') return appendBeeswarmData(data, index);
     if (exampleName === 'spiral') return appendSpiralData(data, index);
+    if (exampleName === 'smith') return appendSmithData(data, index);
     if (exampleName === 'vector-field') return appendVectorFieldData(data, index);
     return false;
   }
@@ -1391,6 +1473,7 @@
     if (exampleName === 'lollipop') return arrayLength(data.lollipop);
     if (exampleName === 'beeswarm') return arrayLength(data.beeswarm);
     if (exampleName === 'spiral') return arrayLength(data.spiral);
+    if (exampleName === 'smith') return arrayLength(data.smith);
     if (exampleName === 'vector-field') return arrayLength(data.wind);
     return 0;
   }
@@ -1640,6 +1723,17 @@
     list.push({
       name: `Added ${index}`,
       value: 28 + (index * 13) % 82
+    });
+    return true;
+  }
+
+  function appendSmithData(data, index) {
+    const list = ensureArrayData(data, 'smith');
+    list.push({
+      name: `Load ${list.length + 1}`,
+      resistance: 20 + (index * 19) % 130,
+      reactance: ((index * 37) % 120) - 60,
+      itemStyle: { color: addDataColor(index) }
     });
     return true;
   }

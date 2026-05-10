@@ -319,6 +319,15 @@
       { country: 'Ethiopia', population: 129, itemStyle: { color: '#2db5ff' } }
     ],
     spiral: createSpiralData(),
+    smith: [
+      { name: 'Matched load', resistance: 50, reactance: 0, itemStyle: { color: '#2563eb' } },
+      { name: 'Inductive tune', resistance: 74, reactance: 32, itemStyle: { color: '#0f766e' } },
+      { name: 'Series cap', resistance: 38, reactance: -28, itemStyle: { color: '#c2410c' } },
+      { name: 'High-Z stub', resistance: 125, reactance: 78, itemStyle: { color: '#7c3aed' } },
+      { name: 'Low-Z stub', resistance: 18, reactance: -12, itemStyle: { color: '#be123c' } },
+      { name: 'Load 6', resistance: 66, reactance: -44, itemStyle: { color: '#0e7490' } },
+      { name: 'Load 7', resistance: 94, reactance: 12, itemStyle: { color: '#ca8a04' } }
+    ],
     beeswarm: [
       { team: 'Design', score: 62, name: 'D-01', itemStyle: { color: '#0f766e' } },
       { team: 'Design', score: 64, name: 'D-02', itemStyle: { color: '#0f766e' } },

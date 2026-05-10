@@ -129,6 +129,12 @@ export const browserVisualCases = [
     screenshotSelector: 'main'
   },
   {
+    name: 'echarts-smith',
+    path: '/packages/echarts-smith/examples/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main'
+  },
+  {
     name: 'echarts-vector-field',
     path: '/packages/echarts-vector-field/examples/',
     readySelector: '#chart canvas, #chart svg',

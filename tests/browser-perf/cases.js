@@ -18,6 +18,7 @@ export const browserPerfCases = [
   ['echarts-lollipop', '/packages/echarts-lollipop/examples/large.html'],
   ['echarts-beeswarm', '/packages/echarts-beeswarm/examples/large.html'],
   ['echarts-spiral', '/packages/echarts-spiral/examples/large.html'],
+  ['echarts-smith', '/packages/echarts-smith/examples/large.html'],
   ['echarts-vector-field', '/packages/echarts-vector-field/examples/large.html']
 ].map(([name, path]) => ({
   name,

@@ -502,6 +502,54 @@
           lineStyle: { color: '#1d4ed8', width: 0.55, opacity: 0.55 }
         }]);
       }
+    },
+    smith: {
+      packageName: 'echarts-smith',
+      title: 'Smith Chart Large Loads',
+      defaultCount: 100000,
+      maxCount: ONE_MILLION,
+      renderLimit: 9000,
+      trendLimit: 1600,
+      createData(count, seed) {
+        return createFlatItems(count, this.renderLimit, (rawIndex, sampleIndex) => {
+          const phase = rawIndex * 0.093 + seed * 0.01;
+          const sweep = sampleIndex / Math.max(1, this.renderLimit - 1);
+          return {
+            name: `Load ${rawIndex}`,
+            resistance: Math.max(2, 8 + sweep * 170 + Math.sin(phase) * 18),
+            reactance: Math.cos(phase * 0.77) * 75 + Math.sin(phase * 1.31) * 28
+          };
+        }, this.sampling);
+      },
+      createOption(payload) {
+        return perfOption(this, payload, [{
+          type: 'smith',
+          top: 42,
+          width: '94%',
+          height: '88%',
+          padding: 10,
+          referenceImpedance: 50,
+          resistanceField: 'resistance',
+          reactanceField: 'reactance',
+          resistanceValues: [0, 0.2, 0.5, 1, 2, 4, 10],
+          reactanceValues: [-10, -4, -2, -1, -0.5, 0.5, 1, 2, 4, 10],
+          data: payload.data,
+          symbolSize: 2,
+          showSwrCircle: false,
+          animation: false,
+          enterAnimation: false,
+          grid: {
+            label: { show: false },
+            unitCircle: { lineStyle: { color: '#334155', width: 1 } },
+            axisLine: { lineStyle: { color: '#94a3b8', width: 0.8 } },
+            resistanceLine: { lineStyle: { color: '#cbd5e1', width: 0.7, opacity: 0.62 } },
+            reactanceLine: { lineStyle: { color: '#cbd5e1', width: 0.7, opacity: 0.62 } }
+          },
+          lineStyle: { show: false },
+          itemStyle: { color: '#2563eb', borderWidth: 0, opacity: 0.48 },
+          label: { show: false }
+        }]);
+      }
     }
   };
 

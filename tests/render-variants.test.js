@@ -20,6 +20,7 @@ import 'echarts-radial';
 import 'echarts-radial-area';
 import 'echarts-radial-boxplot';
 import 'echarts-spiral';
+import 'echarts-smith';
 import 'echarts-subway';
 import 'echarts-sunrise-sunset';
 import 'echarts-vector-field';
@@ -333,6 +334,48 @@ test('radial, temporal, network, and vector custom charts render branch-heavy va
     arrowStyle: { color: '#222' },
     enterAnimation: { enabled: false }
   });
+  renderSeries({
+    type: 'smith',
+    referenceImpedance: 50,
+    resistanceField: 'resistance',
+    reactanceField: 'reactance',
+    data: [
+      { name: 'Matched', resistance: 50, reactance: 0, itemStyle: { color: '#22c55e' } },
+      { name: 'Inductive', resistance: 75, reactance: 25 },
+      { name: 'Capacitive', resistance: 25, reactance: -20, label: { show: false } }
+    ],
+    showSwrCircle: true,
+    grid: {
+      label: { show: true, formatter: 'z {value}' },
+      unitCircle: { lineStyle: { color: '#111', width: '2' } },
+      axisLine: { lineStyle: { type: 'dotted' } },
+      resistanceLine: { lineStyle: { type: [2, 3], opacity: '0.7' } },
+      reactanceLine: { lineStyle: { type: 'dashed' } }
+    },
+    lineStyle: { show: true, color: '#2563eb', width: '2' },
+    itemStyle: { borderWidth: '2', opacity: '0.9' },
+    label: { show: true, formatter: ({ name, resistance, reactance }) => `${name}:${resistance}:${reactance}` },
+    enterAnimation: {
+      duration: () => 18,
+      delay: () => 1,
+      stagger: () => 1,
+      easing: 'linear'
+    }
+  });
+  renderSeries({
+    type: 'smith',
+    dataType: 'gamma',
+    silent: true,
+    grid: { show: false },
+    lineStyle: { show: false },
+    symbolSize: 0,
+    label: { show: true, formatter: '{b}:{gamma}' },
+    data: [
+      { name: 'G1', gamma: [0.2, 0.3] },
+      { name: 'G2', gammaReal: -0.2, gammaImag: -0.1 }
+    ],
+    animation: false
+  });
 
   assert.ok(true);
 });
@@ -453,7 +496,8 @@ test('custom chart renderers tolerate empty, malformed, and disabled option vari
     { type: 'spiral', data: null, label: { show: true }, itemStyle: null },
     { type: 'subway', data: null, label: { show: true }, routeLabel: { show: true } },
     { type: 'sunriseSunset', data: null, label: { show: true }, sunIcon: null, moonIcon: null },
-    { type: 'vectorField', data: null, label: { show: true }, lineStyle: null, arrowStyle: null }
+    { type: 'vectorField', data: null, label: { show: true }, lineStyle: null, arrowStyle: null },
+    { type: 'smith', data: null, label: { show: true }, grid: { show: false }, lineStyle: null }
   ];
 
   variants.forEach((series) => {

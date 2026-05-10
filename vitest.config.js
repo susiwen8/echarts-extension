@@ -24,6 +24,7 @@ export default defineConfig({
       'echarts-radial-area': path.join(root, 'packages/echarts-radial-area/index.ts'),
       'echarts-radial-boxplot': path.join(root, 'packages/echarts-radial-boxplot/index.ts'),
       'echarts-spiral': path.join(root, 'packages/echarts-spiral/index.ts'),
+      'echarts-smith': path.join(root, 'packages/echarts-smith/index.ts'),
       'echarts-subway': path.join(root, 'packages/echarts-subway/index.ts'),
       'echarts-sunrise-sunset': path.join(root, 'packages/echarts-sunrise-sunset/index.ts'),
       'echarts-vector-field': path.join(root, 'packages/echarts-vector-field/index.ts'),

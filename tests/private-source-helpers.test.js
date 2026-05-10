@@ -21,6 +21,8 @@ import * as packBubbleLayout from '../packages/echarts-pack-bubble/src/layout.ts
 import { __test__ as packBubbleRenderer } from '../packages/echarts-pack-bubble/src/pack-bubble.ts';
 import * as spiralLayout from '../packages/echarts-spiral/src/layout.ts';
 import { __test__ as spiralRenderer } from '../packages/echarts-spiral/src/spiral.ts';
+import * as smithLayout from '../packages/echarts-smith/src/layout.ts';
+import { __test__ as smithRenderer } from '../packages/echarts-smith/src/smith.ts';
 import * as vectorFieldLayout from '../packages/echarts-vector-field/src/layout.ts';
 import { __test__ as vectorFieldRenderer } from '../packages/echarts-vector-field/src/vector-field.ts';
 import * as vennLayout from '../packages/echarts-venn/src/layout.ts';
@@ -392,6 +394,298 @@ test('direct renderer test exports cover shared helper branches on real modules'
   assert.equal(vectorFieldRenderer.resolveAnimationValue(() => 'bad', 0, 4), 4);
   assert.deepEqual(vectorFieldRenderer.asRecord([]), {});
   assert.equal(vectorFieldRenderer.formatPathNumber(1.23456), '1.235');
+});
+
+test('smith private helpers cover layout and renderer fallback branches', () => {
+  const enabled = { enabled: true, duration: 5, delay: 2, easing: 'linear' };
+  const disabled = { enabled: false, duration: 0, delay: 0, easing: 'cubicOut' };
+  const host = graphicHost();
+  const group = new host.graphic.Group();
+
+  assert.deepEqual(smithLayout.impedanceToGamma(-1, 0), { real: 1, imag: 0, magnitude: 1, angle: 0 });
+  assert.deepEqual(smithLayout.gammaToImpedance(1, 0), { r: Infinity, x: 0 });
+  assert.equal(smithLayout.__test__.readDataType('other'), undefined);
+  assert.equal(smithLayout.__test__.readField({ a: 1 }, 0, undefined, -1, ['a']), undefined);
+  assert.equal(smithLayout.__test__.readField(['a'], 0, undefined, -1, []), 'a');
+  assert.equal(smithLayout.__test__.readField(7, 'a', undefined, 0, []), undefined);
+  assert.deepEqual(smithLayout.__test__.readPair([null, 2]), null);
+  assert.deepEqual(smithLayout.__test__.readPair([3]), [3, 0]);
+  assert.deepEqual(smithLayout.__test__.readPair({ re: '2', im: '-1' }), [2, -1]);
+  assert.deepEqual(smithLayout.__test__.readPair({ real: 3 }), [3, 0]);
+  assert.deepEqual(smithLayout.__test__.readPair({ resistance: 3, reactance: 4 }), [3, 4]);
+  assert.equal(smithLayout.__test__.readPair({}), null);
+  assert.deepEqual(smithLayout.__test__.readNormalizedImpedance({ r: 2 }, {}, undefined, 1), { r: 2, x: 0 });
+  assert.deepEqual(smithLayout.__test__.normalizePadding({ top: 1, right: 2, bottom: 3, left: 4 }), { top: 1, right: 2, bottom: 3, left: 4 });
+  assert.deepEqual(smithLayout.__test__.readPaddingOption({ top: '5', right: 'bad' }), { top: 5, right: undefined, bottom: undefined, left: undefined });
+  assert.deepEqual(smithLayout.__test__.normalizeResistanceValues([2, 2, -1, 0]), [0, 2]);
+  assert.deepEqual(smithLayout.__test__.normalizeReactanceValues([0, 1, 1, -1]), [-1, 1]);
+  assert.equal(smithLayout.__test__.stringifyName(7), '7');
+  assert.equal(smithLayout.__test__.finiteNumber('8', 1), 8);
+  assert.equal(smithLayout.__test__.finiteNumber('', 1), 1);
+  assert.equal(smithLayout.__test__.cleanNumber(-0), 0);
+  assert.equal(smithLayout.__test__.cleanNumber(1), 1);
+  assert.equal(smithLayout.__test__.createReactanceArc(0, 10, 10, 5).clockwise, false);
+  assert.equal(smithLayout.__test__.resolveSwrCircle({ showSwrCircle: true }, [], 0, 0, 10)?.magnitude, 0);
+  assert.equal(smithLayout.resolveSmithChartLayout({ data: null }).points.length, 0);
+
+  const layout = smithLayout.resolveSmithChartLayout({
+    data: [
+      { z: [2, 1], id: 12 },
+      { label: 'Gamma', gammaReal: 2, gammaImag: 0 },
+      { label: 'RealOnly', gammaReal: 0.2 },
+      42,
+      { other: true }
+    ],
+    layout: {
+      width: 260,
+      height: 240,
+      padding: { top: 12, right: 14, bottom: 16, left: 18 },
+      dataType: 'gamma',
+      showSwrCircle: true,
+      swrIndex: 10,
+      resistanceValues: [0, 1, 1],
+      reactanceValues: [-1, 0, 1]
+    }
+  });
+  assert.equal(layout.points.length, 2);
+  assert.equal(layout.swrCircle?.magnitude, 0.2);
+
+  const impedanceLayout = smithLayout.layoutSmithChart([
+    { impedance: { resistance: 3, reactance: -1 } },
+    { r: null }
+  ], {
+    width: 220,
+    height: 220,
+    padding: 20,
+    showSwrCircle: true,
+    swrMagnitude: 2
+  });
+  assert.equal(impedanceLayout.points.length, 1);
+  assert.equal(impedanceLayout.swrCircle?.magnitude, 1);
+
+  const smithSeries = series({
+    data: [{ name: 'A', r: 1, x: 0, itemStyle: { color: '#123' } }],
+    label: { show: true, formatter: '{b}:{c}:{r}:{x}:{gamma}' },
+    grid: { label: { show: true, formatter: (value) => `g${value}` } },
+    itemStyle: { borderColor: '#fff', borderWidth: 2, opacity: 0.8 },
+    lineStyle: { color: '', width: 0 },
+    enterAnimation: { show: false }
+  }, [{ name: 'A', itemStyle: { color: '#123' } }]);
+  const smithPoint = {
+    ...impedanceLayout.points[0],
+    id: '',
+    name: 'A',
+    dataIndex: 0
+  };
+
+  assert.deepEqual(smithRenderer.readLayoutOption(model({}), { width: 10, height: 20 }), {
+    data: [],
+    layout: undefined,
+    layoutOptions: {},
+    width: 10,
+    height: 20
+  });
+  assert.deepEqual(smithRenderer.readLayoutOption({ get: () => undefined }, { width: 5, height: 6 }), {
+    data: [],
+    layout: undefined,
+    layoutOptions: {},
+    width: 5,
+    height: 6
+  });
+  const reactanceLabel = smithRenderer.createAxisLabelParams('reactance', -1, 50);
+  assert.equal(smithRenderer.formatAxisLabel('{ohms}j', reactanceLabel), '-50j');
+  assert.equal(smithRenderer.formatAxisLabel('{value}:{normalized}:{impedance}:{referenceImpedance}:{axis}', reactanceLabel), '-1:-1:-50:50:reactance');
+  assert.equal(smithRenderer.formatAxisLabel((value) => `v${value}`, 2), 'v2');
+  assert.equal(smithRenderer.formatAxisLabel(null, 2), '2');
+  assert.equal(smithRenderer.formatAxisNumber(-0), '0');
+  assert.equal(smithRenderer.normalizeAxisLabelParams(reactanceLabel).axis, 'reactance');
+  assert.equal(smithRenderer.formatLabel(({ name }) => name, smithPoint), 'A');
+  assert.equal(smithRenderer.formatLabel('{b}:{c}:{r}:{x}:{gamma}', smithPoint), 'A:3-j1:3:-1:0.529,-0.118');
+  assert.equal(smithRenderer.formatLabel(null, smithPoint), 'A');
+  assert.equal(smithRenderer.formatImpedance(smithPoint), '3-j1');
+  assert.equal(smithRenderer.smithPointKey({ ...smithPoint, id: '', name: '' }), 'item-0');
+  assert.equal(JSON.stringify(smithRenderer.readLineDash('dotted')), '[1.5,5]');
+  assert.equal(smithRenderer.readLineDash('solid'), null);
+  assert.equal(smithRenderer.readLineStyle(model({ stroke: '#abc', lineWidth: '3', opacity: '0.5' }), {}).stroke, '#abc');
+  assert.equal(smithRenderer.readLineStyle(model({}), { color: '#def' }).stroke, '#def');
+  assert.deepEqual(smithRenderer.resolveCursorLineStyle(model({}), { lineDash: [5, 6] }).lineDash, [5, 6]);
+  assert.equal(smithRenderer.resolveCursorLineStyle(model({ type: 'solid' }), { lineDash: [5, 6] }).lineDash, null);
+  assert.equal(smithRenderer.readPointStyle(smithSeries.data, smithSeries.model, model({ itemStyle: { color: '#123' } }), smithPoint).fill, '#123');
+  assert.equal(smithRenderer.readPointStyle(data([{ style: { fill: '#456' } }]), model({ itemStyle: {} }), model({}), smithPoint).fill, '#456');
+  assert.equal(smithRenderer.readEnterAnimation(model({ animation: false }), 0).enabled, false);
+  assert.equal(smithRenderer.readEnterAnimation(model({ enterAnimation: { enabled: false } }), 0).enabled, false);
+  assert.equal(smithRenderer.readEnterAnimation(model({ enterAnimation: { show: false } }), 0).enabled, false);
+  assert.equal(smithRenderer.resolveAnimationNumber(() => '6', {}, 0, 1), 1);
+  assert.equal(smithRenderer.resolveAnimationNumber(() => 6, {}, 0, 1), 6);
+  assert.equal(smithRenderer.resolveAnimationEasing(''), 'cubicOut');
+  assert.equal(smithRenderer.disabledEnterAnimation().enabled, false);
+  assert.equal(JSON.stringify(smithRenderer.asRecord([])), '{}');
+  assert.equal(smithRenderer.finiteNumber('8', 1), 1);
+  assert.equal(smithRenderer.round(1.23456), 1.235);
+
+  const fallbackHost = graphicHost();
+  fallbackHost.graphic.Arc = undefined;
+  assert.equal(smithRenderer.createArcElement(fallbackHost, impedanceLayout.reactanceArcs[0], {}).type, 'polyline');
+  const sampledSmithArc = smithRenderer.sampleArcPoints(impedanceLayout.reactanceArcs.find((arc) => arc.value === 1));
+  assert.equal(sampledSmithArc.length, 80);
+  sampledSmithArc.forEach(([x, y]) => {
+    assert.ok(Math.hypot(x - impedanceLayout.centerX, y - impedanceLayout.centerY) <= impedanceLayout.radius + 0.001);
+  });
+  const cursorLayout = smithLayout.layoutSmithChart([], {
+    width: 500,
+    height: 420,
+    padding: 30,
+    referenceImpedance: 50
+  });
+  const cursorState = smithRenderer.resolveSmithCursorState(
+    cursorLayout.centerX + cursorLayout.radius * 0.2,
+    cursorLayout.centerY - cursorLayout.radius * 0.4,
+    cursorLayout
+  );
+  assert.equal(smithRenderer.resolveSmithCursorState(0, 0, cursorLayout), null);
+  const shortCursorState = smithRenderer.resolveSmithCursorState(
+    cursorLayout.centerX - cursorLayout.radius,
+    cursorLayout.centerY,
+    cursorLayout
+  );
+  assert.equal(shortCursorState.vswr, Infinity);
+  assert.equal(shortCursorState.q, Infinity);
+  assert.equal(smithRenderer.round(cursorState.impedance.real), 50);
+  assert.equal(smithRenderer.round(cursorState.impedance.imag), 50);
+  assert.equal(Math.round(cursorState.resistanceCircle.cx), cursorLayout.centerX + cursorLayout.radius / 2);
+  assert.equal(Math.round(cursorState.resistanceCircle.cy), cursorLayout.centerY);
+  assert.equal(Math.round(cursorState.resistanceCircle.r), cursorLayout.radius / 2);
+  assert.equal(Math.round(Math.hypot(cursorState.x - cursorState.resistanceCircle.cx, cursorState.y - cursorState.resistanceCircle.cy)), Math.round(cursorState.resistanceCircle.r));
+  assert.deepEqual(smithRenderer.createResistanceCursorCircle(cursorLayout, Infinity), {
+    cx: cursorLayout.centerX + cursorLayout.radius,
+    cy: cursorLayout.centerY,
+    r: 0
+  });
+  assert.equal(smithRenderer.createResistanceCursorCircle(cursorLayout, -1).r, cursorLayout.radius);
+  assert.equal(smithRenderer.round(cursorState.admittance.real), 0.01);
+  assert.equal(smithRenderer.round(cursorState.admittance.imag), -0.01);
+  assert.equal(smithRenderer.round(cursorState.q), 1);
+  assert.match(smithRenderer.formatSmithCursorTooltip(cursorState), /阻抗 = 50 \+ 50j/);
+  assert.match(smithRenderer.formatSmithCursorTooltip({ ...cursorState, vswr: Infinity, q: Infinity }), /VSWR = ∞/);
+  assert.equal(smithRenderer.sampleReactanceCursorPoints(cursorLayout, 0, 1).every((point) => point[1] === cursorLayout.centerY), true);
+  assert.equal(smithRenderer.sampleReactanceCursorPoints(cursorLayout, cursorState.normalized.x, cursorState.normalized.r).length, 81);
+  assert.equal(smithRenderer.sampleReactanceCursorPoints(cursorLayout, cursorState.normalized.x).length, 80);
+  assert.equal(smithRenderer.readCursorEventPoint({ offsetX: 12, offsetY: 13 }, { x: 2, y: 3, width: 10, height: 10 }).x, 10);
+  assert.equal(smithRenderer.readCursorEventPoint({ zrX: 12, zrY: 13 }, { x: 2, y: 3, width: 10, height: 10 }).y, 10);
+  assert.equal(smithRenderer.readCursorEventPoint({ event: { offsetX: 12, offsetY: 13 } }, { x: 2, y: 3, width: 10, height: 10 }).x, 10);
+  assert.deepEqual(smithRenderer.readCursorEventPoint(
+    { offsetX: 112, offsetY: 214 },
+    { x: 10, y: 20, width: 100, height: 100 },
+    { transformCoordToLocal: (x, y) => [x / 2 - 20, y / 2 - 30] }
+  ), { x: 36, y: 77 });
+  assert.equal(smithRenderer.readCursorEventPoint({}, { x: 2, y: 3, width: 10, height: 10 }), null);
+  assert.deepEqual(smithRenderer.normalizeTooltipPadding(8), [8, 8, 8, 8]);
+  assert.deepEqual(smithRenderer.normalizeTooltipPadding([1, 2]), [1, 2, 1, 2]);
+  assert.deepEqual(smithRenderer.normalizeTooltipPadding([1, 2, 3, 4]), [1, 2, 3, 4]);
+  assert.deepEqual(smithRenderer.normalizeTooltipPadding('x'), [10, 12, 10, 12]);
+  assert.deepEqual(smithRenderer.placeTooltip(490, 390, 120, 90, cursorLayout), { x: 356, y: 286 });
+  assert.equal(smithRenderer.estimateTooltipWidth(['阻抗 = 50 + 50j'], 14) > 100, true);
+  assert.equal(smithRenderer.formatSignedNumber(-0), '0');
+  assert.equal(smithRenderer.formatComplexValue({ real: 1, imag: -2 }), '1 - 2j');
+  assert.equal(smithRenderer.invertComplex({ real: 0, imag: 0 }).real, Infinity);
+  const directElement = {};
+  smithRenderer.updateElement(directElement, {
+    shape: { x: 1 },
+    style: { fill: '#000' },
+    invisible: true
+  });
+  assert.deepEqual(directElement.shape, { x: 1 });
+  assert.deepEqual(directElement.style, { fill: '#000' });
+  assert.equal(directElement.invisible, true);
+  const attrElement = {
+    captured: null,
+    attr(attrs) {
+      this.captured = attrs;
+    }
+  };
+  smithRenderer.updateElement(attrElement, { invisible: false });
+  assert.deepEqual(attrElement.captured, { invisible: false });
+  const fallbackCursorGroup = new host.graphic.Group();
+  const fallbackCursorElements = smithRenderer.createSmithCursorElements(host, fallbackCursorGroup, model({ cursor: {} }));
+  smithRenderer.updateSmithCursorElements(fallbackCursorElements, model({ cursor: {} }), cursorLayout, cursorState);
+  assert.equal(fallbackCursorElements.tooltipText.style.fill, '#ffffff');
+  assert.equal(fallbackCursorElements.tooltipText.style.fontFamily, 'sans-serif');
+  smithRenderer.updateSmithCursorElements(fallbackCursorElements, model({ cursor: { tooltip: { show: false } } }), cursorLayout, cursorState);
+  assert.equal(fallbackCursorElements.tooltipText.invisible, true);
+
+  const zrHandlers = {};
+  const zrender = {
+    on(eventName, handler) {
+      zrHandlers[eventName] = handler;
+    },
+    off(eventName, handler) {
+      if (zrHandlers[eventName] === handler) delete zrHandlers[eventName];
+    }
+  };
+  const cursorGroup = new host.graphic.Group();
+  const cursorController = smithRenderer.installSmithCursor(
+    host,
+    cursorGroup,
+    model({
+      cursor: {
+        lineStyle: { color: '#111', width: 2 },
+        tooltip: { fontSize: 13, padding: [6, 8], backgroundColor: '#010101', color: '#fff' }
+      }
+    }),
+    cursorLayout,
+    { x: 5, y: 7, width: cursorLayout.width, height: cursorLayout.height },
+    zrender
+  );
+  zrHandlers.mousemove({ offsetX: 5 + cursorLayout.centerX, offsetY: 7 + cursorLayout.centerY });
+  const cursorRoot = cursorGroup.children()[0];
+  assert.equal(cursorRoot.invisible, false);
+  assert.equal(cursorRoot.children().every((element) => element.invisible !== true), true);
+  zrHandlers.mousemove({ offsetX: 5, offsetY: 7 });
+  assert.equal(cursorRoot.invisible, true);
+  assert.equal(cursorRoot.children().every((element) => element.invisible === true), true);
+  zrHandlers.mousemove({});
+  assert.equal(cursorRoot.invisible, true);
+  assert.equal(cursorRoot.children().every((element) => element.invisible === true), true);
+  zrHandlers.mousemove({ offsetX: 5 + cursorLayout.centerX, offsetY: 7 + cursorLayout.centerY });
+  assert.equal(cursorRoot.invisible, false);
+  assert.equal(cursorRoot.children()[0].invisible, false);
+  assert.equal(cursorRoot.children()[1].invisible, false);
+  zrHandlers.globalout();
+  assert.equal(cursorRoot.invisible, true);
+  assert.equal(cursorRoot.children().every((element) => element.invisible === true), true);
+  cursorController.dispose();
+  assert.equal(zrHandlers.mousemove, undefined);
+  assert.equal(smithRenderer.installSmithCursor(host, cursorGroup, model({ silent: true }), cursorLayout, { x: 0, y: 0, width: 1, height: 1 }, zrender), undefined);
+  assert.equal(smithRenderer.installSmithCursor(host, cursorGroup, model({ cursor: { show: false } }), cursorLayout, { x: 0, y: 0, width: 1, height: 1 }, zrender), undefined);
+  assert.equal(smithRenderer.installSmithCursor(host, cursorGroup, model({}), cursorLayout, { x: 0, y: 0, width: 1, height: 1 }, null), undefined);
+  smithRenderer.drawGridLabels(host, group, model({ label: { show: false } }), impedanceLayout);
+  smithRenderer.drawGrid(host, group, model({
+    grid: {
+      axisLine: { show: false },
+      resistanceLine: { show: false },
+      reactanceLine: { show: false },
+      label: { show: false }
+    }
+  }), impedanceLayout);
+  smithRenderer.drawSwrCircle(host, group, smithSeries.model, impedanceLayout);
+  assert.equal(smithRenderer.drawSeriesLine(host, group, smithSeries.model, { ...impedanceLayout, points: [smithPoint, { ...smithPoint, x: 2 }] }), null);
+  assert.equal(smithRenderer.drawPoints(host, group, series({ silent: true, symbolSize: 4 }, [{}]).model, {
+    ...impedanceLayout,
+    points: [
+      { ...smithPoint, dataIndex: -1 },
+      { ...smithPoint, dataIndex: 0 }
+    ]
+  }, { x: 1, y: 2, width: 10, height: 10 }, null).length, 0);
+  smithRenderer.drawPointLabels(host, group, model({ label: { show: false } }), [smithPoint], new Map());
+  coverCircleAndFadeAnimation(smithRenderer, enabled, disabled);
+  smithRenderer.applyCircleEnterAnimation(animatable({ shape: undefined }), 4, enabled);
+  smithRenderer.applyFadeEnterAnimation(animatable({ style: undefined }), enabled);
+  const fallback = { style: {}, animate: () => null };
+  smithRenderer.animateGraphicProperty(fallback, 'style', enabled, { opacity: 0.7 });
+  assert.equal(fallback.style.opacity, 0.7);
+  smithRenderer.animateGraphicProperty({ animate: () => null }, 'style', enabled, { opacity: 0.5 });
+  coverHover(smithRenderer);
+  smithRenderer.addHoverElement({ elements: [], triggerElements: [] }, {});
 });
 
 test('direct renderer exports cover draw guards, style fallbacks, and disabled animation branches', () => {
