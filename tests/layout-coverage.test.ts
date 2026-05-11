@@ -78,6 +78,18 @@ import {
   resolveSubwayLayout
 } from '../packages/echarts-subway/src/layout.ts';
 import {
+  __test__ as sequenceLayoutInternals,
+  collectSequenceMessageData,
+  layoutSequenceDiagram,
+  resolveSequenceDiagramLayout
+} from '../packages/echarts-sequence-diagram/src/layout.ts';
+import {
+  __test__ as causeEffectInternals,
+  collectCauseEffectData,
+  layoutCauseEffect,
+  resolveCauseEffectLayout
+} from '../packages/echarts-cause-effect/src/layout.ts';
+import {
   __test__ as routePathInternals,
   buildRoundedRoutePathShape,
   createRoutePathShape,
@@ -442,6 +454,42 @@ test('network, route, and path-like layouts cover projection and sampling varian
   assert.ok(createRoundedRoutePath([{ x: 0, y: 0 }, { x: 20, y: 0 }, { x: 20, y: 20 }], 6).includes('Q'));
   assert.equal(routeSegmentOffsetKey('a', 'b'), 'a\0b');
   assert.ok(resolveSharedSegmentOffsets(subway.routes, 12).size >= 0);
+
+  const sequence = resolveSequenceDiagramLayout({
+    data: [
+      ['client', 'api', 'request'],
+      ['api', 'db', 'query', 'async'],
+      ['db', 'api', 'rows', 'return'],
+      ['api', 'api', 'cache', 'self']
+    ],
+    activations: [
+      { participant: 'api', start: 0, end: 'cache', depth: 1 }
+    ],
+    padding: { top: 20, right: 30, bottom: 40, left: 50 },
+    selfLoopWidth: 44
+  });
+  assert.deepEqual(sequence.participants.map((participant) => participant.id), ['client', 'api', 'db']);
+  assert.equal(sequence.messages[3].direction, 'self');
+  assert.equal(sequence.activations[0].depth, 1);
+  assert.deepEqual(collectSequenceMessageData({ data: sequence.messages.map((message) => message.raw) }).length, 4);
+
+  const causeEffect = resolveCauseEffectLayout({
+    effect: { name: 'Late delivery' },
+    data: [
+      ['People', 'handoff gaps', ['unclear owner', 'no escalation path']],
+      { category: 'Process', items: [{ label: 'manual approval' }, 'batch release'] },
+      { name: 'Tools', children: ['slow build'] }
+    ],
+    padding: { top: 20, right: 30, bottom: 40, left: 50 },
+    categoryAngle: 54,
+    maxCauseDepth: 2
+  });
+  assert.deepEqual(causeEffect.categories.map((category) => category.side), ['top', 'bottom', 'top']);
+  assert.equal(causeEffect.categories[0].causes[1].children[0].depth, 1);
+  assert.deepEqual(collectCauseEffectData({ effect: 'Low NPS', categories: [['People', 'missed follow-up']] }).map((item) => item.kind), ['effect', 'category', 'cause']);
+  assert.equal(layoutCauseEffect({ effect: null, categories: [null, 'Loose'] }, { width: 0, height: -1, padding: -5 }).width, 1);
+  assert.equal(causeEffectInternals.readCategoryName(['Quality'], 'fallback'), 'Quality');
+  assert.deepEqual(causeEffectInternals.readCauseItems({ causes: ['A'] }), ['A']);
 
   assert.equal(layoutSpiral([
     ['A', 10],
@@ -996,6 +1044,35 @@ test('spiral, subway, pack bubble, and beeswarm cover numeric string and array-f
   assert.ok(subway.stations.some((station) => station.id === 'array:1'));
   assert.ok(subway.routes[0].points.some((point) => point.stationId === 'b'));
   assert.ok(subway.stations.some((station) => station.id === 'v'));
+
+  const sequence = layoutSequenceDiagram({
+    participants: ['A', ['B', 'Bee'], { id: 'C', label: 'See' }, null],
+    messages: [
+      { source: 'A', target: 'B', name: 'call' },
+      { sender: 'B', receiver: 'C', message: 'emit', type: 'asynchronous' },
+      { from: 'C', to: 'B', label: 'done', type: 'response' },
+      { from: 'B', type: 'loop', text: 'retry' },
+      { from: null, to: 'B' }
+    ],
+    activations: [
+      { participantId: 'B', start: 'call', end: 'retry', depth: '2' },
+      { participant: 'missing', start: 0, end: 1 }
+    ]
+  }, {
+    width: 420,
+    height: 260,
+    padding: 24,
+    headerHeight: '30',
+    headerWidth: '90',
+    messageGap: '36',
+    activationWidth: '10',
+    activationMargin: '8'
+  });
+  assert.equal(sequence.participants[1].name, 'Bee');
+  assert.equal(sequence.participants[2].name, 'See');
+  assert.deepEqual(sequence.messages.map((message) => message.type), ['sync', 'async', 'return', 'self']);
+  assert.equal(sequence.activations.length, 1);
+  assert.equal(sequenceLayoutInternals.normalizePadding({ top: 'bad', right: 1, bottom: -1, left: 2 }).top, 40);
 
   assert.equal(resolvePackBubbleLayout({ data: [], fast: true }).circles.length, 0);
   assert.equal(layoutPackBubble([{ value: 9 }], { fast: false }).circles.length, 1);

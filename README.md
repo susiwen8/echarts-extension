@@ -16,9 +16,12 @@ Implemented packages:
 - `echarts-circle-packing` registers `series.type = 'circlePacking'`
 - `echarts-sleep` registers `series.type = 'sleep'`
 - `echarts-nested-circle` registers `series.type = 'nestedCircle'`
+- `echarts-organization-chart` registers `series.type = 'organizationChart'`
 - `echarts-mosaic` registers `series.type = 'mosaic'`
 - `echarts-voronoi-treemap` registers `series.type = 'voronoiTreemap'`
 - `echarts-subway` registers `series.type = 'subway'`
+- `echarts-sequence-diagram` registers `series.type = 'sequenceDiagram'`
+- `echarts-cause-effect` registers `series.type = 'causeEffect'`
 - `echarts-flame` registers `series.type = 'flame'`
 - `echarts-sunrise-sunset` registers `series.type = 'sunriseSunset'`
 - `echarts-spiral` registers `series.type = 'spiral'`
@@ -27,7 +30,7 @@ Implemented packages:
 - `echarts-beeswarm` registers `series.type = 'beeswarm'`
 - `echarts-fisheye` registers the reusable top-level `fisheye` magnifier component
 
-The radial, radial area, radial boxplot, concentric, grid, mds, and arc layouts are implemented locally without `@antv/layout`. The Venn, pack bubble, circle packing, sleep, nested circle, mosaic, Voronoi treemap, subway, flame, sunrise/sunset, spiral, vector-field, fractal, and beeswarm extensions also use local deterministic layout implementations.
+The radial, radial area, radial boxplot, concentric, grid, mds, and arc layouts are implemented locally without `@antv/layout`. The Venn, pack bubble, circle packing, sleep, nested circle, organization chart, mosaic, Voronoi treemap, subway, sequence diagram, cause/effect fishbone, flame, sunrise/sunset, spiral, vector-field, fractal, and beeswarm extensions also use local deterministic layout implementations.
 The fisheye component is chart-agnostic: import it once and enable `fisheye` in any ECharts option.
 
 Source implementation files live in `index.ts` and `src/**/*.ts`; package entrypoints are compiled to `lib/`, and UMD bundles are emitted to `dist/`.
@@ -420,6 +423,36 @@ chart.setOption({
 });
 ```
 
+### Organization Chart
+
+`echarts-organization-chart` draws reporting structures as hierarchy cards connected by orthogonal links. It accepts nested `children`, flat `id` / `parentId` rows, or explicit `nodes` and `links`.
+
+```js
+import * as echarts from 'echarts';
+import 'echarts-organization-chart';
+
+const chart = echarts.init(document.getElementById('main'));
+chart.setOption({
+  series: [
+    {
+      type: 'organizationChart',
+      orient: 'TB',
+      data: {
+        name: 'CEO',
+        children: [
+          { name: 'Product', children: [{ name: 'Design' }, { name: 'Research' }] },
+          { name: 'Engineering', children: [{ name: 'Frontend' }, { name: 'Platform' }] }
+        ]
+      },
+      nodeWidth: 132,
+      nodeHeight: 48,
+      levelGap: 78,
+      label: { show: true, formatter: '{b}' }
+    }
+  ]
+});
+```
+
 ### Mosaic
 
 `echarts-mosaic` draws categorical mosaic plots. Columns are sized by the first category total, then each column is split vertically by the second category's conditional value.
@@ -526,6 +559,44 @@ chart.setOption({
   ]
 });
 ```
+
+### Sequence Diagram
+
+`echarts-sequence-diagram` draws UML sequence diagrams with participant and actor lifelines, ordered message arrows, return/async variants, self messages, activation bars, create/destroy lifecycles, notes, combined fragments, and timing or duration constraints.
+
+```js
+import * as echarts from 'echarts';
+import 'echarts-sequence-diagram';
+
+const chart = echarts.init(document.getElementById('main'));
+chart.setOption({
+  series: [
+    {
+      type: 'sequenceDiagram',
+      dsl: `
+        sequenceDiagram
+          actor Browser
+          participant API
+          create participant Session
+          participant DB as Database
+          Browser->>+API: GET /orders
+          API->>Session**: create session
+          Note right of API: validate token
+          opt cached
+            API-->>Browser: cache hit
+          end
+          duration API,Session: < 100ms
+          API-)DB: SELECT orders
+          DB-->>-API: rows
+          API->>API: cache()
+          API-xSession: close
+      `
+    }
+  ]
+});
+```
+
+Structured `participants` / `messages` / `activations` input is also supported when you already have parsed data.
 
 ### Beeswarm
 

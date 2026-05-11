@@ -20,6 +20,8 @@ import 'echarts-nested-circle';
 import 'echarts-mosaic';
 import 'echarts-voronoi-treemap';
 import 'echarts-subway';
+import 'echarts-sequence-diagram';
+import 'echarts-cause-effect';
 import 'echarts-flame';
 import 'echarts-sunrise-sunset';
 import 'echarts-lollipop';
@@ -277,6 +279,38 @@ const aliveRenderCases = [
             { id: 'c', name: 'Central', coord: [100, 40] }
           ]
         }
+      ]
+    }
+  },
+  {
+    name: 'sequenceDiagram',
+    series: {
+      type: 'sequenceDiagram',
+      participants: [
+        { id: 'client', name: 'Client' },
+        { id: 'api', name: 'API' },
+        { id: 'db', name: 'Database' }
+      ],
+      messages: [
+        { from: 'client', to: 'api', text: 'GET /orders' },
+        { from: 'api', to: 'db', text: 'SELECT orders', type: 'async' },
+        { from: 'db', to: 'api', text: 'rows', type: 'return' },
+        { from: 'api', to: 'api', text: 'cache()', type: 'self' }
+      ],
+      activations: [
+        { participant: 'api', start: 0, end: 3 }
+      ]
+    }
+  },
+  {
+    name: 'causeEffect',
+    series: {
+      type: 'causeEffect',
+      effect: 'Late delivery',
+      categories: [
+        { name: 'People', causes: ['handoff gaps', { name: 'unclear owner', children: ['no escalation path'] }] },
+        ['Process', 'manual approval', 'batch release'],
+        { name: 'Tools', causes: ['slow build'] }
       ]
     }
   },

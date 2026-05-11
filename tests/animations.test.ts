@@ -15,6 +15,7 @@ import 'echarts-venn';
 import 'echarts-nested-circle';
 import 'echarts-mosaic';
 import 'echarts-subway';
+import 'echarts-sequence-diagram';
 import 'echarts-flame';
 import 'echarts-sunrise-sunset';
 
@@ -166,6 +167,26 @@ const animationCases = [
             { id: 'c', name: 'Central', coord: [100, 40] }
           ]
         }
+      ]
+    }
+  },
+  {
+    name: 'sequenceDiagram',
+    series: {
+      type: 'sequenceDiagram',
+      participants: [
+        { id: 'client', name: 'Client' },
+        { id: 'api', name: 'API' },
+        { id: 'db', name: 'Database' }
+      ],
+      messages: [
+        { from: 'client', to: 'api', text: 'GET /orders' },
+        { from: 'api', to: 'db', text: 'SELECT orders', type: 'async' },
+        { from: 'db', to: 'api', text: 'rows', type: 'return' },
+        { from: 'api', to: 'api', text: 'cache()', type: 'self' }
+      ],
+      activations: [
+        { participant: 'api', start: 0, end: 3 }
       ]
     }
   },

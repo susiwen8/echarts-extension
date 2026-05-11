@@ -116,6 +116,67 @@
         }
       ]
     },
+    organizationChart: {
+      id: 'ceo',
+      name: 'CEO',
+      itemStyle: { color: '#dbeafe', borderColor: '#2563eb' },
+      children: [
+        {
+          id: 'product',
+          name: 'Product',
+          itemStyle: { color: '#dcfce7', borderColor: '#16a34a' },
+          children: [
+            { id: 'design', name: 'Design', itemStyle: { color: '#fef9c3', borderColor: '#ca8a04' } },
+            { id: 'research', name: 'Research', itemStyle: { color: '#fef9c3', borderColor: '#ca8a04' } }
+          ]
+        },
+        {
+          id: 'engineering',
+          name: 'Engineering',
+          itemStyle: { color: '#ede9fe', borderColor: '#7c3aed' },
+          children: [
+            { id: 'frontend', name: 'Frontend', itemStyle: { color: '#fce7f3', borderColor: '#db2777' } },
+            { id: 'platform', name: 'Platform', itemStyle: { color: '#cffafe', borderColor: '#0891b2' } },
+            { id: 'infra', name: 'Infra', itemStyle: { color: '#cffafe', borderColor: '#0891b2' } }
+          ]
+        },
+        {
+          id: 'operations',
+          name: 'Operations',
+          itemStyle: { color: '#ffedd5', borderColor: '#ea580c' },
+          children: [
+            { id: 'support', name: 'Support', itemStyle: { color: '#fee2e2', borderColor: '#dc2626' } },
+            { id: 'success', name: 'Success', itemStyle: { color: '#fee2e2', borderColor: '#dc2626' } }
+          ]
+        }
+      ]
+    },
+    causeEffect: {
+      effect: 'Late delivery',
+      categories: [
+        {
+          name: 'People',
+          causes: [
+            'handoff gaps',
+            { name: 'unclear owner', children: ['no escalation path'] },
+            'low coverage'
+          ]
+        },
+        ['Process', 'manual approval', 'batch release', 'missing cutoff'],
+        {
+          name: 'Tools',
+          causes: ['slow build', 'flaky deploy']
+        },
+        {
+          name: 'Materials',
+          causes: ['supplier queue', 'incomplete checklist']
+        },
+        {
+          name: 'Environment',
+          causes: ['holiday traffic', 'weather delay']
+        }
+      ]
+    },
     nestedCircle: [
       { name: 'Math', children: ['Probability', 'Algebra', 'Calculus'], itemStyle: { color: '#d7e7ff' } },
       { name: 'Python', children: ['Pandas', 'NumPy', 'Scikit-Learn'], itemStyle: { color: '#c5d4fb' } },

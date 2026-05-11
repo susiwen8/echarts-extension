@@ -298,6 +298,55 @@
         }]);
       }
     },
+    'sequence-diagram': {
+      packageName: 'echarts-sequence-diagram',
+      title: 'Sequence Diagram Large Trace',
+      defaultCount: 100000,
+      maxCount: ONE_MILLION,
+      renderLimit: 3000,
+      trendLimit: 900,
+      createData(count) {
+        const renderCount = clampCount(count, this.renderLimit);
+        const participants = ['Client', 'Gateway', 'Auth', 'Orders', 'Inventory', 'Payment', 'Email', 'Queue']
+          .map((name) => ({ id: name, name }));
+        const messages = Array.from({ length: renderCount }, (_, index) => {
+          const from = participants[index % (participants.length - 1)].id;
+          const to = participants[(index + 1) % participants.length].id;
+          return {
+            id: `message-${index}`,
+            from,
+            to,
+            text: index % 5 === 0 ? `return ${index}` : `message ${index}`,
+            type: index % 5 === 0 ? 'return' : index % 3 === 0 ? 'async' : 'sync'
+          };
+        });
+        return withMeta({ participants, messages }, count, renderCount);
+      },
+      createOption(payload) {
+        return perfOption(this, payload, [{
+          type: 'sequenceDiagram',
+          top: 42,
+          width: '96%',
+          height: '90%',
+          padding: 28,
+          headerWidth: 86,
+          headerHeight: 28,
+          messageGap: 6,
+          selfLoopWidth: 32,
+          selfLoopHeight: 10,
+          activationWidth: 8,
+          participants: payload.data.participants,
+          messages: payload.data.messages,
+          animation: false,
+          enterAnimation: false,
+          label: { show: false },
+          participantLabel: { show: true, fontSize: 10 },
+          lineStyle: { width: 1, opacity: 0.64 },
+          lifelineStyle: { width: 0.8, opacity: 0.5 },
+          participantStyle: { borderWidth: 1 }
+        }]);
+      }
+    },
     flame: treeCase('echarts-flame', 'flame', 'Flame Large Profile', 100000, 6000),
     'sunrise-sunset': {
       packageName: 'echarts-sunrise-sunset',

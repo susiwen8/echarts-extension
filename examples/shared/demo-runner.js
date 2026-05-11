@@ -485,6 +485,138 @@
         ]
       })
     },
+    'organization-chart': {
+      controls: [
+        ...commonChartControls('Product Organization', [0]),
+        rangeControl('enterDuration', 'Enter duration', 'series.0.enterAnimation.duration', 620, 120, 1800, 20),
+        rangeControl('enterStagger', 'Enter stagger', 'series.0.enterAnimation.stagger', 34, 0, 180, 2),
+        selectControl('orient', 'Orientation', 'series.0.orient', 'TB', ['TB', 'BT', 'LR', 'RL']),
+        rangeControl('nodeWidth', 'Node width', 'series.0.nodeWidth', 100, 72, 180, 2),
+        rangeControl('nodeHeight', 'Node height', 'series.0.nodeHeight', 42, 30, 72, 1),
+        rangeControl('levelGap', 'Level gap', 'series.0.levelGap', 68, 32, 130, 2),
+        rangeControl('siblingGap', 'Sibling gap', 'series.0.siblingGap', 12, 0, 60, 1),
+        rangeControl('subtreeGap', 'Subtree gap', 'series.0.subtreeGap', 22, 0, 80, 1),
+        rangeControl('borderWidth', 'Node border', 'series.0.itemStyle.borderWidth', 1.3, 0, 5, 0.1),
+        checkboxControl('labelShow', 'Labels', 'series.0.label.show', true),
+        rangeControl('labelFontSize', 'Label size', 'series.0.label.fontSize', 12, 8, 20, 1)
+      ],
+      option: (data) => ({
+        animation: true,
+        backgroundColor: '#ffffff',
+        title: title('Product Organization'),
+        series: [
+          {
+            type: 'organizationChart',
+            top: 68,
+            width: '94%',
+            height: '82%',
+            orient: 'TB',
+            padding: { top: 18, right: 14, bottom: 18, left: 14 },
+            nodeWidth: 100,
+            nodeHeight: 42,
+            levelGap: 68,
+            siblingGap: 12,
+            subtreeGap: 22,
+            data: data.organizationChart,
+            enterAnimation: { duration: 620, stagger: 34, easing: 'cubicOut' },
+            itemStyle: { borderWidth: 1.3, borderRadius: 6, opacity: 0.96 },
+            lineStyle: { color: '#94a3b8', width: 1.5, type: 'solid', opacity: 0.92 },
+            label: { show: true, color: '#0f172a', fontSize: 12, fontWeight: 720, formatter: '{b}' },
+            emphasis: {
+              itemStyle: {
+                borderWidth: 2,
+                shadowBlur: 12,
+                shadowColor: 'rgba(15, 23, 42, 0.18)'
+              }
+            }
+          }
+        ]
+      })
+    },
+    'cause-effect': {
+      controls: [
+        ...commonChartControls('Cause and Effect Analysis', [0]),
+        rangeControl('padding', 'Padding', 'series.0.padding', 88, 24, 120, 2),
+        rangeControl('effectWidth', 'Effect width', 'series.0.effectWidth', 138, 80, 220, 2),
+        rangeControl('effectHeight', 'Effect height', 'series.0.effectHeight', 58, 36, 100, 1),
+        rangeControl('categoryGap', 'Category gap', 'series.0.categoryGap', 118, 64, 190, 2),
+        rangeControl('categoryLength', 'Bone length', 'series.0.categoryLength', 130, 80, 240, 2),
+        rangeControl('categoryAngle', 'Bone angle', 'series.0.categoryAngle', 48, 24, 72, 1),
+        rangeControl('causeGap', 'Cause gap', 'series.0.causeGap', 24, 14, 54, 1),
+        rangeControl('causeLength', 'Cause length', 'series.0.causeLength', 46, 28, 130, 2),
+        rangeControl('maxCauseDepth', 'Max cause depth', 'series.0.maxCauseDepth', 3, 0, 5, 1),
+        rangeControl('spineWidth', 'Spine width', 'series.0.lineStyle.width', 2, 0.6, 5, 0.1),
+        rangeControl('boneWidth', 'Bone width', 'series.0.categoryLineStyle.width', 1.6, 0.4, 4, 0.1),
+        rangeControl('causeLineWidth', 'Cause width', 'series.0.causeLineStyle.width', 1.1, 0.3, 3, 0.1),
+        checkboxControl('labelShow', 'Labels', [
+          'series.0.label.show',
+          'series.0.effectLabel.show',
+          'series.0.categoryLabel.show',
+          'series.0.causeLabel.show'
+        ], true),
+        rangeControl('labelFontSize', 'Label size', [
+          'series.0.label.fontSize',
+          'series.0.categoryLabel.fontSize',
+          'series.0.causeLabel.fontSize'
+        ], 10, 8, 18, 1),
+        colorControl('lineColor', 'Line color', [
+          'series.0.lineStyle.color',
+          'series.0.categoryLineStyle.color',
+          'series.0.causeLineStyle.color'
+        ], '#2454a6'),
+        colorControl('effectBorderColor', 'Effect border', 'series.0.effectStyle.borderColor', '#2454a6')
+      ],
+      option: (data) => {
+        const causeEffect = data.causeEffect || { effect: 'Effect', categories: [] };
+        return {
+          animation: true,
+          backgroundColor: '#ffffff',
+          title: title('Cause and Effect Analysis'),
+          series: [
+            {
+              type: 'causeEffect',
+              top: 76,
+              width: '94%',
+              height: '82%',
+              effect: causeEffect.effect,
+              categories: causeEffect.categories,
+              padding: 88,
+              effectWidth: 138,
+              effectHeight: 58,
+              categoryGap: 118,
+              categoryLength: 130,
+              categoryAngle: 48,
+              causeGap: 24,
+              causeLength: 46,
+              maxCauseDepth: 3,
+              enterAnimation: false,
+              animationDurationUpdate: 0,
+              lineStyle: { color: '#2454a6', width: 2, opacity: 1 },
+              categoryLineStyle: { color: '#2454a6', width: 1.6, opacity: 0.96 },
+              causeLineStyle: { color: '#2454a6', width: 1.1, opacity: 0.92 },
+              effectStyle: {
+                color: '#f8fafc',
+                borderColor: '#2454a6',
+                borderWidth: 1.2,
+                borderRadius: 4,
+                opacity: 1
+              },
+              label: { show: true, color: '#0f172a', fontSize: 10, fontWeight: 600, formatter: '{b}' },
+              effectLabel: { show: true, color: '#0f172a', fontSize: 13, fontWeight: 700, formatter: '{b}' },
+              categoryLabel: { show: true, color: '#0f172a', fontSize: 10, fontWeight: 700, formatter: '{b}' },
+              causeLabel: { show: true, color: '#334155', fontSize: 10, fontWeight: 500, formatter: '{b}' },
+              emphasis: {
+                itemStyle: {
+                  opacity: 1,
+                  shadowBlur: 8,
+                  shadowColor: 'rgba(14, 165, 233, 0.22)'
+                }
+              }
+            }
+          ]
+        };
+      }
+    },
     'nested-circle': {
       controls: [
         ...commonChartControls('Data Skill Roadmap', [0]),
@@ -1439,6 +1571,8 @@
     if (exampleName === 'venn-bubble') return appendBubbleVennData(data, index);
     if (exampleName === 'pack-bubble') return appendPackBubbleData(data, index);
     if (exampleName === 'circle-packing') return appendCirclePackingData(data, index);
+    if (exampleName === 'organization-chart') return appendOrganizationChartData(data, index);
+    if (exampleName === 'cause-effect') return appendCauseEffectData(data, index);
     if (exampleName === 'nested-circle') return appendNestedCircleData(data, index);
     if (exampleName === 'mosaic') return appendMosaicData(data, index);
     if (exampleName === 'voronoi-treemap') return appendVoronoiTreemapData(data, index);
@@ -1464,6 +1598,8 @@
     if (exampleName === 'venn-bubble') return arrayLength(data.bubbleVenn);
     if (exampleName === 'pack-bubble') return arrayLength(data.packBubble);
     if (exampleName === 'circle-packing') return countTreeItems(data.circlePacking);
+    if (exampleName === 'organization-chart') return countTreeItems(data.organizationChart);
+    if (exampleName === 'cause-effect') return countCauseEffectItems(data.causeEffect);
     if (exampleName === 'nested-circle') return (data.nestedCircle || []).reduce((total, ring) => total + 1 + arrayLength(ring.children), 0);
     if (exampleName === 'mosaic') return arrayLength(data.mosaic);
     if (exampleName === 'voronoi-treemap') return countTreeItems(data.voronoiTreemap);
@@ -1600,6 +1736,38 @@
       name: `Added ${index}`,
       value: 10 + (index * 7) % 34,
       itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendOrganizationChartData(data, index) {
+    const root = data.organizationChart || (data.organizationChart = { id: 'ceo', name: 'CEO', children: [] });
+    const parent = ensureOrganizationChartAppendParent(root, index);
+    const color = addDataColor(index);
+    parent.children.push({
+      id: `added-organization-chart-${index}`,
+      name: `Added ${index}`,
+      itemStyle: { color: '#f8fafc', borderColor: color }
+    });
+    return true;
+  }
+
+  function appendCauseEffectData(data, index) {
+    const diagram = data.causeEffect || (data.causeEffect = { effect: 'Effect', categories: [] });
+    if (!Array.isArray(diagram.categories)) diagram.categories = [];
+    const templates = [
+      ['Measurement', 'stale dashboard', 'manual status report', 'late QA signal'],
+      ['Policy', 'approval queue', 'unclear SLA', 'handoff freeze'],
+      ['Customer', 'address mismatch', 'missing contact', 'late confirmation'],
+      ['Planning', 'overbooked route', 'capacity buffer', 'weather fallback']
+    ];
+    const template = templates[(index - 1) % templates.length];
+    const cycle = Math.floor((index - 1) / templates.length);
+    const name = cycle === 0 ? template[0] : `${template[0]} ${cycle + 1}`;
+    diagram.categories.push({
+      id: `added-cause-effect-${index}`,
+      name,
+      causes: template.slice(1)
     });
     return true;
   }
@@ -1797,11 +1965,65 @@
     return group;
   }
 
+  function ensureOrganizationChartAppendParent(root, index) {
+    if (!Array.isArray(root.children)) root.children = [];
+    if (!root.children.length) {
+      root.children.push({
+        id: 'added-organization-group',
+        name: 'Added Team',
+        itemStyle: { color: addDataColor(index), borderColor: addDataColor(index) },
+        children: []
+      });
+    }
+    const candidates = collectOrganizationChartAppendCandidates(root);
+    const parents = candidates.length ? candidates : root.children;
+    const fewestChildren = parents.reduce((minimum, node) => (
+      Math.min(minimum, arrayLength(node.children))
+    ), Number.POSITIVE_INFINITY);
+    const leastFilledParents = parents.filter((node) => arrayLength(node.children) === fewestChildren);
+    const parent = leastFilledParents[(index - 1) % leastFilledParents.length];
+    if (!Array.isArray(parent.children)) parent.children = [];
+    return parent;
+  }
+
+  function collectOrganizationChartAppendCandidates(root) {
+    const candidates = [];
+    visitOrganizationChartNode(root, 0, candidates);
+    return candidates;
+  }
+
+  function visitOrganizationChartNode(node, depth, candidates) {
+    if (!node || typeof node !== 'object') return;
+    const id = String(node.id ?? '');
+    if (depth >= 2 && !id.startsWith('added-organization-chart-')) candidates.push(node);
+    if (!Array.isArray(node.children)) return;
+    node.children.forEach((child) => visitOrganizationChartNode(child, depth + 1, candidates));
+  }
+
   function countTreeItems(node) {
     if (!node || typeof node !== 'object') return 0;
     return 1 + (Array.isArray(node.children)
       ? node.children.reduce((total, child) => total + countTreeItems(child), 0)
       : 0);
+  }
+
+  function countCauseEffectItems(diagram) {
+    if (!diagram || typeof diagram !== 'object') return 0;
+    const categories = Array.isArray(diagram.categories) ? diagram.categories : [];
+    return 1 + categories.reduce((total, category) => total + 1 + countCauseItems(readCauseEffectCauses(category)), 0);
+  }
+
+  function countCauseItems(causes) {
+    return Array.isArray(causes)
+      ? causes.reduce((total, cause) => total + 1 + countCauseItems(readCauseEffectCauses(cause)), 0)
+      : 0;
+  }
+
+  function readCauseEffectCauses(item) {
+    if (Array.isArray(item)) return item.slice(1);
+    if (!item || typeof item !== 'object') return [];
+    const causes = item.causes || item.items || item.children;
+    return Array.isArray(causes) ? causes : [];
   }
 
   function currentSunriseSunsetData(data) {

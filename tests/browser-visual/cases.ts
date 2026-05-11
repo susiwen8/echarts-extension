@@ -80,6 +80,12 @@ export const browserVisualCases = [
     screenshotSelector: 'main'
   },
   {
+    name: 'echarts-organization-chart',
+    path: '/packages/echarts-organization-chart/examples/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main'
+  },
+  {
     name: 'echarts-mosaic',
     path: '/packages/echarts-mosaic/examples/',
     readySelector: '#chart canvas, #chart svg',
@@ -94,6 +100,12 @@ export const browserVisualCases = [
   {
     name: 'echarts-subway',
     path: '/packages/echarts-subway/examples/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main'
+  },
+  {
+    name: 'echarts-sequence-diagram',
+    path: '/packages/echarts-sequence-diagram/examples/',
     readySelector: '#chart canvas, #chart svg',
     screenshotSelector: 'main'
   },

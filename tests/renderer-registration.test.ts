@@ -395,6 +395,53 @@ test('captured renderer registrations cover lifecycle across the remaining custo
       }
     },
     {
+      path: '../packages/echarts-sequence-diagram/src/sequence-diagram.ts?registration',
+      option: {
+        participants: [
+          { id: 'client', name: 'Client' },
+          { id: 'api', name: 'API' },
+          { id: 'db', name: 'Database' }
+        ],
+        messages: [
+          { from: 'client', to: 'api', text: 'GET /orders', type: 'sync' },
+          { from: 'api', to: 'db', text: 'SELECT orders', type: 'async' },
+          { from: 'db', to: 'api', text: 'rows', type: 'return' },
+          { from: 'api', to: 'api', text: 'cache()', type: 'self' }
+        ],
+        activations: [
+          { participant: 'api', start: 0, end: 3 }
+        ],
+        label: { show: true, formatter: '{from}->{to}:{b}' },
+        participantLabel: { show: true, formatter: '{b}' },
+        lineStyle: { type: 'dashed', opacity: 0.8 },
+        enterAnimation: { duration: 10, delay: 1, stagger: 1 }
+      }
+    },
+    {
+      path: '../packages/echarts-cause-effect/src/cause-effect.ts?registration',
+      option: {
+        effect: { name: 'Late delivery', itemStyle: { color: '#ffffff', borderColor: '#2563eb' } },
+        categories: [
+          {
+            id: 'people',
+            name: 'People',
+            lineStyle: { type: [2, 2] },
+            causes: [
+              { name: 'handoff gaps', labelStyle: { color: '#111827' } },
+              { name: 'unclear owner', children: [{ name: 'no escalation path' }] }
+            ]
+          },
+          ['Process', 'manual approval', 'batch release'],
+          { name: 'Tools', causes: ['slow build'] }
+        ],
+        label: { show: true, formatter: '{kind}:{b}' },
+        lineStyle: { type: 'dashed', opacity: 0.8 },
+        categoryLineStyle: { type: 'dotted' },
+        causeLineStyle: { type: [2, 3] },
+        enterAnimation: { duration: 10, delay: 1, stagger: 1 }
+      }
+    },
+    {
       path: '../packages/echarts-sunrise-sunset/src/sunrise-sunset.ts?registration',
       option: {
         sunrise: '22:00',
@@ -466,6 +513,23 @@ test('captured renderer registrations cover lifecycle across the remaining custo
         },
         rootVisible: true,
         label: { show: true, formatter: '{b} {c}' },
+        enterAnimation: { duration: 10, delay: 1, stagger: 1 }
+      }
+    },
+    {
+      path: '../packages/echarts-organization-chart/src/organization-chart.ts?registration',
+      option: {
+        data: {
+          name: 'CEO',
+          itemStyle: { color: '#dbeafe' },
+          children: [
+            { name: 'Product Long Label', label: { show: true }, children: [{ name: 'Design' }, { name: 'Research' }] },
+            { name: 'Engineering', children: [{ name: 'Frontend' }, { name: 'Platform' }] }
+          ]
+        },
+        orient: 'TB',
+        label: { show: true, formatter: '{b}' },
+        lineStyle: { type: 'dashed', opacity: 0.8 },
         enterAnimation: { duration: 10, delay: 1, stagger: 1 }
       }
     },

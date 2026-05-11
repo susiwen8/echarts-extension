@@ -6,6 +6,7 @@ import { SVGRenderer } from 'echarts/renderers';
 
 import 'echarts-arc';
 import 'echarts-beeswarm';
+import 'echarts-cause-effect';
 import 'echarts-circle-packing';
 import 'echarts-concentric';
 import 'echarts-fisheye';
@@ -16,6 +17,7 @@ import 'echarts-lollipop';
 import 'echarts-mds';
 import 'echarts-mosaic';
 import 'echarts-nested-circle';
+import 'echarts-organization-chart';
 import 'echarts-pack-bubble';
 import 'echarts-radial';
 import 'echarts-radial-area';
@@ -23,6 +25,7 @@ import 'echarts-radial-boxplot';
 import 'echarts-spiral';
 import 'echarts-smith';
 import 'echarts-subway';
+import 'echarts-sequence-diagram';
 import 'echarts-sunrise-sunset';
 import 'echarts-vector-field';
 import 'echarts-venn';
@@ -193,6 +196,20 @@ test('hierarchical and polar custom charts render label and style option variant
     enterAnimation: { enabled: false }
   });
   renderSeries({
+    type: 'organizationChart',
+    data: tree,
+    orient: 'LR',
+    nodeWidth: 112,
+    nodeHeight: 42,
+    levelGap: 64,
+    siblingGap: 18,
+    subtreeGap: 26,
+    label: { show: true, formatter: ({ name, depth }) => `${depth}:${name}` },
+    itemStyle: { borderColor: '#bfdbfe', borderWidth: '1', opacity: '0.94' },
+    lineStyle: { type: 'dashed', width: '1.5' },
+    enterAnimation: false
+  });
+  renderSeries({
     type: 'mosaic',
     data: [
       { channel: 'Organic', stage: 'New', users: 10, itemStyle: { color: '#60a5fa' } },
@@ -306,6 +323,50 @@ test('radial, temporal, network, and vector custom charts render branch-heavy va
     routeLabel: { show: true, position: 'start', formatter: '{b}' },
     lineStyle: { type: 'dashed' },
     stationStyle: { borderColor: '#fff', borderWidth: '2' },
+    enterAnimation: false
+  }, { width: 900, height: 560 });
+  renderSeries({
+    type: 'sequenceDiagram',
+    participants: [
+      { id: 'client', name: 'Client', itemStyle: { color: '#ffffff', borderColor: '#2563eb' } },
+      { id: 'api', name: 'API' },
+      { id: 'db', name: 'Database' }
+    ],
+    messages: [
+      { from: 'client', to: 'api', text: 'GET /orders', type: 'sync' },
+      { from: 'api', to: 'db', text: 'SELECT orders', type: 'async' },
+      { from: 'db', to: 'api', text: 'rows', type: 'return', lineStyle: { type: [2, 2] } },
+      { from: 'api', to: 'api', text: 'cache()', type: 'self', label: { show: true } }
+    ],
+    activations: [
+      { participant: 'api', start: 0, end: 3 }
+    ],
+    label: { show: true, formatter: ({ from, to, name }) => `${from}>${to}:${name}` },
+    participantLabel: { show: true, formatter: '{b}' },
+    lifelineStyle: { type: 'dotted' },
+    enterAnimation: false
+  }, { width: 900, height: 560 });
+  renderSeries({
+    type: 'causeEffect',
+    effect: 'Late delivery',
+    categories: [
+      {
+        id: 'people',
+        name: 'People',
+        lineStyle: { type: [2, 2] },
+        causes: [
+          { name: 'handoff gaps', labelStyle: { color: '#111' } },
+          { name: 'unclear owner', children: [{ name: 'no escalation path' }] }
+        ]
+      },
+      ['Process', 'manual approval', 'batch release'],
+      { name: 'Tools', causes: ['slow build'] }
+    ],
+    label: { show: true, formatter: ({ kind, name }) => `${kind}:${name}` },
+    lineStyle: { type: 'dashed' },
+    categoryLineStyle: { type: 'dotted' },
+    causeLineStyle: { type: [2, 3] },
+    effectStyle: { color: '#fff', borderColor: '#2563eb' },
     enterAnimation: false
   }, { width: 900, height: 560 });
   renderSeries({
@@ -507,6 +568,7 @@ test('custom chart renderers tolerate empty, malformed, and disabled option vari
     { type: 'packBubble', data: null, label: { show: true }, itemStyle: null },
     { type: 'nestedCircle', data: null, label: { show: true }, childLabel: { show: true } },
     { type: 'flame', data: null, label: { show: true }, itemStyle: null },
+    { type: 'organizationChart', data: null, label: { show: true }, lineStyle: null },
     { type: 'mosaic', data: null, label: { show: true }, itemStyle: null },
     { type: 'voronoiTreemap', data: null, rootVisible: false, label: { show: true }, itemStyle: null },
     { type: 'venn', data: null, layout: 'bubble', label: { show: true } },
@@ -514,6 +576,8 @@ test('custom chart renderers tolerate empty, malformed, and disabled option vari
     { type: 'radialBoxplot', data: null, label: { show: true }, angleAxis: { show: false }, radialAxis: { show: false } },
     { type: 'spiral', data: null, label: { show: true }, itemStyle: null },
     { type: 'subway', data: null, label: { show: true }, routeLabel: { show: true } },
+    { type: 'sequenceDiagram', data: null, participants: null, activations: null, label: { show: true }, participantLabel: { show: true } },
+    { type: 'causeEffect', data: null, effect: null, label: { show: true }, effectLabel: { show: true } },
     { type: 'sunriseSunset', data: null, label: { show: true }, sunIcon: null, moonIcon: null },
     { type: 'vectorField', data: null, label: { show: true }, lineStyle: null, arrowStyle: null },
     { type: 'fractal', data: null, roam: false, pixelRatio: 1, maxPixelCount: 1, fallbackMaxCells: 1 },

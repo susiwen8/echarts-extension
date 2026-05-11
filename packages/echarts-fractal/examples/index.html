@@ -6,6 +6,18 @@
   <title>echarts-fractal example</title>
   <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../../examples/shared/demo-page.css?v=interactions-4">
+  <style>
+    .fractal-option-panel .demo-option-editor {
+      border-top: 0;
+      padding-top: 14px;
+    }
+
+    .fractal-option-panel .demo-option-editor__textarea {
+      height: calc(min(74vh, 760px) - 72px);
+      min-height: 360px;
+      resize: none;
+    }
+  </style>
 </head>
 <body class="demo-page" data-example="fractal">
   <main class="demo-shell">
@@ -19,13 +31,23 @@
         <a href="../../../examples/">All examples</a>
       </nav>
     </header>
-    <section class="demo-stage"><div class="chart-frame"><div id="chart" class="demo-chart--interactive"></div></div></section>
+    <section class="demo-stage demo-stage--with-controls">
+      <div class="chart-frame"><div id="chart" class="demo-chart--interactive"></div></div>
+      <aside class="demo-controls fractal-option-panel" aria-label="Chart option">
+        <div class="demo-controls__header">
+          <h2>Option</h2>
+        </div>
+        <div class="demo-option-editor">
+          <textarea id="option-json" class="demo-option-editor__textarea" readonly spellcheck="false"></textarea>
+        </div>
+      </aside>
+    </section>
   </main>
   <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
   <script src="../dist/echarts-fractal.js?v=fractal"></script>
   <script>
     const chart = echarts.init(document.getElementById('chart'));
-    chart.setOption({
+    const option = {
       animation: false,
       backgroundColor: '#ffffff',
       series: [
@@ -63,7 +85,10 @@
           ]
         }
       ]
-    });
+    };
+
+    chart.setOption(option);
+    document.getElementById('option-json').value = JSON.stringify(option, null, 2);
     window.addEventListener('resize', () => chart.resize());
   </script>
 </body>
