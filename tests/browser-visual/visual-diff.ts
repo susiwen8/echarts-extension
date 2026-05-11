@@ -8,6 +8,7 @@ import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
 
 import { browserVisualCases } from './cases.ts';
+import { resolveScreenshotSelector } from './visual-target.ts';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const snapshotDir = path.join(root, 'tests/browser-visual/__snapshots__');
@@ -99,14 +100,15 @@ async function runVisualCase(context, visualCase, baseUrl) {
     }
     await page.waitForTimeout(visualCase.waitAfterRenderMs ?? 1400);
 
-    const target = page.locator(visualCase.screenshotSelector || 'body');
-    const screenshot = await target.screenshot({ animations: 'disabled' });
+    const screenshotTarget = await screenshotVisualTarget(page, visualCase);
+    const screenshot = screenshotTarget.screenshot;
 
     if (shouldUpdate) {
       await writeFile(snapshotPath, screenshot);
       return {
         name: visualCase.name,
         ok: true,
+        screenshotSelector: screenshotTarget.selector,
         snapshotPath: relative(snapshotPath),
         url: `${baseUrl}${visualCase.path}`,
         updated: true
@@ -120,6 +122,7 @@ async function runVisualCase(context, visualCase, baseUrl) {
         ok: false,
         actualPath: relative(actualPath),
         message: `missing baseline ${relative(snapshotPath)}; run npm run test:visual:browser:update`,
+        screenshotSelector: screenshotTarget.selector,
         snapshotPath: relative(snapshotPath),
         url: `${baseUrl}${visualCase.path}`
       };
@@ -134,6 +137,7 @@ async function runVisualCase(context, visualCase, baseUrl) {
         ok: false,
         actualPath: relative(actualPath),
         message: `size changed from ${expected.width}x${expected.height} to ${actual.width}x${actual.height}`,
+        screenshotSelector: screenshotTarget.selector,
         snapshotPath: relative(snapshotPath),
         url: `${baseUrl}${visualCase.path}`
       };
@@ -156,6 +160,7 @@ async function runVisualCase(context, visualCase, baseUrl) {
         diffPixels,
         maxDiffPixels: allowedDiffPixels,
         message: `${diffPixels} pixels differ; expected at most ${allowedDiffPixels}`,
+        screenshotSelector: screenshotTarget.selector,
         snapshotPath: relative(snapshotPath),
         url: `${baseUrl}${visualCase.path}`
       };
@@ -166,12 +171,63 @@ async function runVisualCase(context, visualCase, baseUrl) {
       ok: true,
       diffPixels,
       maxDiffPixels: allowedDiffPixels,
+      screenshotSelector: screenshotTarget.selector,
       snapshotPath: relative(snapshotPath),
       url: `${baseUrl}${visualCase.path}`
     };
   } finally {
     await page.close();
   }
+}
+
+async function screenshotVisualTarget(page, visualCase) {
+  const selector = resolveScreenshotSelector(visualCase);
+  const locator = page.locator(selector);
+  const count = await locator.count();
+  if (count === 0) {
+    throw new Error(`No browser visual screenshot target matched ${selector}`);
+  }
+
+  const regions = [];
+  for (let index = 0; index < count; index += 1) {
+    const target = locator.nth(index);
+    const box = await target.boundingBox();
+    if (box && box.width > 0 && box.height > 0) {
+      regions.push({ box, index });
+    }
+  }
+
+  if (regions.length === 0) {
+    throw new Error(`Browser visual screenshot target ${selector} has no visible region`);
+  }
+
+  if (regions.length === 1) {
+    return {
+      screenshot: await locator.nth(regions[0].index).screenshot({ animations: 'disabled' }),
+      selector
+    };
+  }
+
+  const clip = unionClip(regions.map((region) => region.box));
+  return {
+    screenshot: await page.screenshot({ animations: 'disabled', clip }),
+    selector
+  };
+}
+
+function unionClip(boxes) {
+  const minX = Math.min(...boxes.map((box) => box.x));
+  const minY = Math.min(...boxes.map((box) => box.y));
+  const maxX = Math.max(...boxes.map((box) => box.x + box.width));
+  const maxY = Math.max(...boxes.map((box) => box.y + box.height));
+  const x = Math.max(0, Math.floor(minX));
+  const y = Math.max(0, Math.floor(minY));
+  return {
+    x,
+    y,
+    width: Math.ceil(maxX) - x,
+    height: Math.ceil(maxY) - y
+  };
 }
 
 async function disableAnimationControls(page) {
