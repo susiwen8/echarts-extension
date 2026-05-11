@@ -9,6 +9,7 @@ import 'echarts-beeswarm';
 import 'echarts-circle-packing';
 import 'echarts-concentric';
 import 'echarts-fisheye';
+import 'echarts-fractal';
 import 'echarts-flame';
 import 'echarts-grid';
 import 'echarts-lollipop';
@@ -335,6 +336,24 @@ test('radial, temporal, network, and vector custom charts render branch-heavy va
     enterAnimation: { enabled: false }
   });
   renderSeries({
+    type: 'fractal',
+    fractalType: 'julia',
+    roam: false,
+    width: '90%',
+    height: '80%',
+    viewport: { center: [0, 0], viewWidth: 3, scale: 8 },
+    pixelRatio: 1,
+    maxPixelCount: 2400,
+    fallbackMaxCells: 2400,
+    baseIterations: 80,
+    iterationBoost: 12,
+    iterationLimit: 180,
+    juliaConstant: [-0.72, 0.22],
+    insideColor: '#050609',
+    backgroundColor: '#050609',
+    colorStops: [[0, '#111827'], [0.5, '#16a3a3'], [1, '#fff7d6']]
+  }, { width: 320, height: 220 });
+  renderSeries({
     type: 'smith',
     referenceImpedance: 50,
     resistanceField: 'resistance',
@@ -497,6 +516,7 @@ test('custom chart renderers tolerate empty, malformed, and disabled option vari
     { type: 'subway', data: null, label: { show: true }, routeLabel: { show: true } },
     { type: 'sunriseSunset', data: null, label: { show: true }, sunIcon: null, moonIcon: null },
     { type: 'vectorField', data: null, label: { show: true }, lineStyle: null, arrowStyle: null },
+    { type: 'fractal', data: null, roam: false, pixelRatio: 1, maxPixelCount: 1, fallbackMaxCells: 1 },
     { type: 'smith', data: null, label: { show: true }, grid: { show: false }, lineStyle: null }
   ];
 

@@ -13,6 +13,7 @@ export default defineConfig({
       'echarts-circle-packing': path.join(root, 'packages/echarts-circle-packing/index.ts'),
       'echarts-concentric': path.join(root, 'packages/echarts-concentric/index.ts'),
       'echarts-fisheye': path.join(root, 'packages/echarts-fisheye/index.ts'),
+      'echarts-fractal': path.join(root, 'packages/echarts-fractal/index.ts'),
       'echarts-flame': path.join(root, 'packages/echarts-flame/index.ts'),
       'echarts-grid': path.join(root, 'packages/echarts-grid/index.ts'),
       'echarts-lollipop': path.join(root, 'packages/echarts-lollipop/index.ts'),

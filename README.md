@@ -23,10 +23,11 @@ Implemented packages:
 - `echarts-sunrise-sunset` registers `series.type = 'sunriseSunset'`
 - `echarts-spiral` registers `series.type = 'spiral'`
 - `echarts-vector-field` registers `series.type = 'vectorField'`
+- `echarts-fractal` registers `series.type = 'fractal'`
 - `echarts-beeswarm` registers `series.type = 'beeswarm'`
 - `echarts-fisheye` registers the reusable top-level `fisheye` magnifier component
 
-The radial, radial area, radial boxplot, concentric, grid, mds, and arc layouts are implemented locally without `@antv/layout`. The Venn, pack bubble, circle packing, sleep, nested circle, mosaic, Voronoi treemap, subway, flame, sunrise/sunset, spiral, vector-field, and beeswarm extensions also use local deterministic layout implementations.
+The radial, radial area, radial boxplot, concentric, grid, mds, and arc layouts are implemented locally without `@antv/layout`. The Venn, pack bubble, circle packing, sleep, nested circle, mosaic, Voronoi treemap, subway, flame, sunrise/sunset, spiral, vector-field, fractal, and beeswarm extensions also use local deterministic layout implementations.
 The fisheye component is chart-agnostic: import it once and enable `fisheye` in any ECharts option.
 
 Source implementation files live in `index.ts` and `src/**/*.ts`; package entrypoints are compiled to `lib/`, and UMD bundles are emitted to `dist/`.
@@ -585,6 +586,37 @@ chart.setOption({
         width: 1.15,
         opacity: 0.88
       }
+    }
+  ]
+});
+```
+
+### Fractal
+
+`echarts-fractal` renders Mandelbrot, Julia, and Burning Ship fractals. Wheel zoom and drag pan recompute the complex-plane viewport instead of scaling a fixed bitmap, so newly revealed detail is sampled at the current display resolution.
+
+```js
+import * as echarts from 'echarts';
+import 'echarts-fractal';
+
+const chart = echarts.init(document.getElementById('main'));
+chart.setOption({
+  series: [
+    {
+      type: 'fractal',
+      fractalType: 'mandelbrot',
+      roam: true,
+      viewport: {
+        center: [-0.743643887037151, 0.13182590420533],
+        viewWidth: 3.2,
+        scale: 1
+      },
+      baseIterations: 180,
+      iterationBoost: 42,
+      iterationLimit: 2400,
+      maxPixelCount: 420000,
+      interactiveMaxPixelCount: 90000,
+      refineDelay: 180
     }
   ]
 });

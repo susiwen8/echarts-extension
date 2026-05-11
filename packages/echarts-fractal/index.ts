@@ -1,0 +1,2 @@
+import './src/fractal.js';
+

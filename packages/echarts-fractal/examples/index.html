@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>echarts-fractal example</title>
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../../examples/shared/demo-page.css?v=interactions-4">
+</head>
+<body class="demo-page" data-example="fractal">
+  <main class="demo-shell">
+    <header class="demo-header">
+      <div>
+        <p class="eyebrow">echarts-fractal</p>
+        <h1>Fractal Explorer</h1>
+        <p>Wheel to zoom and drag to pan; each view is recomputed from the complex plane.</p>
+      </div>
+      <nav class="demo-links" aria-label="Example navigation">
+        <a href="../../../examples/">All examples</a>
+      </nav>
+    </header>
+    <section class="demo-stage"><div class="chart-frame"><div id="chart" class="demo-chart--interactive"></div></div></section>
+  </main>
+  <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
+  <script src="../dist/echarts-fractal.js?v=fractal"></script>
+  <script>
+    const chart = echarts.init(document.getElementById('chart'));
+    chart.setOption({
+      animation: false,
+      backgroundColor: '#ffffff',
+      series: [
+        {
+          type: 'fractal',
+          name: 'Mandelbrot',
+          width: '100%',
+          height: '100%',
+          fractalType: 'mandelbrot',
+          roam: true,
+          viewport: {
+            center: [-0.743643887037151, 0.13182590420533],
+            viewWidth: 3.2,
+            scale: 1
+          },
+          pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+          maxPixelCount: 520000,
+          interactivePixelRatio: 0.52,
+          interactiveMaxPixelCount: 60000,
+          interactiveIterationScale: 0.32,
+          minInteractiveIterations: 56,
+          refineDelay: 220,
+          worker: true,
+          baseIterations: 180,
+          iterationBoost: 48,
+          iterationLimit: 3000,
+          insideColor: '#050609',
+          backgroundColor: '#050609',
+          colorStops: [
+            [0, '#07111f'],
+            [0.16, '#2454a6'],
+            [0.38, '#16a3a3'],
+            [0.68, '#e6a13d'],
+            [1, '#fff7d6']
+          ]
+        }
+      ]
+    });
+    window.addEventListener('resize', () => chart.resize());
+  </script>
+</body>
+</html>
