@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build:ts": "tsc -p tsconfig.json",
-    "test": "npm run build:ts && vitest run --config ../../vitest.config.js packages/echarts-layout-core/test/layouts.test.js",
-    "test:unit": "vitest run --config ../../vitest.config.js packages/echarts-layout-core/test/layouts.test.js"
+    "test": "npm run build:ts && vitest run --config ../../vitest.config.js packages/echarts-layout-core/test/layouts.test.ts",
+    "test:unit": "vitest run --config ../../vitest.config.js packages/echarts-layout-core/test/layouts.test.ts"
   }
 }

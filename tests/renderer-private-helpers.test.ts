@@ -720,6 +720,16 @@ test('sunrise sunset private renderer helpers cover full draw and disabled anima
     width: 58,
     height: 200
   });
+  assert.deepEqual(sunriseSunset.createStackedAreaPoints(
+    [{ x: 10, y: 2 }, { x: 20, y: 4 }],
+    [{ x: 10, y: 8 }, { x: 20, y: 10 }],
+    12
+  ), [{ x: 10, y: 2 }, { x: 20, y: 4 }, { x: 20, y: 10 }, { x: 10, y: 8 }]);
+  assert.deepEqual(sunriseSunset.createStackedAreaPoints([{ x: 10, y: 2 }], [], 12), []);
+  assert.equal(sunriseSunset.interpolateLowerBoundary(15, [], 14), 14);
+  assert.equal(sunriseSunset.interpolateLowerBoundary(15, [{ x: 10, y: 8 }, { x: 20, y: 10 }], 12), 9);
+  assert.equal(sunriseSunset.interpolateLowerBoundary(10, [{ x: 10, y: 8 }, { x: 10, y: 10 }], 12), 8);
+  assert.equal(sunriseSunset.interpolateLowerBoundary(15, [{ x: 10, y: 8 }, { x: Number.NaN, y: 10 }, { x: 20, y: 12 }], 14), 14);
   assert.deepEqual(sunriseSunset.readLineStyle(createSeriesModel({ customStyle: { color: '', width: 'bad', opacity: 'bad' } }), 'customStyle', '#fallback', 3, 0.5), {
     stroke: '#fallback',
     lineWidth: 3,

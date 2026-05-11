@@ -8,8 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build:ts": "tsc -p tsconfig.json",
-    "test": "npm run build:ts && vitest run --config ../../vitest.config.js packages/echarts-circle-packing/test/circle-packing.test.js",
-    "test:unit": "vitest run --config ../../vitest.config.js packages/echarts-circle-packing/test/circle-packing.test.js",
+    "test": "npm run build:ts && vitest run --config ../../vitest.config.js packages/echarts-circle-packing/test/circle-packing.test.ts",
+    "test:unit": "vitest run --config ../../vitest.config.js packages/echarts-circle-packing/test/circle-packing.test.ts",
     "build": "vite build --config ../../vite.config.js --mode development",
     "release": "vite build --config ../../vite.config.js --mode production && vite build --config ../../vite.config.js --mode development"
   },

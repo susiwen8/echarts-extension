@@ -35,7 +35,7 @@ import {
   vennSnapshotPath,
   writeActual,
   writeSnapshot
-} from './render-fixture.js';
+} from './render-fixture.ts';
 
 const cases = [
   {

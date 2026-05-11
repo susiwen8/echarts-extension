@@ -7,7 +7,7 @@ import pixelmatch from 'pixelmatch';
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
 
-import { browserVisualCases } from './cases.js';
+import { browserVisualCases } from './cases.ts';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const snapshotDir = path.join(root, 'tests/browser-visual/__snapshots__');

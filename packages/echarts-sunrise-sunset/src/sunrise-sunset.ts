@@ -665,10 +665,13 @@ function interpolateLowerBoundary(x: number, points: SunriseSunsetPoint[], fallb
   for (let index = 1; index < points.length; index += 1) {
     const previous = points[index - 1];
     const next = points[index];
-    if (x < previous.x || x > next.x) continue;
-    const span = next.x - previous.x;
+    const previousX = finiteNumber(previous.x, NaN);
+    const nextX = finiteNumber(next.x, NaN);
+    if (!Number.isFinite(previousX) || !Number.isFinite(nextX)) continue;
+    if (x < previousX || x > nextX) continue;
+    const span = nextX - previousX;
     if (span <= 0) return previous.y;
-    const ratio = (x - previous.x) / span;
+    const ratio = (x - previousX) / span;
     return previous.y + (next.y - previous.y) * ratio;
   }
 
@@ -1438,6 +1441,8 @@ export const __test__ = {
   drawEvent,
   drawSunIcon,
   drawMoonIcon,
+  createStackedAreaPoints,
+  interpolateLowerBoundary,
   finishIconGroup,
   addCustomIcon,
   resolveCustomIcon,

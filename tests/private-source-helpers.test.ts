@@ -578,6 +578,21 @@ test('smith private helpers cover layout and renderer fallback branches', () => 
     { x: 10, y: 20, width: 100, height: 100 },
     { transformCoordToLocal: (x, y) => [x / 2 - 20, y / 2 - 30] }
   ), { x: 36, y: 77 });
+  assert.deepEqual(smithRenderer.readCursorEventPoint(
+    { offsetX: 112, offsetY: 214 },
+    { x: 10, y: 20, width: 100, height: 100 },
+    { transformCoordToLocal: (x, y) => ({ x: x / 4, y: y / 2 }) }
+  ), { x: 28, y: 107 });
+  assert.deepEqual(smithRenderer.readCursorEventPoint(
+    { offsetX: 112, offsetY: 214 },
+    { x: 10, y: 20, width: 100, height: 100 },
+    { transformCoordToLocal: () => [NaN, 10] }
+  ), { x: 102, y: 194 });
+  assert.deepEqual(smithRenderer.readCursorEventPoint(
+    { offsetX: 112, offsetY: 214 },
+    { x: 10, y: 20, width: 100, height: 100 },
+    { transformCoordToLocal: () => ({ x: 10, y: NaN }) }
+  ), { x: 102, y: 194 });
   assert.equal(smithRenderer.readCursorEventPoint({}, { x: 2, y: 3, width: 10, height: 10 }), null);
   assert.deepEqual(smithRenderer.normalizeTooltipPadding(8), [8, 8, 8, 8]);
   assert.deepEqual(smithRenderer.normalizeTooltipPadding([1, 2]), [1, 2, 1, 2]);

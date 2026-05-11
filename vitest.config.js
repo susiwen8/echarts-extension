@@ -34,7 +34,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['tests/**/*.test.js', 'packages/*/test/**/*.test.js'],
+    include: ['tests/**/*.test.ts', 'packages/*/test/**/*.test.ts'],
     exclude: ['tests/browser-visual/**', 'node_modules/**', 'dist/**', 'lib/**'],
     fileParallelism: false,
     testTimeout: 30000,

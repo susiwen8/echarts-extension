@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { chromium } from 'playwright';
 
-import { browserPerfCases } from './cases.js';
+import { browserPerfCases } from './cases.ts';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const resultDir = path.join(root, 'test-results/browser-perf');

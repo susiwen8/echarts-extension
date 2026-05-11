@@ -33,27 +33,34 @@ test('extension bundles are built with the shared Vite 8 config', () => {
   }
 });
 
-test('test tooling runs through Vitest and browser visual diff scripts', () => {
+test('test tooling runs through Vitest and browser test scripts', () => {
   const rootPackage = readJson(path.join(root, 'package.json'));
   const devDependencies = rootPackage.devDependencies ?? {};
 
   assert.equal(rootPackage.scripts.test, 'npm run build:ts && vitest run');
   assert.equal(
     rootPackage.scripts['test:unit'],
-    'npm run build:ts && vitest run tests/*.test.js packages/*/test/*.test.js'
+    'npm run build:ts && vitest run tests/*.test.ts packages/*/test/*.test.ts'
   );
   assert.equal(
     rootPackage.scripts['test:visual'],
-    'npm run build:ts && vitest run tests/visual/visual-regression.test.js'
+    'npm run build:ts && vitest run tests/visual/visual-regression.test.ts'
   );
   assert.equal(
     rootPackage.scripts['test:visual:update'],
-    'npm run build:ts && UPDATE_VISUAL_SNAPSHOTS=1 vitest run tests/visual/visual-regression.test.js'
+    'npm run build:ts && UPDATE_VISUAL_SNAPSHOTS=1 vitest run tests/visual/visual-regression.test.ts'
   );
-  assert.equal(rootPackage.scripts['test:visual:browser'], 'node tests/browser-visual/visual-diff.js');
+  assert.equal(
+    rootPackage.scripts['test:visual:browser'],
+    'node --experimental-strip-types --disable-warning=ExperimentalWarning tests/browser-visual/visual-diff.ts'
+  );
   assert.equal(
     rootPackage.scripts['test:visual:browser:update'],
-    'UPDATE_BROWSER_VISUAL_SNAPSHOTS=1 node tests/browser-visual/visual-diff.js'
+    'UPDATE_BROWSER_VISUAL_SNAPSHOTS=1 node --experimental-strip-types --disable-warning=ExperimentalWarning tests/browser-visual/visual-diff.ts'
+  );
+  assert.equal(
+    rootPackage.scripts['test:perf:browser'],
+    'node --experimental-strip-types --disable-warning=ExperimentalWarning tests/browser-perf/perf-runner.ts'
   );
   assert.equal(rootPackage.scripts['pages:build'], 'npm run build && node scripts/build-pages.mjs');
 
@@ -62,7 +69,8 @@ test('test tooling runs through Vitest and browser visual diff scripts', () => {
   assert.ok(devDependencies.pixelmatch);
   assert.ok(devDependencies.pngjs);
   assert.ok(exists(path.join(root, 'vitest.config.js')));
-  assert.ok(exists(path.join(root, 'tests/browser-visual/visual-diff.js')));
+  assert.ok(exists(path.join(root, 'tests/browser-visual/visual-diff.ts')));
+  assert.ok(exists(path.join(root, 'tests/browser-perf/perf-runner.ts')));
   assert.ok(exists(path.join(root, 'scripts/build-pages.mjs')));
 });
 

@@ -1044,7 +1044,9 @@ function indent(value, spaces) {
 
 function normalizeSvg(svg) {
   const zrenderClassMap = new Map();
+  const zrenderClipMap = new Map();
   let zrenderClassIndex = 0;
+  let zrenderClipIndex = 0;
 
   return `${svg
     .replace(/\r\n/g, '\n')
@@ -1055,6 +1057,13 @@ function normalizeSvg(svg) {
         zrenderClassIndex += 1;
       }
       return zrenderClassMap.get(className);
+    })
+    .replace(/\bzr\d+-c\d+\b/g, (clipPathId) => {
+      if (!zrenderClipMap.has(clipPathId)) {
+        zrenderClipMap.set(clipPathId, `zr-clip-${zrenderClipIndex}`);
+        zrenderClipIndex += 1;
+      }
+      return zrenderClipMap.get(clipPathId);
     })
     .trim()}\n`;
 }
