@@ -740,7 +740,7 @@
     const optionStart = now();
     const option = definition.createOption(payload, seed);
     applyLargeControlValues(caseName, option, renderContext);
-    applyLargeAddDataAnimation(option, renderContext);
+    applyLargeDataMutationAnimation(option, renderContext);
     applyLargeInteractionDefaults(option);
     const optionEnd = now();
     return {
@@ -797,6 +797,12 @@
         state.count = clampCount(state.count + 1, definition.maxCount);
         syncPerfCountControl(panel, state.count);
         run({ addDataKey: state.count });
+      },
+      onDeleteData() {
+        customOption = null;
+        state.count = clampCount(state.count - 1, definition.maxCount);
+        syncPerfCountControl(panel, state.count);
+        run({ deleteDataKey: state.count });
       },
       onJsonApply(option) {
         customOption = option;
@@ -1116,8 +1122,8 @@
       : option;
   }
 
-  function applyLargeAddDataAnimation(option, renderContext = {}) {
-    if (!option || renderContext.addDataKey == null) return option;
+  function applyLargeDataMutationAnimation(option, renderContext = {}) {
+    if (!option || (renderContext.addDataKey == null && renderContext.deleteDataKey == null)) return option;
     option.animation = true;
     const seriesList = Array.isArray(option.series) ? option.series : [option.series].filter(Boolean);
     seriesList.forEach((seriesOption) => {

@@ -88,6 +88,7 @@ cases.forEach((layoutCase) => {
       <div class="layout-card__tools">
         <span class="layout-card__zoom">100%</span>
         <button class="layout-card__button layout-card__button--primary" data-layout-add type="button">添加数据</button>
+        <button class="layout-card__button" data-layout-delete type="button">删除数据</button>
         <button class="layout-card__button" data-layout-reset type="button">Reset view</button>
       </div>
     </div>
@@ -138,6 +139,7 @@ function attachLayoutInteractions(card, layoutCase) {
   const eventLabel = card.querySelector('.layout-card__event');
   const zoomLabel = card.querySelector('.layout-card__zoom');
   const addButton = card.querySelector('[data-layout-add]');
+  const deleteButton = card.querySelector('[data-layout-delete]');
   const resetButton = card.querySelector('[data-layout-reset]');
   if (!visual) return;
 
@@ -156,6 +158,17 @@ function attachLayoutInteractions(card, layoutCase) {
     if (viewport) applySvgViewport(viewport, zoomLabel, state);
     animateLayoutUpdate(card, before);
     eventLabel.textContent = `Added ${layoutCase.addCount} · ${layoutCase.graph.data.length} nodes`;
+  });
+
+  deleteButton?.addEventListener('click', () => {
+    const before = readLayoutPositions(card);
+    const removed = deleteLayoutData(layoutCase);
+    if (!removed) return;
+    visual.innerHTML = renderLayout(layoutCase.id, computeLayoutCase(layoutCase));
+    const viewport = card.querySelector('.layout-viewport');
+    if (viewport) applySvgViewport(viewport, zoomLabel, state);
+    animateLayoutUpdate(card, before);
+    eventLabel.textContent = `Deleted ${removed.name} · ${layoutCase.graph.data.length} nodes`;
   });
 
   resetButton?.addEventListener('click', () => {
@@ -257,6 +270,25 @@ function appendLayoutData(layoutCase) {
       target: id
     });
   }
+}
+
+function deleteLayoutData(layoutCase) {
+  const nodes = layoutCase.graph.data;
+  if (!Array.isArray(nodes) || nodes.length <= 1) return null;
+  const index = findLayoutDeleteIndex(nodes);
+  const [removed] = nodes.splice(index, 1);
+  const removedId = String(removed.id);
+  layoutCase.graph.links = layoutCase.graph.links.filter((link) => (
+    String(link.source) !== removedId && String(link.target) !== removedId
+  ));
+  return removed;
+}
+
+function findLayoutDeleteIndex(nodes) {
+  for (let index = nodes.length - 1; index >= 1; index -= 1) {
+    if (/^added-/.test(String(nodes[index].id))) return index;
+  }
+  return nodes.length - 1;
 }
 
 function animateLayoutUpdate(card, previousPositions) {

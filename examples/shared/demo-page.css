@@ -172,6 +172,7 @@ a {
 .demo-option-editor__footer {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }
@@ -186,6 +187,7 @@ a {
   font: inherit;
   font-size: 12px;
   font-weight: 760;
+  white-space: nowrap;
   cursor: pointer;
 }
 

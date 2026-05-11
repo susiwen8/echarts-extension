@@ -1344,7 +1344,7 @@
     if (!entry) return null;
     const option = entry.option(data);
     applyControlValues(option, entry.controls || [], controlValues || {}, context);
-    applyDataAppendAnimation(option, context);
+    applyDataMutationAnimation(option, context);
     return applyDemoInteractionDefaults(option);
   }
 
@@ -1456,6 +1456,7 @@
     chart.hideLoading();
     const state = createControlState(entry.controls || []);
     const addDataState = createAddDataState(exampleName);
+    const deleteDataState = createDeleteDataState(exampleName);
     let customOption = null;
     let replayKey = 0;
     const controlsPanel = createControlsPanel(entry.controls || [], state, {
@@ -1477,6 +1478,11 @@
         customOption = null;
         const addDataInfo = addExampleData(exampleName, data, addDataState);
         render({ addDataKey: addDataState.count, addDataInfo });
+      },
+      onDeleteData() {
+        customOption = null;
+        const deleteDataInfo = deleteExampleData(exampleName, data, deleteDataState);
+        if (deleteDataInfo.deleted) render({ deleteDataKey: deleteDataState.count, deleteDataInfo });
       },
       onJsonApply(option) {
         customOption = option;
@@ -1548,12 +1554,30 @@
     };
   }
 
+  function createDeleteDataState(exampleName) {
+    return {
+      exampleName,
+      count: 0
+    };
+  }
+
   function addExampleData(exampleName, data, state = createAddDataState(exampleName)) {
     if (!data || typeof data !== 'object') return { added: false, count: state.count || 0 };
     const index = advanceAddDataState(state);
     const added = appendExampleData(exampleName, data, index);
     return {
       added,
+      count: state.count,
+      exampleName
+    };
+  }
+
+  function deleteExampleData(exampleName, data, state = createDeleteDataState(exampleName)) {
+    if (!data || typeof data !== 'object') return { deleted: false, count: state.count || 0, exampleName };
+    const deleted = removeExampleData(exampleName, data);
+    if (deleted) advanceAddDataState(state);
+    return {
+      deleted,
       count: state.count,
       exampleName
     };
@@ -1587,6 +1611,184 @@
     return false;
   }
 
+  function removeExampleData(exampleName, data) {
+    if (['radial', 'concentric', 'grid', 'mds', 'arc'].includes(exampleName)) return removeGraphExampleData(exampleName, data);
+    if (exampleName === 'radial-area') return removeArrayData(data, 'radialArea');
+    if (exampleName === 'radial-boxplot') return removeArrayData(data, 'radialBoxplot', isAddedItem);
+    if (exampleName === 'venn-hollow') return removeHollowVennData(data);
+    if (exampleName === 'venn-bubble') return removeArrayData(data, 'bubbleVenn', isAddedItem);
+    if (exampleName === 'pack-bubble') return removeArrayData(data, 'packBubble', isAddedItem);
+    if (exampleName === 'circle-packing') return removeTreeData(data.circlePacking);
+    if (exampleName === 'organization-chart') return removeTreeData(data.organizationChart);
+    if (exampleName === 'cause-effect') return removeCauseEffectData(data);
+    if (exampleName === 'nested-circle') return removeArrayData(data, 'nestedCircle', isAddedItem);
+    if (exampleName === 'mosaic') return removeArrayData(data, 'mosaic', isAddedItem);
+    if (exampleName === 'voronoi-treemap') return removeTreeData(data.voronoiTreemap);
+    if (exampleName === 'subway') return removeSubwayData(data);
+    if (exampleName === 'flame') return removeTreeData(data.flame);
+    if (exampleName === 'sunrise-sunset') return removeArrayData(data, 'sunriseSunset', isAddedItem, 'first');
+    if (exampleName === 'lollipop') return removeArrayData(data, 'lollipop', isAddedItem);
+    if (exampleName === 'beeswarm') return removeArrayData(data, 'beeswarm', isAddedItem);
+    if (exampleName === 'spiral') return removeArrayData(data, 'spiral', isAddedItem);
+    if (exampleName === 'smith') return removeArrayData(data, 'smith', isAddedItem);
+    if (exampleName === 'vector-field') return removeArrayData(data, 'wind');
+    return false;
+  }
+
+  function removeGraphExampleData(exampleName, data) {
+    const graph = graphDataForExample(exampleName, data);
+    if (!graph || typeof graph !== 'object') return false;
+    const nodes = graphNodes(graph);
+    if (nodes.length <= 1) return false;
+    const addedIndex = findRemovableIndex(nodes, isAddedItem, nodes.length - 1, 1);
+    const nodeIndex = addedIndex >= 0 ? addedIndex : nodes.length - 1;
+    if (nodeIndex < 0) return false;
+    const [removed] = nodes.splice(nodeIndex, 1);
+    const removedId = dataItemKey(removed, nodeIndex);
+    const edges = Array.isArray(graph.edges) ? graph.edges : Array.isArray(graph.links) ? graph.links : [];
+    removeMatchingItems(edges, (edge) => {
+      const source = String(edge?.source ?? '');
+      const target = String(edge?.target ?? '');
+      return source === removedId || target === removedId;
+    });
+    return true;
+  }
+
+  function removeArrayData(data, key, prefer = isAddedItem, fallback = 'last') {
+    const list = data && Array.isArray(data[key]) ? data[key] : null;
+    if (!list || !list.length) return false;
+    let index = typeof prefer === 'function' ? findRemovableIndex(list, prefer, list.length - 1, 0) : -1;
+    if (index < 0) index = fallback === 'first' ? 0 : list.length - 1;
+    if (index < 0 || index >= list.length) return false;
+    list.splice(index, 1);
+    return true;
+  }
+
+  function removeHollowVennData(data) {
+    const list = data && Array.isArray(data.hollowVenn) ? data.hollowVenn : null;
+    if (!list || list.length <= 1) return false;
+    const addedSet = list.find((item) => isAddedItem(item) && Array.isArray(item.sets) && item.sets.length === 1)?.sets?.[0];
+    if (addedSet) {
+      removeMatchingItems(list, (item) => Array.isArray(item?.sets) && item.sets.includes(addedSet));
+      return true;
+    }
+
+    const removable = findRemovableIndex(
+      list,
+      (item) => Array.isArray(item?.sets) && item.sets.length > 1,
+      list.length - 1,
+      0
+    );
+    const index = removable >= 0 ? removable : list.length - 1;
+    list.splice(index, 1);
+    return true;
+  }
+
+  function removeTreeData(root) {
+    if (!root || typeof root !== 'object') return false;
+    const addedPath = findTreeLeafPath(root, (node) => isAddedItem(node));
+    const path = addedPath || findTreeLeafPath(root, () => true);
+    if (!path || path.length < 2) return false;
+    const parent = path[path.length - 2];
+    if (!Array.isArray(parent.children)) return false;
+    parent.children.splice(parent.children.indexOf(path[path.length - 1]), 1);
+    return true;
+  }
+
+  function findTreeLeafPath(root, predicate) {
+    let best = null;
+    visit(root, []);
+    return best;
+
+    function visit(node, path) {
+      if (!node || typeof node !== 'object') return;
+      const nextPath = [...path, node];
+      const children = Array.isArray(node.children) ? node.children : [];
+      if (!children.length && nextPath.length > 1 && predicate(node)) {
+        best = nextPath;
+        return;
+      }
+      for (let index = children.length - 1; index >= 0; index -= 1) {
+        visit(children[index], nextPath);
+        if (best) return;
+      }
+    }
+  }
+
+  function removeCauseEffectData(data) {
+    const diagram = data?.causeEffect;
+    const categories = Array.isArray(diagram?.categories) ? diagram.categories : null;
+    if (!categories || !categories.length) return false;
+    const addedIndex = findRemovableIndex(categories, isAddedItem, categories.length - 1, 0);
+    const index = addedIndex >= 0 ? addedIndex : categories.length - 1;
+    categories.splice(index, 1);
+    return true;
+  }
+
+  function removeSubwayData(data) {
+    const routes = Array.isArray(data?.subway) ? data.subway : null;
+    if (!routes || !routes.length) return false;
+    const candidate = findSubwayStation(routes, isAddedItem) || findSubwayStation(routes, () => true);
+    if (!candidate) return false;
+    const [removed] = candidate.route.stations.splice(candidate.index, 1);
+    const removedKeys = new Set([removed?.id, removed?.name].filter(Boolean).map(String));
+    candidate.route.waypoints = sanitizeSubwayWaypoints(candidate.route.waypoints, candidate.route.stations, removedKeys);
+    return true;
+  }
+
+  function findSubwayStation(routes, predicate) {
+    for (let routeIndex = routes.length - 1; routeIndex >= 0; routeIndex -= 1) {
+      const route = routes[routeIndex];
+      const stations = Array.isArray(route?.stations) ? route.stations : [];
+      if (stations.length <= 1) continue;
+      for (let index = stations.length - 1; index >= 0; index -= 1) {
+        if (predicate(stations[index])) return { route, index };
+      }
+    }
+    return null;
+  }
+
+  function sanitizeSubwayWaypoints(waypoints, stations, removedKeys) {
+    const nextWaypoints = (Array.isArray(waypoints) ? waypoints : []).filter((point) => {
+      if (!Array.isArray(point)) return true;
+      const key = point[0];
+      return typeof key !== 'string' || !removedKeys.has(key);
+    });
+    if (nextWaypoints.length) return nextWaypoints;
+    return stations.map((station) => [
+      String(station.id ?? station.name),
+      ...(Array.isArray(station.coord) ? station.coord : [0, 0])
+    ]);
+  }
+
+  function findRemovableIndex(list, predicate, startIndex, minimumIndex = 0) {
+    for (let index = Math.min(startIndex, list.length - 1); index >= minimumIndex; index -= 1) {
+      if (predicate(list[index], index)) return index;
+    }
+    return -1;
+  }
+
+  function removeMatchingItems(list, predicate) {
+    for (let index = list.length - 1; index >= 0; index -= 1) {
+      if (predicate(list[index], index)) list.splice(index, 1);
+    }
+  }
+
+  function isAddedItem(item) {
+    const values = [
+      item?.id,
+      item?.name,
+      item?.country,
+      item?.channel,
+      item?.team
+    ];
+    return values.some((value) => /(^|[-\s])added([-_\s]|\d|$)/i.test(String(value ?? '')));
+  }
+
+  function dataItemKey(item, index) {
+    return String(item?.id ?? item?.name ?? index);
+  }
+
   function countExampleDataItems(exampleName, data) {
     if (!data || typeof data !== 'object') return 0;
     if (['radial', 'concentric', 'grid', 'mds', 'arc'].includes(exampleName)) {
@@ -1618,8 +1820,8 @@
     return cloneJsonValue(data || {});
   }
 
-  function applyDataAppendAnimation(option, context = {}) {
-    if (!option || context.addDataKey == null) return option;
+  function applyDataMutationAnimation(option, context = {}) {
+    if (!option || (context.addDataKey == null && context.deleteDataKey == null)) return option;
     if (option.animation !== false) option.animation = true;
     const seriesList = Array.isArray(option.series) ? option.series : [option.series].filter(Boolean);
     seriesList.forEach((seriesOption) => {
@@ -2076,6 +2278,11 @@
       addDataButton.classList.add('demo-control-button--primary');
       addDataButton.addEventListener('click', handlers.onAddData);
       actions.append(addDataButton);
+    }
+    if (typeof handlers.onDeleteData === 'function') {
+      const deleteDataButton = controlButton('删除数据');
+      deleteDataButton.addEventListener('click', handlers.onDeleteData);
+      actions.append(deleteDataButton);
     }
     const replayButton = controlButton('Replay');
     replayButton.addEventListener('click', handlers.onReplay);
@@ -2854,6 +3061,8 @@
   namespace.applyDemoInteractionDefaults = applyDemoInteractionDefaults;
   namespace.createAddDataState = createAddDataState;
   namespace.addExampleData = addExampleData;
+  namespace.createDeleteDataState = createDeleteDataState;
+  namespace.deleteExampleData = deleteExampleData;
   namespace.countExampleDataItems = countExampleDataItems;
   namespace.cloneExampleData = cloneExampleData;
   namespace.createControlsPanel = createControlsPanel;
