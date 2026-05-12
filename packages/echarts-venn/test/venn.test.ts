@@ -168,6 +168,80 @@ test('highlights related hollow Venn circles when hovering an intersection label
   chart.dispose();
 });
 
+test('keeps existing hollow Venn labels interactive after adding data', () => {
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 600,
+    height: 420
+  });
+  const series = {
+    type: 'venn',
+    layout: 'hollow',
+    data: hollowData,
+    label: {
+      show: true
+    }
+  };
+
+  chart.setOption({
+    series: [series]
+  });
+  chart.setOption({
+    series: [{
+      ...series,
+      data: [
+        ...hollowData,
+        { name: 'Added 1', sets: ['Added 1'], value: 42 },
+        { name: 'A&Added 1', sets: ['A', 'Added 1'], value: 8 }
+      ]
+    }]
+  });
+
+  const elements = collectVennElements(chart);
+  const acLabel = elements.labels.find((label) => label.style.text === 'A&C');
+  const addedIntersectionLabel = elements.labels.find((label) => label.style.text === 'A&Added 1');
+
+  assert.ok(acLabel, 'A&C label should remain rendered');
+  assert.ok(addedIntersectionLabel, 'A&Added 1 label should render after adding data');
+  assert.equal(acLabel.silent, false);
+  assert.equal(addedIntersectionLabel.silent, false);
+
+  chart.dispose();
+});
+
+test('leaves hollow Venn labels without hover targets silent', () => {
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 360,
+    height: 260
+  });
+
+  chart.setOption({
+    animation: false,
+    series: [{
+      type: 'venn',
+      layout: 'hollow',
+      data: [
+        { name: 'A', sets: ['A'], value: 20 },
+        { name: 'Loose', value: 8 }
+      ],
+      label: {
+        show: true
+      }
+    }]
+  });
+
+  const elements = collectVennElements(chart);
+  const looseLabel = elements.labels.find((label) => label.style.text === 'Loose');
+
+  assert.ok(looseLabel, 'Loose label should render');
+  assert.equal(looseLabel.silent, true);
+
+  chart.dispose();
+});
+
 function collectVennElements(chart) {
   const view = chart._chartsViews.find((chartView) => chartView.type === 'venn');
   const circles = [];

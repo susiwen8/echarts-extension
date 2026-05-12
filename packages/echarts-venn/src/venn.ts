@@ -377,6 +377,7 @@ function addLabelHoverElement(
   const relatedCircleElements = collectRelatedCircleElements(label, circleElementsBySetKey);
 
   if (relatedCircleElements.length > 1 && hoverItems) {
+    textEl.silent = false;
     hoverItems.push({
       elements: [...relatedCircleElements, textEl],
       triggerElements: [textEl]
@@ -384,7 +385,10 @@ function addLabelHoverElement(
     return;
   }
 
-  addHoverElement(hoverItemsByDataIndex.get(label.dataIndex), textEl);
+  const hoverItem = hoverItemsByDataIndex.get(label.dataIndex);
+  if (!hoverItem) return;
+  textEl.silent = false;
+  addHoverElement(hoverItem, textEl);
 }
 
 function collectRelatedCircleElements(
