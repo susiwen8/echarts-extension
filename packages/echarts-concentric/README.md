@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a custom concentric graph layout. Import this package for side effects to register `series.type = 'concentric'`.
 
-![Concentric chart](../../tests/browser-visual/__snapshots__/echarts-concentric.png)
+![Concentric chart](../../docs/packages/echarts-concentric/screenshot.png)
 
 ## Install
 

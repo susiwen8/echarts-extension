@@ -110,6 +110,12 @@ export const browserVisualCases = [
     screenshotSelector: 'main'
   },
   {
+    name: 'echarts-cause-effect',
+    path: '/docs/packages/echarts-cause-effect/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main'
+  },
+  {
     name: 'echarts-flame',
     path: '/docs/packages/echarts-flame/',
     readySelector: '#chart canvas, #chart svg',
@@ -149,6 +155,19 @@ export const browserVisualCases = [
   {
     name: 'echarts-vector-field',
     path: '/docs/packages/echarts-vector-field/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main'
+  },
+  {
+    name: 'echarts-fractal',
+    path: '/docs/packages/echarts-fractal/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main',
+    waitAfterRenderMs: 2200
+  },
+  {
+    name: 'echarts-fisheye',
+    path: '/docs/packages/echarts-fisheye/',
     readySelector: '#chart canvas, #chart svg',
     screenshotSelector: 'main'
   }

@@ -4,7 +4,7 @@
 
 ECharts 径向箱线图扩展。导入本包即可注册 `series.type = 'radialBoxplot'`。
 
-![Radial Boxplot 图表截图](../../tests/browser-visual/__snapshots__/echarts-radial-boxplot.png)
+![Radial Boxplot 图表截图](../../docs/packages/echarts-radial-boxplot/screenshot.png)
 
 ## 安装
 

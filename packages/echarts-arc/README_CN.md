@@ -4,7 +4,7 @@
 
 ECharts 自定义弧形图布局扩展。导入本包即可注册 `series.type = 'arc'`。
 
-![Arc 图表截图](../../tests/browser-visual/__snapshots__/echarts-arc.png)
+![Arc 图表截图](../../docs/packages/echarts-arc/screenshot.png)
 
 ## 安装
 

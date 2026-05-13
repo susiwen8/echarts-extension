@@ -4,7 +4,7 @@
 
 ECharts 确定性网格图布局扩展。导入本包即可注册 `series.type = 'grid'`。
 
-![Grid 图表截图](../../tests/browser-visual/__snapshots__/echarts-grid.png)
+![Grid 图表截图](../../docs/packages/echarts-grid/screenshot.png)
 
 ## 安装
 

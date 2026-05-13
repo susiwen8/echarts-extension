@@ -4,7 +4,7 @@
 
 本 monorepo 中 ECharts 扩展包共享的布局与渲染辅助库。大多数图表用户不需要直接导入它；它主要用于构建新扩展或测试本地图布局。
 
-![Layout Core 图表截图](../../tests/browser-visual/__snapshots__/layout-core.png)
+![Layout Core 图表截图](../../docs/packages/echarts-layout-core/screenshot.png)
 
 ## 安装
 

@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for sunrise, sunset, moonrise, and moonset paths. Import this package for side effects to register `series.type = 'sunriseSunset'`.
 
-![Sunrise Sunset chart](../../tests/browser-visual/__snapshots__/echarts-sunrise-sunset.png)
+![Sunrise Sunset chart](../../docs/packages/echarts-sunrise-sunset/screenshot.png)
 
 ## Install
 

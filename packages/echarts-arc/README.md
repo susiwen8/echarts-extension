@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a custom arc graph layout. Import this package for side effects to register `series.type = 'arc'`.
 
-![Arc chart](../../tests/browser-visual/__snapshots__/echarts-arc.png)
+![Arc chart](../../docs/packages/echarts-arc/screenshot.png)
 
 ## Install
 

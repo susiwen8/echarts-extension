@@ -4,7 +4,7 @@
 
 ECharts 分类马赛克图扩展。导入本包即可注册 `series.type = 'mosaic'`。
 
-![Mosaic 图表截图](../../tests/browser-visual/__snapshots__/echarts-mosaic.png)
+![Mosaic 图表截图](../../docs/packages/echarts-mosaic/screenshot.png)
 
 ## 安装
 

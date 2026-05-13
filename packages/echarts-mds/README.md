@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a custom multidimensional-scaling graph layout. Import this package for side effects to register `series.type = 'mds'`.
 
-![MDS chart](../../tests/browser-visual/__snapshots__/echarts-mds.png)
+![MDS chart](../../docs/packages/echarts-mds/screenshot.png)
 
 ## Install
 

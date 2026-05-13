@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a deterministic grid graph layout. Import this package for side effects to register `series.type = 'grid'`.
 
-![Grid chart](../../tests/browser-visual/__snapshots__/echarts-grid.png)
+![Grid chart](../../docs/packages/echarts-grid/screenshot.png)
 
 ## Install
 

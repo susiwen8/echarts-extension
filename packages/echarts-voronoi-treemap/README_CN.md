@@ -4,7 +4,7 @@
 
 ECharts 加权 Voronoi 矩形树图扩展。导入本包即可注册 `series.type = 'voronoiTreemap'`。
 
-![Voronoi Treemap 图表截图](../../tests/browser-visual/__snapshots__/echarts-voronoi-treemap.png)
+![Voronoi Treemap 图表截图](../../docs/packages/echarts-voronoi-treemap/screenshot.png)
 
 ## 安装
 

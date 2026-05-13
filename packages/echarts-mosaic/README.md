@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for categorical mosaic plots. Import this package for side effects to register `series.type = 'mosaic'`.
 
-![Mosaic chart](../../tests/browser-visual/__snapshots__/echarts-mosaic.png)
+![Mosaic chart](../../docs/packages/echarts-mosaic/screenshot.png)
 
 ## Install
 

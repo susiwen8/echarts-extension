@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for UML sequence diagrams.
 
-![Sequence Diagram chart](../../tests/browser-visual/__snapshots__/echarts-sequence-diagram.png)
+![Sequence Diagram chart](../../docs/packages/echarts-sequence-diagram/screenshot.png)
 
 ```js
 import * as echarts from 'echarts';

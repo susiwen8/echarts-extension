@@ -4,7 +4,7 @@
 
 ECharts 因果图（鱼骨图 / 石川图）扩展。
 
-![Cause and Effect 图表截图](../../tests/browser-visual/__snapshots__/echarts-cause-effect.png)
+![Cause and Effect 图表截图](../../docs/packages/echarts-cause-effect/screenshot.png)
 
 ```js
 import * as echarts from 'echarts';

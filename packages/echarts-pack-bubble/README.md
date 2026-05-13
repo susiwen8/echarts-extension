@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for flat packed bubble diagrams. Import this package for side effects to register `series.type = 'packBubble'`.
 
-![Pack Bubble chart](../../tests/browser-visual/__snapshots__/echarts-pack-bubble.png)
+![Pack Bubble chart](../../docs/packages/echarts-pack-bubble/screenshot.png)
 
 ## Install
 

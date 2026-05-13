@@ -4,7 +4,7 @@
 
 ECharts 棒棒糖图扩展。导入本包即可注册 `series.type = 'lollipop'`。
 
-![Lollipop 图表截图](../../tests/browser-visual/__snapshots__/echarts-lollipop.png)
+![Lollipop 图表截图](../../docs/packages/echarts-lollipop/screenshot.png)
 
 ## 安装
 

@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for zoomable fractal rendering. Import this package for side effects to register `series.type = 'fractal'`.
 
-![Fractal chart](../../tests/browser-visual/__snapshots__/echarts-fractal.png)
+![Fractal chart](../../docs/packages/echarts-fractal/screenshot.png)
 
 ## Install
 

@@ -4,7 +4,7 @@
 
 ECharts 自定义同心圆图布局扩展。导入本包即可注册 `series.type = 'concentric'`。
 
-![Concentric 图表截图](../../tests/browser-visual/__snapshots__/echarts-concentric.png)
+![Concentric 图表截图](../../docs/packages/echarts-concentric/screenshot.png)
 
 ## 安装
 

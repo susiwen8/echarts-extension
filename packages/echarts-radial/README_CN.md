@@ -4,7 +4,7 @@
 
 ECharts 自定义径向图布局扩展。导入本包即可注册 `series.type = 'radial'`。
 
-![Radial 图表截图](../../tests/browser-visual/__snapshots__/echarts-radial.png)
+![Radial 图表截图](../../docs/packages/echarts-radial/screenshot.png)
 
 ## 安装
 

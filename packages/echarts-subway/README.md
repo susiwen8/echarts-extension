@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for schematic subway route maps. Import this package for side effects to register `series.type = 'subway'`.
 
-![Subway chart](../../tests/browser-visual/__snapshots__/echarts-subway.png)
+![Subway chart](../../docs/packages/echarts-subway/screenshot.png)
 
 ## Install
 

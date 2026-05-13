@@ -4,7 +4,7 @@
 
 ECharts 日出、日落、月升和月落路径图扩展。导入本包即可注册 `series.type = 'sunriseSunset'`。
 
-![Sunrise Sunset 图表截图](../../tests/browser-visual/__snapshots__/echarts-sunrise-sunset.png)
+![Sunrise Sunset 图表截图](../../docs/packages/echarts-sunrise-sunset/screenshot.png)
 
 ## 安装
 

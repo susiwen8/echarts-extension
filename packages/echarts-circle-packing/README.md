@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for hierarchical circle packing diagrams. Import this package for side effects to register `series.type = 'circlePacking'`.
 
-![Circle Packing chart](../../tests/browser-visual/__snapshots__/echarts-circle-packing.png)
+![Circle Packing chart](../../docs/packages/echarts-circle-packing/screenshot.png)
 
 ## Install
 

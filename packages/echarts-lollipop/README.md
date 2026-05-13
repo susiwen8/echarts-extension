@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for lollipop plots. Import this package for side effects to register `series.type = 'lollipop'`.
 
-![Lollipop chart](../../tests/browser-visual/__snapshots__/echarts-lollipop.png)
+![Lollipop chart](../../docs/packages/echarts-lollipop/screenshot.png)
 
 ## Install
 

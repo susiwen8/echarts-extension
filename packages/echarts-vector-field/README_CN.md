@@ -4,7 +4,7 @@
 
 ECharts 向量场和风场图扩展。导入本包即可注册 `series.type = 'vectorField'`。
 
-![Vector Field 图表截图](../../tests/browser-visual/__snapshots__/echarts-vector-field.png)
+![Vector Field 图表截图](../../docs/packages/echarts-vector-field/screenshot.png)
 
 ## 安装
 

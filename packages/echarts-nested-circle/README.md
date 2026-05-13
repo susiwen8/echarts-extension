@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for bottom-aligned nested circle diagrams. Import this package for side effects to register `series.type = 'nestedCircle'`.
 
-![Nested Circle chart](../../tests/browser-visual/__snapshots__/echarts-nested-circle.png)
+![Nested Circle chart](../../docs/packages/echarts-nested-circle/screenshot.png)
 
 ## Install
 

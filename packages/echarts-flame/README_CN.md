@@ -4,7 +4,7 @@
 
 ECharts 层级火焰图扩展。导入本包即可注册 `series.type = 'flame'`。
 
-![Flame 图表截图](../../tests/browser-visual/__snapshots__/echarts-flame.png)
+![Flame 图表截图](../../docs/packages/echarts-flame/screenshot.png)
 
 ## 安装
 

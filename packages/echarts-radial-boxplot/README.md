@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for radial boxplots. Import this package for side effects to register `series.type = 'radialBoxplot'`.
 
-![Radial Boxplot chart](../../tests/browser-visual/__snapshots__/echarts-radial-boxplot.png)
+![Radial Boxplot chart](../../docs/packages/echarts-radial-boxplot/screenshot.png)
 
 ## Install
 

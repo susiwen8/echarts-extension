@@ -4,7 +4,7 @@
 
 ECharts 可缩放分形渲染扩展。导入本包即可注册 `series.type = 'fractal'`。
 
-![Fractal 图表截图](../../tests/browser-visual/__snapshots__/echarts-fractal.png)
+![Fractal 图表截图](../../docs/packages/echarts-fractal/screenshot.png)
 
 ## 安装
 

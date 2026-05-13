@@ -4,7 +4,7 @@
 
 ECharts 自定义多维缩放图布局扩展。导入本包即可注册 `series.type = 'mds'`。
 
-![MDS 图表截图](../../tests/browser-visual/__snapshots__/echarts-mds.png)
+![MDS 图表截图](../../docs/packages/echarts-mds/screenshot.png)
 
 ## 安装
 

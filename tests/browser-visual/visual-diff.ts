@@ -11,13 +11,17 @@ import { browserVisualCases } from './cases.ts';
 import { resolveScreenshotSelector } from './visual-target.ts';
 
 const root = path.resolve(import.meta.dirname, '../..');
-const snapshotDir = path.join(root, 'tests/browser-visual/__snapshots__');
 const resultDir = path.join(root, 'test-results/browser-visual');
 const shouldUpdate = process.env.UPDATE_BROWSER_VISUAL_SNAPSHOTS === '1' || process.argv.includes('--update');
 const skipBuild = process.env.SKIP_BROWSER_VISUAL_BUILD === '1';
 const maxDiffPixels = Number.parseInt(process.env.BROWSER_VISUAL_MAX_DIFF_PIXELS || '50', 10);
 const pixelThreshold = Number.parseFloat(process.env.BROWSER_VISUAL_PIXEL_THRESHOLD || '0.1');
 const caseFilter = process.env.BROWSER_VISUAL_CASE;
+const allowedRemoteDataHosts = new Set([
+  'assets.antv.antgroup.com',
+  'gw.alipayobjects.com',
+  'raw.githubusercontent.com'
+]);
 
 const selectedCases = caseFilter
   ? browserVisualCases.filter((visualCase) => visualCase.name.includes(caseFilter))
@@ -31,7 +35,6 @@ if (!skipBuild) {
   await run('npm', ['run', 'build']);
 }
 
-await mkdir(snapshotDir, { recursive: true });
 await mkdir(resultDir, { recursive: true });
 
 const server = await startStaticServer(root);
@@ -49,7 +52,7 @@ try {
 
   await context.route('**/*', async (route) => {
     const url = route.request().url();
-    if (url.startsWith(baseUrl)) {
+    if (url.startsWith(baseUrl) || isAllowedRemoteDataUrl(url)) {
       await route.continue();
     } else {
       await route.abort();
@@ -78,14 +81,14 @@ if (failures.length > 0) {
 for (const result of report) {
   console.log(
     shouldUpdate
-      ? `Updated browser visual baseline: ${result.snapshotPath}`
-      : `Browser visual baseline matched: ${result.snapshotPath}`
+      ? `Updated browser visual example screenshot: ${result.snapshotPath}`
+      : `Browser visual example screenshot matched: ${result.snapshotPath}`
   );
 }
 
 async function runVisualCase(context, visualCase, baseUrl) {
   const page = await context.newPage();
-  const snapshotPath = path.join(snapshotDir, `${visualCase.name}.png`);
+  const snapshotPath = resolveExampleScreenshotPath(visualCase);
   const actualPath = path.join(resultDir, `${visualCase.name}.actual.png`);
   const diffPath = path.join(resultDir, `${visualCase.name}.diff.png`);
 
@@ -104,6 +107,7 @@ async function runVisualCase(context, visualCase, baseUrl) {
     const screenshot = screenshotTarget.screenshot;
 
     if (shouldUpdate) {
+      await mkdir(path.dirname(snapshotPath), { recursive: true });
       await writeFile(snapshotPath, screenshot);
       return {
         name: visualCase.name,
@@ -121,7 +125,7 @@ async function runVisualCase(context, visualCase, baseUrl) {
         name: visualCase.name,
         ok: false,
         actualPath: relative(actualPath),
-        message: `missing baseline ${relative(snapshotPath)}; run npm run test:visual:browser:update`,
+        message: `missing example screenshot ${relative(snapshotPath)}; run npm run test:visual:browser:update`,
         screenshotSelector: screenshotTarget.selector,
         snapshotPath: relative(snapshotPath),
         url: `${baseUrl}${visualCase.path}`
@@ -178,6 +182,18 @@ async function runVisualCase(context, visualCase, baseUrl) {
   } finally {
     await page.close();
   }
+}
+
+function resolveExampleScreenshotPath(visualCase) {
+  const pagePath = visualCase.path.replace(/^\/+/, '');
+  if (!pagePath.startsWith('docs/packages/')) {
+    throw new Error(`Browser visual screenshots must live with docs package examples: ${visualCase.path}`);
+  }
+
+  const normalizedPagePath = pagePath.endsWith('/') ? `${pagePath}index.html` : pagePath;
+  const parsed = path.parse(normalizedPagePath);
+  const fileName = parsed.name === 'index' ? 'screenshot.png' : `${parsed.name}.png`;
+  return path.join(root, parsed.dir, fileName);
 }
 
 async function screenshotVisualTarget(page, visualCase) {
@@ -323,6 +339,15 @@ function contentType(filePath) {
   if (extension === '.json' || extension === '.map') return 'application/json; charset=utf-8';
   if (extension === '.png') return 'image/png';
   return 'application/octet-stream';
+}
+
+function isAllowedRemoteDataUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && allowedRemoteDataHosts.has(parsed.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function relative(filePath) {

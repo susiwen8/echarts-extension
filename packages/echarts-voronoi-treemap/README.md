@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for weighted Voronoi treemaps. Import this package for side effects to register `series.type = 'voronoiTreemap'`.
 
-![Voronoi Treemap chart](../../tests/browser-visual/__snapshots__/echarts-voronoi-treemap.png)
+![Voronoi Treemap chart](../../docs/packages/echarts-voronoi-treemap/screenshot.png)
 
 ## Install
 

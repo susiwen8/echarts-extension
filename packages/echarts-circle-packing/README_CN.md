@@ -4,7 +4,7 @@
 
 ECharts 层级圆堆积图扩展。导入本包即可注册 `series.type = 'circlePacking'`。
 
-![Circle Packing 图表截图](../../tests/browser-visual/__snapshots__/echarts-circle-packing.png)
+![Circle Packing 图表截图](../../docs/packages/echarts-circle-packing/screenshot.png)
 
 ## 安装
 

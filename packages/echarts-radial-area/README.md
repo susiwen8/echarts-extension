@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for radial area and radial range-area time series. Import this package for side effects to register `series.type = 'radialArea'`.
 
-![Radial Area chart](../../tests/browser-visual/__snapshots__/echarts-radial-area.png)
+![Radial Area chart](../../docs/packages/echarts-radial-area/screenshot.png)
 
 ## Install
 

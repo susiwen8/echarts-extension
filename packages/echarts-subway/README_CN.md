@@ -4,7 +4,7 @@
 
 ECharts 示意地铁线路图扩展。导入本包即可注册 `series.type = 'subway'`。
 
-![Subway 图表截图](../../tests/browser-visual/__snapshots__/echarts-subway.png)
+![Subway 图表截图](../../docs/packages/echarts-subway/screenshot.png)
 
 ## 安装
 

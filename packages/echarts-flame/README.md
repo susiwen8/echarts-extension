@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for hierarchical flame graphs. Import this package for side effects to register `series.type = 'flame'`.
 
-![Flame chart](../../tests/browser-visual/__snapshots__/echarts-flame.png)
+![Flame chart](../../docs/packages/echarts-flame/screenshot.png)
 
 ## Install
 

@@ -6,7 +6,7 @@ ECharts 空心和气泡维恩图扩展。导入本包即可注册 `series.type =
 
 | 空心维恩图 | 气泡维恩图 |
 | --- | --- |
-| ![空心维恩图截图](../../tests/browser-visual/__snapshots__/echarts-venn-hollow.png) | ![气泡维恩图截图](../../tests/browser-visual/__snapshots__/echarts-venn-bubble.png) |
+| ![空心维恩图截图](../../docs/packages/echarts-venn/hollow.png) | ![气泡维恩图截图](../../docs/packages/echarts-venn/bubble.png) |
 
 ## 安装
 

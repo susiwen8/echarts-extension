@@ -4,7 +4,7 @@
 
 ECharts 蜂群图扩展。导入本包即可注册 `series.type = 'beeswarm'`。
 
-![Beeswarm 图表截图](../../tests/browser-visual/__snapshots__/echarts-beeswarm.png)
+![Beeswarm 图表截图](../../docs/packages/echarts-beeswarm/screenshot.png)
 
 ## 安装
 

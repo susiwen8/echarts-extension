@@ -2,6 +2,7 @@ node_modules
 npm-debug.log
 test-results
 coverage
+videos/
 .pages/
 .DS_Store
 .omx/

@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for segmented spiral heatmaps. Import this package for side effects to register `series.type = 'spiral'`.
 
-![Spiral chart](../../tests/browser-visual/__snapshots__/echarts-spiral.png)
+![Spiral chart](../../docs/packages/echarts-spiral/screenshot.png)
 
 ## Install
 

@@ -4,7 +4,7 @@
 
 ECharts 径向面积图和径向区间面积时间序列扩展。导入本包即可注册 `series.type = 'radialArea'`。
 
-![Radial Area 图表截图](../../tests/browser-visual/__snapshots__/echarts-radial-area.png)
+![Radial Area 图表截图](../../docs/packages/echarts-radial-area/screenshot.png)
 
 ## 安装
 

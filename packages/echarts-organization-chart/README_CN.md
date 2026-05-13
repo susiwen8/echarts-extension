@@ -4,7 +4,7 @@
 
 ECharts 组织结构图扩展。导入本包即可注册 `series.type = 'organizationChart'`。
 
-![Organization Chart 图表截图](../../tests/browser-visual/__snapshots__/echarts-organization-chart.png)
+![Organization Chart 图表截图](../../docs/packages/echarts-organization-chart/screenshot.png)
 
 ## 安装
 

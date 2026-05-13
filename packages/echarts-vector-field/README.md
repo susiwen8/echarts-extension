@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for vector field and wind data. Import this package for side effects to register `series.type = 'vectorField'`.
 
-![Vector Field chart](../../tests/browser-visual/__snapshots__/echarts-vector-field.png)
+![Vector Field chart](../../docs/packages/echarts-vector-field/screenshot.png)
 
 ## Install
 

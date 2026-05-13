@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for Smith charts. Import this package for side effects to register `series.type = 'smith'`.
 
-![Smith chart](../../tests/browser-visual/__snapshots__/echarts-smith.png)
+![Smith chart](../../docs/packages/echarts-smith/screenshot.png)
 
 ## Install
 

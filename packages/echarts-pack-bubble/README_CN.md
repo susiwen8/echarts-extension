@@ -4,7 +4,7 @@
 
 ECharts 平面气泡堆积图扩展。导入本包即可注册 `series.type = 'packBubble'`。
 
-![Pack Bubble 图表截图](../../tests/browser-visual/__snapshots__/echarts-pack-bubble.png)
+![Pack Bubble 图表截图](../../docs/packages/echarts-pack-bubble/screenshot.png)
 
 ## 安装
 

@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for organization charts. Import this package for side effects to register `series.type = 'organizationChart'`.
 
-![Organization Chart chart](../../tests/browser-visual/__snapshots__/echarts-organization-chart.png)
+![Organization Chart chart](../../docs/packages/echarts-organization-chart/screenshot.png)
 
 ## Install
 

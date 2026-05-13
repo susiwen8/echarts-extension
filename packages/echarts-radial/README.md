@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a custom radial graph layout. Import this package for side effects to register `series.type = 'radial'`.
 
-![Radial chart](../../tests/browser-visual/__snapshots__/echarts-radial.png)
+![Radial chart](../../docs/packages/echarts-radial/screenshot.png)
 
 ## Install
 

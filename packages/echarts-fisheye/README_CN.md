@@ -4,7 +4,7 @@
 
 ECharts 可复用鱼眼放大交互组件。导入一次后，可在任意图表中添加顶层 `fisheye` 选项。
 
-![Fisheye 图表截图](../../tests/browser-visual/__snapshots__/echarts-fisheye.png)
+![Fisheye 图表截图](../../docs/packages/echarts-fisheye/screenshot.png)
 
 ```js
 import * as echarts from 'echarts';

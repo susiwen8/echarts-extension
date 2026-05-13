@@ -4,7 +4,7 @@ Language: English | [中文](./README_CN.md)
 
 Shared layout and rendering helpers for the ECharts extension packages in this monorepo. Most chart users do not import this package directly; use it when you are building a new extension or testing the local graph layouts.
 
-![Layout Core chart](../../tests/browser-visual/__snapshots__/layout-core.png)
+![Layout Core chart](../../docs/packages/echarts-layout-core/screenshot.png)
 
 ## Install
 

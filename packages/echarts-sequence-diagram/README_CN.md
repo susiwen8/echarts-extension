@@ -4,7 +4,7 @@
 
 ECharts UML 时序图扩展。
 
-![Sequence Diagram 图表截图](../../tests/browser-visual/__snapshots__/echarts-sequence-diagram.png)
+![Sequence Diagram 图表截图](../../docs/packages/echarts-sequence-diagram/screenshot.png)
 
 ```js
 import * as echarts from 'echarts';

@@ -4,7 +4,7 @@
 
 ECharts 底部对齐嵌套圆图扩展。导入本包即可注册 `series.type = 'nestedCircle'`。
 
-![Nested Circle 图表截图](../../tests/browser-visual/__snapshots__/echarts-nested-circle.png)
+![Nested Circle 图表截图](../../docs/packages/echarts-nested-circle/screenshot.png)
 
 ## 安装
 

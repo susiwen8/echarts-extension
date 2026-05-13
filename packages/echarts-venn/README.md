@@ -6,7 +6,7 @@ ECharts extension chart for hollow and bubble Venn diagrams. Import this package
 
 | Hollow Venn | Bubble Venn |
 | --- | --- |
-| ![Hollow Venn chart](../../tests/browser-visual/__snapshots__/echarts-venn-hollow.png) | ![Bubble Venn chart](../../tests/browser-visual/__snapshots__/echarts-venn-bubble.png) |
+| ![Hollow Venn chart](../../docs/packages/echarts-venn/hollow.png) | ![Bubble Venn chart](../../docs/packages/echarts-venn/bubble.png) |
 
 ## Install
 
