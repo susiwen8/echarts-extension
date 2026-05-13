@@ -43,6 +43,12 @@ describe('options docs SSG output', () => {
 
     expect(html).toContain('data-option-target="echarts-layout-core"');
     expect(html).toContain('布局核心');
+    expect(html).toContain('href="./index.zh.html">示例</a>');
+    expect(html).toContain('href="./packages/echarts-radial-boxplot/index.zh.html">示例</a>');
+    expect(html).toContain('href="./packages/echarts-venn/hollow.zh.html">空心示例</a>');
+    expect(html).toContain('href="./packages/echarts-venn/bubble.zh.html">气泡示例</a>');
+    expect(html).not.toContain('href="./packages/echarts-radial-boxplot/">示例</a>');
+    expect(html).not.toContain('href="./packages/echarts-venn/hollow.html">空心示例</a>');
     expect(html).toContain('data-option-name="input"');
     expect(html).toContain('汇总图布局输入数据和连线配置');
     expect(html).not.toContain('正在加载配置项文档');

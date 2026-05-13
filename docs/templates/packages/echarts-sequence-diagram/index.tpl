@@ -111,6 +111,7 @@
         </div>
         <nav class="demo-links" aria-label="Example navigation">
           <a href="../../">All examples</a>
+          <a href="../../options.html#echarts-sequence-diagram">Options</a>
           <a href="./large.html">Large data</a>
         </nav>
       </header>

@@ -81,6 +81,46 @@ describe('docs SSG pages', () => {
     expect(html).toContain('class="layout-card"');
     expect(html).toContain('<svg');
   });
+
+  it('links every package example to its options section', () => {
+    const packagePages = generatedHtmlFiles().filter((filePath) => {
+      return path.relative(generatedDocsDir, filePath).startsWith(`packages${path.sep}`);
+    });
+
+    expect(packagePages.length).toBeGreaterThan(80);
+    for (const filePath of packagePages) {
+      const relativePath = path.relative(generatedDocsDir, filePath);
+      const packageName = relativePath.split(path.sep)[1];
+      const html = readDoc(filePath);
+      const isChinesePage = relativePath.endsWith('.zh.html');
+      const optionsPage = isChinesePage ? 'options.zh.html' : 'options.html';
+      const optionsLabel = isChinesePage ? '配置项' : 'Options';
+      expect(html, relativePath).toContain(`href="../../${optionsPage}#${packageName}"`);
+      expect(html, relativePath).toContain(`>${optionsLabel}</a>`);
+    }
+  });
+
+  it('generates localized Chinese example pages with language switches', () => {
+    const englishHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-radial-boxplot/index.html'));
+    const chineseHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-radial-boxplot/index.zh.html'));
+    const chineseLargeHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-radial-boxplot/large.zh.html'));
+    const chineseGalleryHtml = readDoc(path.join(generatedDocsDir, 'index.zh.html'));
+
+    expect(englishHtml).toContain('href="./index.zh.html" lang="zh-CN">中文</a>');
+    expect(chineseHtml).toContain('<html lang="zh-CN">');
+    expect(chineseHtml).toContain('<h1>径向箱线图</h1>');
+    expect(chineseHtml).toContain('五数概括以径向箱体、须线和中位数弧线呈现。');
+    expect(chineseHtml).toContain('href="../../index.zh.html">全部示例</a>');
+    expect(chineseHtml).toContain('href="../../options.zh.html#echarts-radial-boxplot">配置项</a>');
+    expect(chineseHtml).toContain('href="./large.zh.html">大数据</a>');
+    expect(chineseHtml).toContain('href="./" lang="en">English</a>');
+    expect(chineseLargeHtml).toContain('href="./index.zh.html">标准示例</a>');
+    expect(chineseLargeHtml).toContain('href="./large.html" lang="en">English</a>');
+    expect(chineseGalleryHtml).toContain('<title>ECharts Extension 示例</title>');
+    expect(chineseGalleryHtml).toContain('href="./packages/echarts-radial-boxplot/index.zh.html"');
+    expect(chineseGalleryHtml).toContain('href="./options.zh.html">配置项</a>');
+    expect(chineseGalleryHtml).toContain('href="./" lang="en">English</a>');
+  });
 });
 
 function generatedHtmlFiles() {

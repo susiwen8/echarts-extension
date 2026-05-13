@@ -216,6 +216,7 @@
       </div>
       <nav class="demo-links" aria-label="Example navigation">
         <a href="../../">All examples</a>
+        <a href="../../options.html#echarts-layout-core">Options</a>
       </nav>
     </header>
     <section id="layouts" class="layout-grid" aria-label="Layout examples"></section>

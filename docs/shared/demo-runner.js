@@ -42,6 +42,163 @@
     { name: 'West Europe', min: 6, q1: 11, median: 14, q3: 18, max: 24, itemStyle: { color: '#c89b2f' } },
     { name: 'West Africa', min: 1, q1: 5, median: 8, q3: 12, max: 16, itemStyle: { color: '#f070be' } }
   ];
+  const translations = {
+    zh: {
+      'Options': '配置项',
+      'Add data': '添加数据',
+      'Delete data': '删除数据',
+      'Replay': '重播',
+      'Reset': '重置',
+      'Interactions': '交互',
+      'Reset view': '重置视图',
+      'Hover': '悬停',
+      'Click': '点击',
+      'None': '无',
+      'Option JSON': '配置 JSON',
+      'Apply JSON': '应用 JSON',
+      'Invalid JSON': 'JSON 无效',
+      'On': '开',
+      'Off': '关',
+      'JSON': 'JSON',
+      'ECharts failed to load.': 'ECharts 加载失败。',
+      'Loading data': '正在加载数据',
+      'Title': '标题',
+      'Background': '背景',
+      'Time': '时间',
+      'Arc': '弧线图',
+      'Beeswarm': '蜂群图',
+      'Cause and Effect Diagram': '因果图',
+      'Circle Packing': '圆形打包图',
+      'Concentric': '同心布局',
+      'Fisheye': '鱼眼交互',
+      'Flame': '火焰图',
+      'Fractal Explorer': '分形浏览器',
+      'Grid': '网格布局',
+      'Layout Core': '布局核心',
+      'Lollipop': '棒棒糖图',
+      'MDS': 'MDS 布局',
+      'Mosaic': '马赛克图',
+      'Nested Circle': '嵌套圆图',
+      'Organization Chart': '组织结构图',
+      'Pack Bubble': '打包气泡图',
+      'Radial Area': '径向区域图',
+      'Radial Boxplot': '径向箱线图',
+      'Radial': '径向布局',
+      'Sequence Diagram': '时序图',
+      'Smith Chart': '史密斯圆图',
+      'Spiral Heatmap': '螺旋热力图',
+      'Subway': '地铁线路图',
+      'Sunrise Sunset': '日出日落图',
+      'Vector Field': '向量场',
+      'Bubble Venn': '气泡韦恩图',
+      'Hollow Venn': '空心韦恩图',
+      'Voronoi Treemap': 'Voronoi 树图',
+      'Population Pack Bubble': '人口打包气泡图',
+      'Product Circle Packing': '产品圆形打包图',
+      'Until sunset': '距离日落',
+      'Until sunrise': '距离日出',
+      'Updated': '更新于',
+      'Radial Large Graph': '径向大规模图',
+      'Concentric Large Graph': '同心大规模图',
+      'Grid Large Graph': '网格大规模图',
+      'MDS Sampled Large Graph': 'MDS 采样大规模图',
+      'Arc Large Graph': '弧线大规模图',
+      'Radial Area Large Series': '径向区域大规模序列',
+      'Radial Boxplot Large Categories': '径向箱线图大规模分类',
+      'Venn Bubble Large Items': '韦恩气泡大规模条目',
+      'Pack Bubble Large Items': '打包气泡大规模条目',
+      'Circle Packing Large Tree': '圆形打包大规模树',
+      'Nested Circle Large Rings': '嵌套圆大规模环',
+      'Mosaic Million Row Aggregate': '马赛克百万行聚合',
+      'Voronoi Treemap Sampled Tree': 'Voronoi 树图采样树',
+      'Subway Large Network': '地铁大规模网络',
+      'Sequence Diagram Large Trace': '时序图大规模链路',
+      'Flame Large Profile': '火焰图大规模剖析',
+      'Sunrise Sunset Large Data Parse': '日出日落大数据解析',
+      'Lollipop Large Categories': '棒棒糖图大规模分类',
+      'Beeswarm Large Points': '蜂群图大规模点',
+      'Spiral Large Segments': '螺旋图大规模分段',
+      'Vector Field Large Grid': '向量场大规模网格',
+      'Smith Chart Large Loads': '史密斯圆图大规模负载',
+      'Performance': '性能',
+      'Run': '运行',
+      'Target': '目标',
+      'Max data': '最大数据量',
+      'Render cap': '渲染上限',
+      'Raw rows': '原始行数',
+      'Waiting...': '等待中...',
+      'Raw': '原始',
+      'Rendered': '已渲染',
+      'Optimize': '优化',
+      'Sample': '采样',
+      'Focus': '焦点',
+      'Displayables': '显示对象',
+      'Data': '数据',
+      'Option': '配置',
+      'First frame': '首帧',
+      'Finished': '完成',
+      'Total': '总计',
+      'Inspect': '检查',
+      'All': '全部',
+      'on': '开',
+      'off': '关',
+      'Unit radius': '单位半径',
+      'Link distance': '连线距离',
+      'Prevent overlap': '防止重叠',
+      'Sort by': '排序方式',
+      'Max level diff': '最大层级差',
+      'Equidistant rings': '等距环',
+      'Columns': '列数',
+      'Rows': '行数',
+      'Node spacing': '节点间距',
+      'Overlap padding': '重叠留白',
+      'Condense': '紧凑布局',
+      'Node separation': '节点间隔',
+      'Edge duration': '边动画时长',
+      'Edge stagger': '边动画错峰',
+      'Edge easing': '边动画缓动',
+      'Enter duration': '入场时长',
+      'Enter stagger': '入场错峰',
+      'Inner radius %': '内半径 %',
+      'Outer radius %': '外半径 %',
+      'Padding': '内边距',
+      'Value min': '最小值',
+      'Value max': '最大值',
+      'Tick count': '刻度数',
+      'Band opacity': '范围带透明度',
+      'Line width': '线宽',
+      'Show symbols': '显示符号',
+      'Box width': '箱体宽度',
+      'Cap width': '端帽宽度',
+      'Box opacity': '箱体透明度',
+      'Angle labels': '角度标签',
+      'Value labels': '数值标签',
+      'Animation': '动画',
+      'Duration': '时长',
+      'Stagger': '错峰',
+      'Easing': '缓动',
+      'Opacity': '透明度',
+      'Gap': '间距',
+      'Border width': '边框宽度',
+      'Label size': '标签字号',
+      'Show labels': '显示标签',
+      'Show links': '显示连线',
+      'Min radius': '最小半径',
+      'Max radius': '最大半径',
+      'Center radius': '中心半径',
+      'Radius': '半径',
+      'Zoom': '缩放'
+    }
+  };
+
+  function currentLocale() {
+    const lang = root.document?.documentElement?.lang || '';
+    return String(lang).toLowerCase().startsWith('zh') ? 'zh' : 'en';
+  }
+
+  function t(value) {
+    return translations[currentLocale()]?.[value] || value;
+  }
 
   const registry = {
     radial: {
@@ -1339,6 +1496,16 @@
     }, {});
   }
 
+  function localizeControlState(controls, state) {
+    if (currentLocale() === 'en') return state;
+    controls.forEach((control) => {
+      if (control.type === 'text' && typeof state[control.id] === 'string') {
+        state[control.id] = t(state[control.id]);
+      }
+    });
+    return state;
+  }
+
   function createDemoOption(exampleName, data, controlValues, context = {}) {
     const entry = registry[exampleName];
     if (!entry) return null;
@@ -1441,13 +1608,13 @@
     const entry = registry[exampleName];
     if (!chartElement || !entry) return;
     if (!root.echarts) {
-      chartElement.textContent = 'ECharts failed to load.';
+      chartElement.textContent = t('ECharts failed to load.');
       return;
     }
 
     const chart = root.echarts.init(chartElement);
     chart.showLoading('default', {
-      text: 'Loading data',
+      text: t('Loading data'),
       color: '#3f6fd8',
       textColor: '#647085',
       maskColor: 'rgba(255, 255, 255, 0.82)'
@@ -1459,6 +1626,7 @@
     if (embeddedPayload?.controlValues && typeof embeddedPayload.controlValues === 'object') {
       Object.assign(state, embeddedPayload.controlValues);
     }
+    localizeControlState(entry.controls || [], state);
     const addDataState = createAddDataState(exampleName);
     const deleteDataState = createDeleteDataState(exampleName);
     let customOption = null;
@@ -1470,6 +1638,7 @@
       },
       onReset() {
         Object.assign(state, createControlState(entry.controls || []));
+        localizeControlState(entry.controls || [], state);
         customOption = null;
         syncControlElements(controlsPanel, entry.controls || [], state);
         render();
@@ -2274,23 +2443,23 @@
     const header = document.createElement('div');
     header.className = 'demo-controls__header';
     const title = document.createElement('h2');
-    title.textContent = 'Options';
+    title.textContent = t('Options');
     const actions = document.createElement('div');
     actions.className = 'demo-controls__actions';
     if (typeof handlers.onAddData === 'function') {
-      const addDataButton = controlButton('添加数据');
+      const addDataButton = controlButton(t('Add data'));
       addDataButton.classList.add('demo-control-button--primary');
       addDataButton.addEventListener('click', handlers.onAddData);
       actions.append(addDataButton);
     }
     if (typeof handlers.onDeleteData === 'function') {
-      const deleteDataButton = controlButton('删除数据');
+      const deleteDataButton = controlButton(t('Delete data'));
       deleteDataButton.addEventListener('click', handlers.onDeleteData);
       actions.append(deleteDataButton);
     }
-    const replayButton = controlButton('Replay');
+    const replayButton = controlButton(t('Replay'));
     replayButton.addEventListener('click', handlers.onReplay);
-    const resetButton = controlButton('Reset');
+    const resetButton = controlButton(t('Reset'));
     resetButton.addEventListener('click', handlers.onReset);
     actions.append(replayButton, resetButton);
     header.append(title, actions);
@@ -2313,7 +2482,7 @@
 
     const title = document.createElement('h3');
     title.className = 'demo-interactions__title';
-    title.textContent = 'Interactions';
+    title.textContent = t('Interactions');
 
     const viewRow = document.createElement('div');
     viewRow.className = 'demo-interactions__view';
@@ -2321,15 +2490,15 @@
     zoomLabel.className = 'demo-interactions__zoom';
     zoomLabel.dataset.demoInteraction = 'zoom';
     zoomLabel.textContent = '100%';
-    const resetViewButton = controlButton('Reset view');
+    const resetViewButton = controlButton(t('Reset view'));
     resetViewButton.dataset.demoInteraction = 'reset-view';
     viewRow.append(zoomLabel, resetViewButton);
 
     section.append(
       title,
       viewRow,
-      createInteractionStatusRow('Hover', 'None', 'hover'),
-      createInteractionStatusRow('Click', 'None', 'click')
+      createInteractionStatusRow(t('Hover'), t('None'), 'hover'),
+      createInteractionStatusRow(t('Click'), t('None'), 'click')
     );
     return section;
   }
@@ -2354,7 +2523,7 @@
 
     const name = document.createElement('span');
     name.className = 'demo-control__label';
-    name.textContent = control.label;
+    name.textContent = t(control.label);
 
     const value = document.createElement('span');
     value.className = 'demo-control__value';
@@ -2422,7 +2591,7 @@
     details.className = 'demo-option-editor';
 
     const summary = document.createElement('summary');
-    summary.textContent = 'Option JSON';
+    summary.textContent = t('Option JSON');
 
     const textarea = document.createElement('textarea');
     textarea.className = 'demo-option-editor__textarea';
@@ -2432,13 +2601,13 @@
     footer.className = 'demo-option-editor__footer';
     const error = document.createElement('span');
     error.className = 'demo-option-editor__error';
-    const applyButton = controlButton('Apply JSON');
+    const applyButton = controlButton(t('Apply JSON'));
     applyButton.addEventListener('click', () => {
       try {
         error.textContent = '';
         onJsonApply(JSON.parse(textarea.value));
       } catch (parseError) {
-        error.textContent = 'Invalid JSON';
+        error.textContent = t('Invalid JSON');
       }
     });
     footer.append(error, applyButton);
@@ -2586,7 +2755,7 @@
     }
 
     function onMouseOut() {
-      updateInteractionValue(status.hoverValue, 'None');
+      updateInteractionValue(status.hoverValue, t('None'));
       if (!activeHoverTarget) return;
       chart.dispatchAction({ type: 'downplay', ...activeHoverTarget });
       activeHoverTarget = null;
@@ -2607,7 +2776,7 @@
     function onZrMouseOut(event) {
       if (!event?.target) return;
       if (activeZrHoverTarget === event.target) activeZrHoverTarget = null;
-      updateInteractionValue(status.hoverValue, 'None');
+      updateInteractionValue(status.hoverValue, t('None'));
     }
 
     function onZrClick(event) {
@@ -2767,7 +2936,7 @@
   }
 
   function formatInteractionEvent(kind, params = {}, now = new Date()) {
-    const prefix = kind === 'click' ? `Click ${formatInteractionTime(now)}` : 'Hover';
+    const prefix = kind === 'click' ? `${t('Click')} ${formatInteractionTime(now)}` : t('Hover');
     const parts = [prefix];
     const seriesType = params.seriesType || params.componentSubType || params.seriesName;
     const name = params.name || params.data?.name;
@@ -2780,7 +2949,7 @@
   }
 
   function formatZrInteractionEvent(kind, target, now = new Date()) {
-    const prefix = kind === 'click' ? `Click ${formatInteractionTime(now)}` : 'Hover';
+    const prefix = kind === 'click' ? `${t('Click')} ${formatInteractionTime(now)}` : t('Hover');
     const parts = [prefix];
     const type = target?.type;
     const key = readGraphicElementKey(target);
@@ -2828,9 +2997,9 @@
 
   function formatControlValue(control, value) {
     if (typeof control.formatValue === 'function') return control.formatValue(value);
-    if (control.type === 'checkbox') return value ? 'On' : 'Off';
+    if (control.type === 'checkbox') return value ? t('On') : t('Off');
     if (control.type === 'color') return String(value).toUpperCase();
-    if (control.type === 'json') return isValidJsonControlValue(value) ? 'JSON' : 'Invalid JSON';
+    if (control.type === 'json') return isValidJsonControlValue(value) ? t('JSON') : t('Invalid JSON');
     if (control.type === 'range') {
       const numeric = finiteNumber(Number(value), control.defaultValue);
       return Number.isInteger(numeric) ? String(numeric) : numeric.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
@@ -2879,10 +3048,10 @@
 
     setPath(option, 'series.0.currentTime', currentTime);
     setPath(option, 'series.0.updatedAt', currentTime);
-    setPath(option, 'series.0.updatedText', `Updated ${timeText}`);
+    setPath(option, 'series.0.updatedText', `${t('Updated')} ${timeText}`);
     setPath(option, 'series.0.remainingText', formatDurationSeconds(Math.max(0, target - minutes) * 60));
     if (shouldUseDynamicSunriseSunsetTitle(controlValues?.titleText)) {
-      setPath(option, 'series.0.title', daylight ? 'Until sunset' : 'Until sunrise');
+      setPath(option, 'series.0.title', daylight ? t('Until sunset') : t('Until sunrise'));
     }
     if (context.interactionControlId === control.id) {
       setPath(option, 'series.0.enterAnimation', false);
@@ -3062,7 +3231,7 @@
 
   function title(text) {
     return {
-      text,
+      text: t(text),
       left: 'center',
       top: 20,
       textStyle: { color: '#111827', fontSize: 22, fontWeight: 720 }
@@ -3097,6 +3266,8 @@
   namespace.resetViewport = resetViewport;
   namespace.formatInteractionEvent = formatInteractionEvent;
   namespace.formatZrInteractionEvent = formatZrInteractionEvent;
+  namespace.currentLocale = currentLocale;
+  namespace.t = t;
 
   document.addEventListener('DOMContentLoaded', () => {
     const exampleName = document.body.dataset.example;

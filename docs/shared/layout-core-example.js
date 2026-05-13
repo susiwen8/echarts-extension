@@ -77,6 +77,28 @@ const cases = layoutCaseDefinitions.map((definition) => ({
   graph: cloneGraph(graph),
   addCount: 0
 }));
+const translations = {
+  zh: {
+    'Add data': '添加数据',
+    'Delete data': '删除数据',
+    'Reset view': '重置视图',
+    'Click': '点击',
+    'Hover': '悬停',
+    'None': '无',
+    'Added': '已添加',
+    'Deleted': '已删除',
+    'nodes': '个节点'
+  }
+};
+
+function readLocale(locale) {
+  const value = locale || (typeof document === 'undefined' ? '' : document.documentElement?.lang);
+  return String(value || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+
+function t(value, locale) {
+  return translations[readLocale(locale)]?.[value] || value;
+}
 
 const host = typeof document === 'undefined' ? null : document.getElementById('layouts');
 
@@ -89,8 +111,8 @@ if (host) {
   });
 }
 
-export function createLayoutCardsMarkup() {
-  return cases.map(createLayoutCardMarkup).join('\n');
+export function createLayoutCardsMarkup(locale = 'en') {
+  return cases.map((layoutCase) => createLayoutCardMarkup(layoutCase, locale)).join('\n');
 }
 
 function createLayoutCardElement(layoutCase) {
@@ -102,23 +124,23 @@ function createLayoutCardElement(layoutCase) {
   return card;
 }
 
-function createLayoutCardMarkup(layoutCase) {
+function createLayoutCardMarkup(layoutCase, locale) {
   return `<article id="layout-${escapeHtml(layoutCase.id)}" class="layout-card" data-layout-case="${escapeHtml(layoutCase.id)}">
-${createLayoutCardInnerMarkup(layoutCase)}
+${createLayoutCardInnerMarkup(layoutCase, locale)}
 </article>`;
 }
 
-function createLayoutCardInnerMarkup(layoutCase) {
+function createLayoutCardInnerMarkup(layoutCase, locale) {
   return `<div class="layout-card__header">
       <h2>${layoutCase.title}</h2>
       <div class="layout-card__tools">
         <span class="layout-card__zoom">100%</span>
-        <button class="layout-card__button layout-card__button--primary" data-layout-add type="button">添加数据</button>
-        <button class="layout-card__button" data-layout-delete type="button">删除数据</button>
-        <button class="layout-card__button" data-layout-reset type="button">Reset view</button>
+        <button class="layout-card__button layout-card__button--primary" data-layout-add type="button">${t('Add data', locale)}</button>
+        <button class="layout-card__button" data-layout-delete type="button">${t('Delete data', locale)}</button>
+        <button class="layout-card__button" data-layout-reset type="button">${t('Reset view', locale)}</button>
       </div>
     </div>
-    <div class="layout-card__event">Click None</div>
+    <div class="layout-card__event">${t('Click', locale)} ${t('None', locale)}</div>
     <div class="layout-card__visual">${renderLayout(layoutCase.id, computeLayoutCase(layoutCase))}</div>`;
 }
 
@@ -180,7 +202,7 @@ function attachLayoutInteractions(card, layoutCase) {
     const viewport = card.querySelector('.layout-viewport');
     if (viewport) applySvgViewport(viewport, zoomLabel, state);
     animateLayoutUpdate(card, before);
-    eventLabel.textContent = `Added ${layoutCase.addCount} · ${layoutCase.graph.data.length} nodes`;
+    eventLabel.textContent = `${t('Added')} ${layoutCase.addCount} · ${layoutCase.graph.data.length} ${t('nodes')}`;
   });
 
   deleteButton?.addEventListener('click', () => {
@@ -191,7 +213,7 @@ function attachLayoutInteractions(card, layoutCase) {
     const viewport = card.querySelector('.layout-viewport');
     if (viewport) applySvgViewport(viewport, zoomLabel, state);
     animateLayoutUpdate(card, before);
-    eventLabel.textContent = `Deleted ${removed.name} · ${layoutCase.graph.data.length} nodes`;
+    eventLabel.textContent = `${t('Deleted')} ${removed.name} · ${layoutCase.graph.data.length} ${t('nodes')}`;
   });
 
   resetButton?.addEventListener('click', () => {
@@ -256,21 +278,21 @@ function attachLayoutInteractions(card, layoutCase) {
     const target = closestLayoutTarget(event.target);
     if (!target) return;
     target.classList.add('is-hovered');
-    eventLabel.textContent = `Hover · ${target.dataset.layoutKind} · ${target.dataset.layoutName}`;
+    eventLabel.textContent = `${t('Hover')} · ${target.dataset.layoutKind} · ${target.dataset.layoutName}`;
   });
 
   visual.addEventListener('mouseout', (event) => {
     const target = closestLayoutTarget(event.target);
     if (!target || target.contains(event.relatedTarget)) return;
     target.classList.remove('is-hovered');
-    eventLabel.textContent = 'Click None';
+    eventLabel.textContent = `${t('Click')} ${t('None')}`;
   });
 
   visual.addEventListener('click', (event) => {
     if (Date.now() < suppressClickUntil) return;
     const target = closestLayoutTarget(event.target);
     if (!target) return;
-    eventLabel.textContent = `Click ${formatLayoutTime(new Date())} · ${target.dataset.layoutKind} · ${target.dataset.layoutName}`;
+    eventLabel.textContent = `${t('Click')} ${formatLayoutTime(new Date())} · ${target.dataset.layoutKind} · ${target.dataset.layoutName}`;
   });
 }
 

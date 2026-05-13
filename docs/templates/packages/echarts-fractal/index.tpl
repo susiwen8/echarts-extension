@@ -29,6 +29,7 @@
       </div>
       <nav class="demo-links" aria-label="Example navigation">
         <a href="../../">All examples</a>
+        <a href="../../options.html#echarts-fractal">Options</a>
       </nav>
     </header>
     <section class="demo-stage demo-stage--with-controls">

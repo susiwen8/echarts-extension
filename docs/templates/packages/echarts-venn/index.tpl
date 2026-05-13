@@ -18,6 +18,7 @@
       </div>
       <nav class="demo-links" aria-label="Example navigation">
         <a href="../../">All examples</a>
+        <a href="../../options.html#echarts-venn">Options</a>
       </nav>
     </header>
     <section class="case-grid" aria-label="Venn examples">

@@ -901,11 +901,20 @@ function linksForPackage(packageName, locale) {
   const exampleLabel = locale === 'zh' ? '示例' : 'Example';
   if (packageName === 'echarts-venn') {
     return [
-      { href: './packages/echarts-venn/hollow.html', label: locale === 'zh' ? '空心示例' : 'Hollow example' },
-      { href: './packages/echarts-venn/bubble.html', label: locale === 'zh' ? '气泡示例' : 'Bubble example' }
+      {
+        href: locale === 'zh' ? './packages/echarts-venn/hollow.zh.html' : './packages/echarts-venn/hollow.html',
+        label: locale === 'zh' ? '空心示例' : 'Hollow example'
+      },
+      {
+        href: locale === 'zh' ? './packages/echarts-venn/bubble.zh.html' : './packages/echarts-venn/bubble.html',
+        label: locale === 'zh' ? '气泡示例' : 'Bubble example'
+      }
     ];
   }
-  return [{ href: `./packages/${packageName}/`, label: exampleLabel }];
+  return [{
+    href: locale === 'zh' ? `./packages/${packageName}/index.zh.html` : `./packages/${packageName}/`,
+    label: exampleLabel
+  }];
 }
 
 function escapeHtml(value) {

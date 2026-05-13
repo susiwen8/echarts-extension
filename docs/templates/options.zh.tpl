@@ -346,7 +346,7 @@
         <p class="lede">各图表的配置项名称、说明和可选值。</p>
       </div>
       <nav class="demo-links" aria-label="文档导航">
-        <a href="./">示例</a>
+        <a href="./index.zh.html">示例</a>
         <a href="./options.html">English</a>
       </nav>
     </header>

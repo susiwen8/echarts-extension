@@ -979,6 +979,7 @@
   function hydratePreparedOption(caseName, prepared) {
     const definition = cases[caseName];
     const option = applyLargeInteractionDefaults(cloneJsonValue(prepared.option || {}));
+    localizeLargeOption(option, definition);
     return {
       caseName,
       definition,
@@ -992,6 +993,13 @@
         optionMs: finiteNumber(Number(prepared.timings?.optionMs), 0)
       }
     };
+  }
+
+  function localizeLargeOption(option, definition) {
+    if (option?.title && typeof option.title === 'object') {
+      option.title.text = t(option.title.text || definition.title);
+    }
+    return option;
   }
 
   function largePayloadMetaFromOption(option, definition) {
@@ -1222,6 +1230,11 @@
 
   function getDemoApi() {
     return root.EChartsExtensionExamples || {};
+  }
+
+  function t(value) {
+    const demoApi = getDemoApi();
+    return typeof demoApi.t === 'function' ? demoApi.t(value) : value;
   }
 
   function createSamplingPlan(definition, count, renderContext = {}) {
@@ -1556,7 +1569,7 @@
         confine: true
       },
       title: {
-        text: definition.title,
+        text: t(definition.title),
         left: 'center',
         top: 10,
         textStyle: { color: '#111827', fontSize: 16, fontWeight: 720 }
@@ -1595,19 +1608,19 @@
     panel.className = controlsPanel ? 'demo-perf-panel' : 'demo-controls demo-perf-panel';
     panel.innerHTML = [
       '<div class="demo-controls__header">',
-      '<h2>Performance</h2>',
-      '<div class="demo-controls__actions"><button class="demo-control-button" type="button" data-perf-run>Run</button></div>',
+      `<h2>${t('Performance')}</h2>`,
+      `<div class="demo-controls__actions"><button class="demo-control-button" type="button" data-perf-run>${t('Run')}</button></div>`,
       '</div>',
       '<section class="demo-perf-summary">',
-      `<div><span>Target</span><strong>1000ms</strong></div>`,
-      `<div><span>Max data</span><strong>${formatNumber(definition.maxCount)}</strong></div>`,
-      `<div><span>Render cap</span><strong>${formatNumber(definition.renderLimit)}</strong></div>`,
+      `<div><span>${t('Target')}</span><strong>1000ms</strong></div>`,
+      `<div><span>${t('Max data')}</span><strong>${formatNumber(definition.maxCount)}</strong></div>`,
+      `<div><span>${t('Render cap')}</span><strong>${formatNumber(definition.renderLimit)}</strong></div>`,
       '</section>',
       '<label class="demo-control demo-control--select">',
-      '<span class="demo-control__topline"><span class="demo-control__label">Raw rows</span><span class="demo-control__value" data-perf-count-label></span></span>',
+      `<span class="demo-control__topline"><span class="demo-control__label">${t('Raw rows')}</span><span class="demo-control__value" data-perf-count-label></span></span>`,
       '<select data-perf-count></select>',
       '</label>',
-      '<section class="demo-perf-results" data-perf-results>Waiting...</section>'
+      `<section class="demo-perf-results" data-perf-results>${t('Waiting...')}</section>`
     ].join('');
 
     const select = panel.querySelector('[data-perf-count]');
@@ -1644,20 +1657,20 @@
     const target = panel.querySelector('[data-perf-results]');
     if (!target) return;
     const rows = [
-      ['Raw', formatNumber(result.rawCount)],
-      ['Rendered', formatNumber(result.renderCount)],
-      ['Optimize', formatLargeOptimization(result)],
-      ['Sample', `${result.sampleMode} L${result.detailLevel}`],
-      ['Focus', formatSampleWindow(result.sampleWindow)],
-      ['Zoom', `${Math.round(finiteNumber(Number(result.zoomScale), 1) * 100)}%`],
-      ['Displayables', formatNumber(result.displayableCount)],
-      ['Data', `${result.steps.dataMs}ms`],
-      ['Option', `${result.steps.optionMs}ms`],
+      [t('Raw'), formatNumber(result.rawCount)],
+      [t('Rendered'), formatNumber(result.renderCount)],
+      [t('Optimize'), formatLargeOptimization(result)],
+      [t('Sample'), `${result.sampleMode} L${result.detailLevel}`],
+      [t('Focus'), formatSampleWindow(result.sampleWindow)],
+      [t('Zoom'), `${Math.round(finiteNumber(Number(result.zoomScale), 1) * 100)}%`],
+      [t('Displayables'), formatNumber(result.displayableCount)],
+      [t('Data'), `${result.steps.dataMs}ms`],
+      [t('Option'), `${result.steps.optionMs}ms`],
       ['setOption', `${result.steps.setOptionMs}ms`],
-      ['First frame', `${result.steps.firstFrameMs}ms`],
-      ['Finished', `${result.steps.finishedMs}ms`],
-      ['Total', `${result.steps.totalMs}ms`],
-      ['Inspect', `${result.steps.inspectMs}ms`]
+      [t('First frame'), `${result.steps.firstFrameMs}ms`],
+      [t('Finished'), `${result.steps.finishedMs}ms`],
+      [t('Total'), `${result.steps.totalMs}ms`],
+      [t('Inspect'), `${result.steps.inspectMs}ms`]
     ];
     target.innerHTML = rows
       .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
@@ -1764,14 +1777,14 @@
   }
 
   function formatSampleWindow(window) {
-    if (!window) return 'All';
+    if (!window) return t('All');
     const start = Math.round(finiteNumber(Number(window.startFraction), 0) * 100);
     const end = Math.round(finiteNumber(Number(window.endFraction), 1) * 100);
     return `${start}-${end}%`;
   }
 
   function formatLargeOptimization(result) {
-    const mode = result.optimized ? 'on' : 'off';
+    const mode = result.optimized ? t('on') : t('off');
     return `${mode} >${formatNumber(result.largeThreshold)}`;
   }
 

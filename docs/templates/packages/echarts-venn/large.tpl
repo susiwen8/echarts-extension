@@ -17,6 +17,7 @@
       </div>
       <nav class="demo-links" aria-label="Example navigation">
         <a href="../../">All examples</a>
+        <a href="../../options.html#echarts-venn">Options</a>
         <a href="./hollow.html">Hollow case</a>
         <a href="./bubble.html">Bubble case</a>
       </nav>

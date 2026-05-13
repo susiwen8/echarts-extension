@@ -17,6 +17,7 @@
       </div>
       <nav class="demo-links" aria-label="Example navigation">
         <a href="../../">All examples</a>
+        <a href="../../options.html#echarts-cause-effect">Options</a>
       </nav>
     </header>
     <section class="demo-stage"><div class="chart-frame"><div id="chart"></div></div></section>

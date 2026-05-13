@@ -49,7 +49,6 @@
       <a class="case-card" href="./packages/echarts-smith/">echarts-smith</a>
       <a class="case-card" href="./packages/echarts-vector-field/">echarts-vector-field</a>
       <a class="case-card" href="./packages/echarts-fractal/">echarts-fractal</a>
-      <a class="case-card" href="./huawei-fast-charge.html">Huawei fast charge water drop</a>
     </section>
 
   </main>
