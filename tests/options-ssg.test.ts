@@ -60,4 +60,13 @@ describe('options docs SSG output', () => {
     expect(script).not.toMatch(/const\s+optionReferences\s*=/);
     expect(script).not.toContain('Generated from package README option tables');
   });
+
+  it('keeps the language switch anchored to the active option case', () => {
+    const script = readDoc('options.js');
+
+    expect(script).toContain('function updateLanguageSwitchLinks(optionCaseId)');
+    expect(script).toContain('encodeURIComponent(optionCaseId)');
+    expect(script).toContain('updateLanguageSwitchLinks(activeOptionCaseId)');
+    expect(script).toContain('/options(?:\\.zh)?\\.html$/');
+  });
 });

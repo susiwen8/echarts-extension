@@ -800,6 +800,7 @@ function buildOptionsJs() {
         card.hidden = true;
       });
       updateActiveNavLink('');
+      updateLanguageSwitchLinks('');
       return;
     }
 
@@ -807,6 +808,7 @@ function buildOptionsJs() {
       card.hidden = card.id !== activeOptionCaseId || card.dataset.searchVisible === 'false';
     });
     updateActiveNavLink(activeOptionCaseId);
+    updateLanguageSwitchLinks(activeOptionCaseId);
   }
 
   function updateActiveNavLink(optionCaseId) {
@@ -814,6 +816,17 @@ function buildOptionsJs() {
       const active = link.dataset.optionTarget === optionCaseId;
       link.classList.toggle('options-nav__link--active', active);
       link.setAttribute('aria-current', active ? 'true' : 'false');
+    });
+  }
+
+  function updateLanguageSwitchLinks(optionCaseId) {
+    const targetHash = optionCaseId ? \`#\${encodeURIComponent(optionCaseId)}\` : '';
+    document.querySelectorAll('.demo-links a[href]').forEach((link) => {
+      if (!(link instanceof HTMLAnchorElement)) return;
+      const href = link.getAttribute('href') || '';
+      const baseHref = href.split('#')[0];
+      if (!/options(?:\\.zh)?\\.html$/.test(baseHref)) return;
+      link.setAttribute('href', \`\${baseHref}\${targetHash}\`);
     });
   }
 
