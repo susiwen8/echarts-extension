@@ -1,5 +1,6 @@
 import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -12,6 +13,7 @@ await mkdir(outputDir, { recursive: true });
 
 await copyRequired('favicon.svg');
 await copyRequired('docs');
+generateDocsHtml();
 await copyRequired('node_modules/echarts/dist/echarts.min.js');
 await writeFile(path.join(outputDir, '.nojekyll'), '');
 await writeRootRedirect();
@@ -76,6 +78,26 @@ export async function writeRootRedirect() {
   await writeFile(path.join(outputDir, 'index.html'), html);
 }
 
+export function generateDocsHtml() {
+  const docsOutput = path.relative(rootDir, path.join(outputDir, 'docs'));
+  runNodeScript('scripts/sync-options-from-readmes.mjs', ['--out', docsOutput]);
+  runNodeScript('scripts/sync-docs-ssg.mjs', ['--out', docsOutput]);
+}
+
+export function runNodeScript(scriptPath, args) {
+  const result = spawnSync(process.execPath, [path.join(rootDir, scriptPath), ...args], {
+    cwd: rootDir,
+    stdio: 'inherit'
+  });
+  if (result.status !== 0) {
+    throw new Error(`${scriptPath} failed with exit code ${result.status ?? 'unknown'}`);
+  }
+}
+
 export function shouldCopy(sourcePath) {
-  return path.basename(sourcePath) !== '.DS_Store';
+  const relative = path.relative(rootDir, sourcePath);
+  if (path.basename(sourcePath) === '.DS_Store') return false;
+  if (relative === path.join('docs', 'templates') || relative.startsWith(`docs${path.sep}templates${path.sep}`)) return false;
+  if (relative.startsWith(`docs${path.sep}`) && sourcePath.endsWith('.html')) return false;
+  return true;
 }

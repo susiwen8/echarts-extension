@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { test } from 'vitest';
@@ -90,6 +91,13 @@ test('test tooling runs through Vitest and browser test scripts', () => {
     rootPackage.scripts['test:perf:browser'],
     'node --experimental-strip-types --disable-warning=ExperimentalWarning tests/browser-perf/perf-runner.ts'
   );
+  assert.equal(rootPackage.scripts['docs:sync-options'], 'node scripts/sync-options-from-readmes.mjs');
+  assert.equal(rootPackage.scripts['docs:sync-pages'], 'node scripts/sync-docs-ssg.mjs');
+  assert.equal(rootPackage.scripts['docs:sync'], 'npm run docs:sync-options && npm run docs:sync-pages');
+  assert.equal(
+    rootPackage.scripts['docs:check'],
+    'node scripts/sync-options-from-readmes.mjs --check && node scripts/sync-docs-ssg.mjs --check'
+  );
   assert.equal(rootPackage.scripts['pages:build'], 'npm run build && node scripts/build-pages.mjs');
 
   assert.match(devDependencies.vitest ?? '', /^\^?4\./);
@@ -100,6 +108,7 @@ test('test tooling runs through Vitest and browser test scripts', () => {
   assert.ok(exists(path.join(root, 'tests/browser-visual/visual-diff.ts')));
   assert.ok(exists(path.join(root, 'tests/browser-perf/perf-runner.ts')));
   assert.ok(exists(path.join(root, 'scripts/build-pages.mjs')));
+  assert.ok(exists(path.join(root, 'docs/templates/index.tpl')));
 });
 
 test('GitHub Pages workflow deploys built examples through a Pages artifact', () => {
@@ -115,6 +124,25 @@ test('GitHub Pages workflow deploys built examples through a Pages artifact', ()
   assert.match(workflow, /pages: write/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /uses: actions\/deploy-pages@v5/);
+});
+
+test('docs HTML pages are generated artifacts instead of tracked sources', () => {
+  const trackedHtml = execFileSync('git', ['ls-files', 'docs/*.html', 'docs/**/*.html'], {
+    cwd: root,
+    encoding: 'utf8'
+  }).trim();
+  const trackedPackageDocs = execFileSync('git', ['ls-files', 'docs/packages'], {
+    cwd: root,
+    encoding: 'utf8'
+  }).trim();
+  const gitignore = readFileSync(path.join(root, '.gitignore'), 'utf8');
+
+  assert.equal(trackedHtml, '');
+  assert.equal(trackedPackageDocs, '');
+  assert.match(gitignore, /^docs\/\*\.html$/m);
+  assert.match(gitignore, /^docs\/\*\*\/\*\.html$/m);
+  assert.ok(exists(path.join(root, 'visual-baseline/echarts-radial.png')));
+  assert.ok(exists(path.join(root, 'visual-baseline/echarts-venn-hollow.png')));
 });
 
 test('npm publish workflow only publishes allowlisted packages', () => {

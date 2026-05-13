@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>echarts-vector-field example</title>
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../shared/demo-page.css?v=interactions-4">
+</head>
+<body class="demo-page" data-example="vector-field">
+  <main class="demo-shell">
+    <header class="demo-header">
+      <div>
+        <p class="eyebrow">echarts-vector-field</p>
+        <h1>Vector Field</h1>
+        <p>Wind components are rendered as north-up arrows over longitude and latitude.</p>
+      </div>
+      <nav class="demo-links" aria-label="Example navigation">
+        <a href="../../">All examples</a>
+        <a href="./large.html">Large data</a>
+      </nav>
+    </header>
+    <section class="demo-stage"><div class="chart-frame"><div id="chart"></div></div></section>
+  </main>
+  <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
+  <script src="../../../packages/echarts-vector-field/dist/echarts-vector-field.js?v=vector-field"></script>
+  <script src="../../shared/demo-runner.js?v=vector-field"></script>
+</body>
+</html>

@@ -1452,9 +1452,13 @@
       textColor: '#647085',
       maskColor: 'rgba(255, 255, 255, 0.82)'
     });
-    const data = cloneExampleData(await loadExampleData(exampleName));
+    const embeddedPayload = readEmbeddedDemoPayload(exampleName);
+    const data = cloneExampleData(embeddedPayload?.data || await loadExampleData(exampleName));
     chart.hideLoading();
     const state = createControlState(entry.controls || []);
+    if (embeddedPayload?.controlValues && typeof embeddedPayload.controlValues === 'object') {
+      Object.assign(state, embeddedPayload.controlValues);
+    }
     const addDataState = createAddDataState(exampleName);
     const deleteDataState = createDeleteDataState(exampleName);
     let customOption = null;
@@ -2925,6 +2929,9 @@
   }
 
   async function loadExampleData(exampleName) {
+    const embeddedPayload = readEmbeddedDemoPayload(exampleName);
+    if (embeddedPayload?.data) return embeddedPayload.data;
+
     const data = {
       ...namespace.data
     };
@@ -2947,6 +2954,19 @@
     }
 
     return data;
+  }
+
+  function readEmbeddedDemoPayload(exampleName) {
+    const script = root.document?.querySelector?.('script[type="application/json"][data-demo-payload]');
+    if (!script || script.dataset.exampleName && script.dataset.exampleName !== exampleName) return null;
+
+    try {
+      const payload = JSON.parse(script.textContent || '{}');
+      if (payload.exampleName && payload.exampleName !== exampleName) return null;
+      return payload;
+    } catch (error) {
+      return null;
+    }
   }
 
   function remoteKeyByExample(exampleName) {
@@ -3059,6 +3079,7 @@
   namespace.createDemoOption = createDemoOption;
   namespace.applyControlValues = applyControlValues;
   namespace.applyDemoInteractionDefaults = applyDemoInteractionDefaults;
+  namespace.loadExampleData = loadExampleData;
   namespace.createAddDataState = createAddDataState;
   namespace.addExampleData = addExampleData;
   namespace.createDeleteDataState = createDeleteDataState;

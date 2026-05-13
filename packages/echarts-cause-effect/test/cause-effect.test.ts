@@ -53,7 +53,7 @@ function loadDemoNamespace() {
 }
 
 test('example uses the shared form controls and add data flow', () => {
-  const html = readFileSync(new URL('../../../docs/packages/echarts-cause-effect/index.html', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../../../docs/templates/packages/echarts-cause-effect/index.tpl', import.meta.url), 'utf8');
   const namespace = loadDemoNamespace();
   const data = namespace.cloneExampleData(namespace.data);
   const state = namespace.createAddDataState('cause-effect');
@@ -65,7 +65,7 @@ test('example uses the shared form controls and add data flow', () => {
   const updatedOption = namespace.createDemoOption('cause-effect', data, {}, result);
 
   assert.match(html, /data-example="cause-effect"/);
-  assert.match(html, /\.\.\/\.\.\/shared\/demo-data\.js/);
+  assert.doesNotMatch(html, /\.\.\/\.\.\/shared\/demo-data\.js/);
   assert.match(html, /\.\.\/\.\.\/shared\/demo-runner\.js/);
   assert.equal(firstOption.series[0].type, 'causeEffect');
   assert.equal(firstOption.series[0].categories, data.causeEffect.categories);

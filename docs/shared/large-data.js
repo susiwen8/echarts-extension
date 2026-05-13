@@ -759,10 +759,11 @@
     const definition = cases[caseName];
     const chartElement = root.document?.getElementById?.(targetId);
     if (!definition || !chartElement || !root.echarts) return null;
+    const embeddedPayload = readEmbeddedLargeDemoPayload(caseName);
 
     const state = {
-      count: readCountFromLocation(definition.defaultCount),
-      seed: readNumericQuery('seed', 0),
+      count: readCountFromLocation(embeddedPayload?.count ?? definition.defaultCount),
+      seed: readNumericQuery('seed', embeddedPayload?.seed ?? 0),
       runId: 0,
       detailLevel: 0,
       replayKey: 0
@@ -771,7 +772,9 @@
       renderer: 'canvas',
       useDirtyRect: true
     });
-    const initialPrepared = createLargeOption(caseName, state.count, state.seed);
+    let initialPrepared = embeddedPayload?.prepared
+      ? hydratePreparedOption(caseName, embeddedPayload.prepared)
+      : createLargeOption(caseName, state.count, state.seed);
     const controls = createLargeControls(caseName, initialPrepared.option);
     const controlState = createLargeControlState(controls);
     let customOption = null;
@@ -834,7 +837,8 @@
       chart.resize();
       interactions.applyViewport();
     });
-    root.__ECHARTS_EXTENSION_PERF__.ready = run();
+    root.__ECHARTS_EXTENSION_PERF__.ready = run({ preparedOption: initialPrepared });
+    initialPrepared = null;
     return root.__ECHARTS_EXTENSION_PERF__.ready;
 
     async function run(context = {}) {
@@ -878,7 +882,9 @@
       chart.resize();
     }
     const initEnd = now();
-    const prepared = renderContext.customOption
+    const prepared = renderContext.preparedOption
+      ? hydratePreparedOption(caseName, renderContext.preparedOption)
+      : renderContext.customOption
       ? createCustomPreparedOption(caseName, count, renderContext.customOption)
       : createLargeOption(caseName, count, seed, renderContext);
     renderContext.onOption?.(prepared.option);
@@ -968,6 +974,57 @@
         optionMs: 0
       }
     };
+  }
+
+  function hydratePreparedOption(caseName, prepared) {
+    const definition = cases[caseName];
+    const option = applyLargeInteractionDefaults(cloneJsonValue(prepared.option || {}));
+    return {
+      caseName,
+      definition,
+      payload: {
+        ...largePayloadMetaFromOption(option, definition),
+        ...cloneJsonValue(prepared.payload || {})
+      },
+      option,
+      timings: {
+        dataMs: finiteNumber(Number(prepared.timings?.dataMs), 0),
+        optionMs: finiteNumber(Number(prepared.timings?.optionMs), 0)
+      }
+    };
+  }
+
+  function largePayloadMetaFromOption(option, definition) {
+    const perfMeta = option?.largeDataPerf || {};
+    const rawCount = clampCount(perfMeta.rawCount ?? definition.defaultCount, definition.maxCount);
+    const renderCount = clampCount(perfMeta.renderCount ?? rawCount, Math.max(rawCount, 1));
+    return {
+      data: null,
+      rawCount,
+      renderCount,
+      renderLimit: perfMeta.renderLimit ?? definition.renderLimit,
+      maxRenderLimit: perfMeta.maxRenderLimit ?? definition.renderLimit,
+      sampleMode: perfMeta.sampleMode || 'detail',
+      large: perfMeta.large !== false,
+      largeThreshold: perfMeta.largeThreshold ?? DEFAULT_LARGE_THRESHOLD,
+      optimized: perfMeta.optimized === true,
+      detailLevel: perfMeta.detailLevel ?? 0,
+      zoomScale: perfMeta.zoomScale ?? 1,
+      sampleWindow: perfMeta.sampleWindow || null
+    };
+  }
+
+  function readEmbeddedLargeDemoPayload(caseName) {
+    const script = root.document?.querySelector?.('script[type="application/json"][data-large-demo-payload]');
+    if (!script || script.dataset.caseName && script.dataset.caseName !== caseName) return null;
+
+    try {
+      const payload = JSON.parse(script.textContent || '{}');
+      if (payload.caseName && payload.caseName !== caseName) return null;
+      return payload;
+    } catch (error) {
+      return null;
+    }
   }
 
   function createLargeControls(caseName, option) {

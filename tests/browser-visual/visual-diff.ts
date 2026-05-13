@@ -11,6 +11,7 @@ import { browserVisualCases } from './cases.ts';
 import { resolveScreenshotSelector } from './visual-target.ts';
 
 const root = path.resolve(import.meta.dirname, '../..');
+const pagesDir = path.join(root, '.pages');
 const resultDir = path.join(root, 'test-results/browser-visual');
 const shouldUpdate = process.env.UPDATE_BROWSER_VISUAL_SNAPSHOTS === '1' || process.argv.includes('--update');
 const skipBuild = process.env.SKIP_BROWSER_VISUAL_BUILD === '1';
@@ -32,12 +33,12 @@ if (selectedCases.length === 0) {
 }
 
 if (!skipBuild) {
-  await run('npm', ['run', 'build']);
+  await run('npm', ['run', 'pages:build']);
 }
 
 await mkdir(resultDir, { recursive: true });
 
-const server = await startStaticServer(root);
+const server = await startStaticServer(pagesDir);
 const baseUrl = `http://127.0.0.1:${server.port}`;
 const browser = await chromium.launch({ headless: true });
 const report = [];
@@ -185,15 +186,21 @@ async function runVisualCase(context, visualCase, baseUrl) {
 }
 
 function resolveExampleScreenshotPath(visualCase) {
-  const pagePath = visualCase.path.replace(/^\/+/, '');
+  return path.join(root, 'visual-baseline', `${visualBaselineName(visualCase.path)}.png`);
+}
+
+function visualBaselineName(casePath) {
+  const pagePath = casePath.replace(/^\/+/, '');
   if (!pagePath.startsWith('docs/packages/')) {
-    throw new Error(`Browser visual screenshots must live with docs package examples: ${visualCase.path}`);
+    throw new Error(`Browser visual baselines must come from docs package examples: ${casePath}`);
   }
 
-  const normalizedPagePath = pagePath.endsWith('/') ? `${pagePath}index.html` : pagePath;
-  const parsed = path.parse(normalizedPagePath);
-  const fileName = parsed.name === 'index' ? 'screenshot.png' : `${parsed.name}.png`;
-  return path.join(root, parsed.dir, fileName);
+  const relative = pagePath.slice('docs/packages/'.length);
+  const parts = relative.split('/').filter(Boolean);
+  const packageName = parts[0];
+  const lastPart = parts.at(-1) || '';
+  const pageName = lastPart.endsWith('.html') ? path.parse(lastPart).name : 'index';
+  return pageName === 'index' ? packageName : `${packageName}-${pageName}`;
 }
 
 async function screenshotVisualTarget(page, visualCase) {

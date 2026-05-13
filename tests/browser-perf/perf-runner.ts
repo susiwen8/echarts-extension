@@ -8,6 +8,7 @@ import { chromium } from 'playwright';
 import { browserPerfCases } from './cases.ts';
 
 const root = path.resolve(import.meta.dirname, '../..');
+const pagesDir = path.join(root, '.pages');
 const resultDir = path.join(root, 'test-results/browser-perf');
 const skipBuild = process.env.SKIP_BROWSER_PERF_BUILD === '1';
 const caseFilter = process.env.BROWSER_PERF_CASE;
@@ -29,11 +30,11 @@ await mkdir(resultDir, { recursive: true });
 
 const buildStart = now();
 if (!skipBuild) {
-  await run('npm', ['run', 'build']);
+  await run('npm', ['run', 'pages:build']);
 }
 const buildMs = now() - buildStart;
 
-const server = await startStaticServer(root);
+const server = await startStaticServer(pagesDir);
 const baseUrl = `http://127.0.0.1:${server.port}`;
 const browser = await chromium.launch({ headless: true });
 const report = [];

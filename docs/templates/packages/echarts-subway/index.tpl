@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>echarts-subway example</title>
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../shared/demo-page.css?v=interactions-4">
+</head>
+<body class="demo-page" data-example="subway">
+  <main class="demo-shell">
+    <header class="demo-header">
+      <div>
+        <p class="eyebrow">echarts-subway</p>
+        <h1>Subway</h1>
+        <p>A schematic route map with transfer stations, parallel route markers, planned lines, and construction extensions.</p>
+      </div>
+      <nav class="demo-links" aria-label="Example navigation">
+        <a href="../../">All examples</a>
+        <a href="./large.html">Large data</a>
+      </nav>
+    </header>
+    <section class="demo-stage"><div class="chart-frame"><div id="chart"></div></div></section>
+  </main>
+  <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
+  <script src="../../../packages/echarts-subway/dist/echarts-subway.js"></script>
+  <script src="../../shared/demo-runner.js?v=interactions-4"></script>
+</body>
+</html>

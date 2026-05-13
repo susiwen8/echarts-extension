@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>echarts-organization-chart example</title>
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../shared/demo-page.css?v=organization-chart">
+</head>
+<body class="demo-page" data-example="organization-chart">
+  <main class="demo-shell">
+    <header class="demo-header">
+      <div>
+        <p class="eyebrow">echarts-organization-chart</p>
+        <h1>Organization Chart</h1>
+        <p>Nested or flat reporting structures are drawn as compact hierarchy cards with orthogonal links.</p>
+      </div>
+      <nav class="demo-links" aria-label="Example navigation">
+        <a href="../../">All examples</a>
+      </nav>
+    </header>
+    <section class="demo-stage"><div class="chart-frame"><div id="chart"></div></div></section>
+  </main>
+  <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
+  <script src="../../../packages/echarts-organization-chart/dist/echarts-organization-chart.js"></script>
+  <script src="../../shared/demo-runner.js?v=organization-chart"></script>
+</body>
+</html>

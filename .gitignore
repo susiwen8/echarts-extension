@@ -4,6 +4,8 @@ test-results
 coverage
 videos/
 .pages/
+docs/*.html
+docs/**/*.html
 .DS_Store
 .omx/
 packages/*/dist/
