@@ -756,11 +756,14 @@
       nav.append(createNavLink(optionCase));
       list.append(createOptionCard(optionCase));
     });
+
+    initializeOptionSearch();
   }
 
   function createNavLink(optionCase) {
     const link = document.createElement('a');
     link.href = `#${optionCase.id}`;
+    link.dataset.optionTarget = optionCase.id;
     link.textContent = optionCase.title;
     return link;
   }
@@ -769,6 +772,7 @@
     const article = document.createElement('article');
     article.className = 'option-card';
     article.id = optionCase.id;
+    article.dataset.searchText = normalizeSearchText(`${optionCase.title} ${optionCase.packageName}`);
 
     const header = document.createElement('header');
     header.className = 'option-card__header';
@@ -828,6 +832,7 @@
     tr.dataset.optionIndex = String(node.index);
     tr.dataset.optionName = option.option;
     tr.dataset.level = String(option.level || 0);
+    tr.dataset.searchText = normalizeSearchText(`${option.option} ${option.description} ${option.values}`);
     if (node.parentIndex >= 0) {
       tr.dataset.parentIndex = String(node.parentIndex);
       tr.hidden = true;
@@ -907,6 +912,8 @@
   function initializeOptionTree(tbody) {
     const rowsByIndex = new Map(Array.from(tbody.rows).map((row) => [row.dataset.optionIndex, row]));
     tbody.addEventListener('click', (event) => {
+      if (document.body.classList.contains('options-page--searching')) return;
+
       const target = event.target instanceof Element ? event.target : event.target.parentElement;
       if (!target) return;
 
@@ -960,6 +967,151 @@
     toggle.textContent = expanded ? '-' : '+';
     toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     toggle.setAttribute('aria-label', `${expanded ? 'Collapse' : 'Expand'} ${row.dataset.optionName} options`);
+  }
+
+  function initializeOptionSearch() {
+    const input = document.getElementById('options-search');
+    const clear = document.getElementById('options-search-clear');
+    if (!(input instanceof HTMLInputElement) || !(clear instanceof HTMLButtonElement)) return;
+
+    input.addEventListener('input', () => {
+      applyOptionSearch(input.value);
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !input.value) return;
+      input.value = '';
+      applyOptionSearch('');
+    });
+    clear.addEventListener('click', () => {
+      input.value = '';
+      applyOptionSearch('');
+      input.focus();
+    });
+
+    applyOptionSearch(input.value);
+  }
+
+  function applyOptionSearch(rawQuery) {
+    const query = normalizeSearchText(rawQuery);
+    const searching = Boolean(query);
+    const cards = Array.from(document.querySelectorAll('.option-card'));
+    let visibleCards = 0;
+    let directMatches = 0;
+    let packageMatches = 0;
+
+    document.body.classList.toggle('options-page--searching', searching);
+
+    cards.forEach((card) => {
+      const stats = searching ? filterOptionCard(card, query) : restoreOptionCard(card);
+      visibleCards += stats.visible ? 1 : 0;
+      directMatches += stats.matches;
+      packageMatches += stats.packageMatch ? 1 : 0;
+      const navLink = document.querySelector(`[data-option-target="${card.id}"]`);
+      if (navLink) navLink.hidden = !stats.visible;
+    });
+
+    updateSearchStatus(searching, directMatches, packageMatches, visibleCards, cards.length);
+  }
+
+  function filterOptionCard(card, query) {
+    const rows = Array.from(card.querySelectorAll('tbody tr'));
+    const rowsByIndex = new Map(rows.map((row) => [row.dataset.optionIndex, row]));
+    const visibleIndexes = new Set();
+    const matchIndexes = new Set();
+    const cardMatches = (card.dataset.searchText || '').includes(query);
+
+    rows.forEach((row) => {
+      if ((row.dataset.searchText || '').includes(query)) {
+        matchIndexes.add(row.dataset.optionIndex);
+        includeSearchContext(row, rowsByIndex, visibleIndexes);
+      }
+    });
+
+    const packageMatch = cardMatches && !matchIndexes.size;
+    if (packageMatch) {
+      rows.forEach((row) => {
+        if (!row.dataset.parentIndex) visibleIndexes.add(row.dataset.optionIndex);
+      });
+    }
+
+    rows.forEach((row) => {
+      row.hidden = !visibleIndexes.has(row.dataset.optionIndex);
+      row.classList.toggle('option-table__row--search-match', matchIndexes.has(row.dataset.optionIndex));
+      const toggle = row.querySelector('.option-toggle');
+      if (toggle) toggle.disabled = true;
+    });
+
+    const visible = visibleIndexes.size > 0;
+    card.hidden = !visible;
+    return { visible, matches: matchIndexes.size, packageMatch };
+  }
+
+  function restoreOptionCard(card) {
+    const rows = Array.from(card.querySelectorAll('tbody tr'));
+    const rowsByIndex = new Map(rows.map((row) => [row.dataset.optionIndex, row]));
+
+    card.hidden = false;
+    rows.forEach((row) => {
+      row.hidden = row.dataset.parentIndex ? !areAncestorsExpanded(row, rowsByIndex) : false;
+      row.classList.remove('option-table__row--search-match');
+      const toggle = row.querySelector('.option-toggle');
+      if (toggle) toggle.disabled = false;
+    });
+
+    return { visible: true, matches: 0, packageMatch: false };
+  }
+
+  function includeSearchContext(row, rowsByIndex, visibleIndexes) {
+    visibleIndexes.add(row.dataset.optionIndex);
+    includeAncestors(row, rowsByIndex, visibleIndexes);
+    includeDescendants(row, rowsByIndex, visibleIndexes);
+  }
+
+  function includeAncestors(row, rowsByIndex, visibleIndexes) {
+    let parent = rowsByIndex.get(row.dataset.parentIndex);
+    while (parent) {
+      visibleIndexes.add(parent.dataset.optionIndex);
+      parent = rowsByIndex.get(parent.dataset.parentIndex);
+    }
+  }
+
+  function includeDescendants(row, rowsByIndex, visibleIndexes) {
+    getDirectChildren(row, rowsByIndex).forEach((child) => {
+      visibleIndexes.add(child.dataset.optionIndex);
+      includeDescendants(child, rowsByIndex, visibleIndexes);
+    });
+  }
+
+  function areAncestorsExpanded(row, rowsByIndex) {
+    let parent = rowsByIndex.get(row.dataset.parentIndex);
+    while (parent) {
+      if (parent.dataset.expanded !== 'true') return false;
+      parent = rowsByIndex.get(parent.dataset.parentIndex);
+    }
+    return true;
+  }
+
+  function updateSearchStatus(searching, matches, packageMatches, visibleCards, totalCards) {
+    const status = document.getElementById('options-search-status');
+    if (!status) return;
+
+    if (!searching) {
+      status.textContent = `${totalCards} packages.`;
+      return;
+    }
+    if (!matches && !visibleCards) {
+      status.textContent = 'No matching options.';
+      return;
+    }
+    if (!matches && packageMatches) {
+      status.textContent = `${packageMatches} matching ${packageMatches === 1 ? 'package' : 'packages'}.`;
+      return;
+    }
+    status.textContent = `${matches} matching options in ${visibleCards} packages.`;
+  }
+
+  function normalizeSearchText(value) {
+    return String(value || '').trim().toLowerCase();
   }
 
   function expandNestedRows(optionCase, options) {

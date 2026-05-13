@@ -19,6 +19,75 @@
       margin: 24px auto 64px;
     }
 
+    .options-search {
+      display: grid;
+      gap: 8px;
+      width: min(1360px, calc(100% - 36px));
+      margin: 18px auto 0;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 8px 28px rgba(23, 32, 51, 0.06);
+    }
+
+    .options-search__label {
+      color: #172033;
+      font-size: 12px;
+      font-weight: 780;
+      text-transform: uppercase;
+    }
+
+    .options-search__field {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .options-search__field input {
+      width: 100%;
+      min-width: 0;
+      height: 40px;
+      border: 1px solid #cad4e5;
+      border-radius: 6px;
+      color: #172033;
+      font: 13px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 0 12px;
+    }
+
+    .options-search__field input:focus {
+      border-color: #8fa6d4;
+      outline: 3px solid #e7eefc;
+    }
+
+    .options-search__field button {
+      height: 40px;
+      border: 1px solid #cad4e5;
+      border-radius: 6px;
+      background: #f7f9fd;
+      color: #26344d;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 760;
+      padding: 0 12px;
+    }
+
+    .options-search__field button:hover,
+    .options-search__field button:focus-visible {
+      border-color: #8fa6d4;
+      background: #eef3ff;
+      outline: none;
+    }
+
+    .options-search__status {
+      min-height: 18px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
     .options-nav {
       position: sticky;
       top: 18px;
@@ -195,6 +264,14 @@
       outline: none;
     }
 
+    .options-page--searching .option-toggle {
+      visibility: hidden;
+    }
+
+    .option-table__row--search-match td {
+      background: #fff8e6;
+    }
+
     .option-table__row--level-1 .option-table__name {
       padding-left: 28px;
     }
@@ -238,6 +315,10 @@
         grid-template-columns: 1fr;
       }
 
+      .options-search__field {
+        grid-template-columns: 1fr;
+      }
+
       .options-nav {
         position: static;
         max-height: none;
@@ -263,6 +344,15 @@
       </nav>
     </header>
 
+    <section class="options-search" aria-label="Search package options">
+      <label class="options-search__label" for="options-search">Search</label>
+      <div class="options-search__field">
+        <input id="options-search" type="search" placeholder="Chart, option, description, or value" autocomplete="off">
+        <button id="options-search-clear" type="button">Clear</button>
+      </div>
+      <p id="options-search-status" class="options-search__status" aria-live="polite"></p>
+    </section>
+
     <section class="options-layout" aria-label="Package chart options">
       <nav id="options-nav" class="options-nav" aria-label="Package options navigation"></nav>
       <div id="options-list" class="options-list">
@@ -270,6 +360,6 @@
       </div>
     </section>
   </main>
-  <script defer src="./options.js?v=options-5"></script>
+  <script defer src="./options.js?v=options-6"></script>
 </body>
 </html>
