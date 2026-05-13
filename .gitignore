@@ -2,6 +2,7 @@ node_modules
 npm-debug.log
 test-results
 coverage
+coverage-lcov/
 videos/
 .pages/
 docs/*.html
