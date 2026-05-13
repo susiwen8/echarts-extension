@@ -1,5 +1,5 @@
 {
-  "name": "echarts-radial",
+  "name": "@echarts-extension/radial",
   "version": "0.1.0",
   "description": "ECharts extension chart using the radial layout",
   "type": "module",
@@ -16,5 +16,8 @@
   },
   "peerDependencies": {
     "echarts": "^5.0.1 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

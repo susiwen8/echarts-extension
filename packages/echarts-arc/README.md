@@ -1,18 +1,22 @@
-# echarts-arc
+# @echarts-extension/arc
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a custom arc graph layout. Import this package for side effects to register `series.type = 'arc'`.
+
+![Arc chart](../../tests/browser-visual/__snapshots__/echarts-arc.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-arc
+npm install echarts @echarts-extension/arc
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-arc';
+import '@echarts-extension/arc';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -56,23 +60,3 @@ Use ECharts graph-style input:
 - `layout.begin`: starting point for the layout.
 - `layout.preventOverlap`: nudges nodes apart when labels or symbols collide.
 - `edgeAnimation`: `true` for default edge drawing animation, `false` to disable, or an object with `duration`, `delay`, `stagger`, and `easing`.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-arc.js"></script>
-```
-
-See `examples/index.html` for a runnable demo.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-arc run build:ts
-npm --workspace echarts-arc run build
-```

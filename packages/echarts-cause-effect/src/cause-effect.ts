@@ -494,7 +494,7 @@ function createArrow(
       points: layout.arrow.map((point) => [point.x, point.y])
     },
     style: {
-      fill: style.stroke || '#334155',
+      fill: style.stroke,
       opacity: style.opacity
     },
     silent: true,
@@ -747,7 +747,25 @@ function finiteNumber(value: unknown, fallback: number): number {
 }
 
 export const __test__ = {
+  readLayoutOption,
+  drawCauseEffect,
+  createArrow,
+  createLabel,
+  readLabelModel,
+  createMergedModel,
+  bindData,
+  readBoxStyle,
+  readLineStyle,
   readLineDash,
+  readEnterAnimation,
+  disabledEnterAnimation,
+  resolveAnimationNumber,
+  resolveAnimationEasing,
+  applyLineEnterAnimation,
+  applyFadeEnterAnimation,
+  animateGraphicProperty,
   formatLabel,
-  collectCauseEffectData
+  collectCauseEffectData,
+  asRecord,
+  finiteNumber
 };

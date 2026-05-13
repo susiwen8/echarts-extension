@@ -246,7 +246,7 @@ export function layoutCauseEffect(
   const categories = diagram.categories.map((category, index): CauseEffectCategoryLayout => {
     const side: CauseEffectSide = index % 2 === 0 ? 'top' : 'bottom';
     const direction = side === 'top' ? -1 : 1;
-    const anchor = { x: categorySlots[index] ?? spineX1, y: spineY };
+    const anchor = { x: categorySlots[index], y: spineY };
     const end = {
       x: clamp(anchor.x - horizontalShift, padding.left + 12, spineX2 - 12),
       y: clamp(anchor.y + direction * verticalShift, padding.top + 12, height - padding.bottom - 12)
@@ -673,5 +673,11 @@ export const __test__ = {
   normalizePadding,
   createCategorySlots,
   readCauseItems,
-  readCategoryName
+  readCategoryName,
+  readName,
+  readId,
+  slugName,
+  stringifyName,
+  readPaddingOption,
+  finiteNumber
 };

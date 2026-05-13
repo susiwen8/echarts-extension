@@ -6,8 +6,8 @@ import { test } from 'vitest';
 function loadDemoNamespace() {
   const window = {};
   const document = { addEventListener() {} };
-  runInNewContext(readFileSync(new URL('../examples/shared/demo-data.js', import.meta.url), 'utf8'), { window });
-  runInNewContext(readFileSync(new URL('../examples/shared/demo-runner.js', import.meta.url), 'utf8'), { window, document });
+  runInNewContext(readFileSync(new URL('../docs/shared/demo-data.js', import.meta.url), 'utf8'), { window });
+  runInNewContext(readFileSync(new URL('../docs/shared/demo-runner.js', import.meta.url), 'utf8'), { window, document });
   return window.EChartsExtensionExamples;
 }
 
@@ -60,9 +60,9 @@ test('shared examples can delete an existing data item before add-data', () => {
 });
 
 test('delete-data controls are exposed by shared, large-data, and layout-core examples', () => {
-  const demoRunner = readFileSync(new URL('../examples/shared/demo-runner.js', import.meta.url), 'utf8');
-  const largeData = readFileSync(new URL('../examples/shared/large-data.js', import.meta.url), 'utf8');
-  const layoutCore = readFileSync(new URL('../packages/echarts-layout-core/examples/layout-core-example.js', import.meta.url), 'utf8');
+  const demoRunner = readFileSync(new URL('../docs/shared/demo-runner.js', import.meta.url), 'utf8');
+  const largeData = readFileSync(new URL('../docs/shared/large-data.js', import.meta.url), 'utf8');
+  const layoutCore = readFileSync(new URL('../docs/packages/echarts-layout-core/layout-core-example.js', import.meta.url), 'utf8');
 
   assert.match(demoRunner, /删除数据/);
   assert.match(demoRunner, /onDeleteData/);
@@ -73,8 +73,8 @@ test('delete-data controls are exposed by shared, large-data, and layout-core ex
 });
 
 test('delete-data buttons keep their labels on one line', () => {
-  const demoPageCss = readFileSync(new URL('../examples/shared/demo-page.css', import.meta.url), 'utf8');
-  const layoutCoreHtml = readFileSync(new URL('../packages/echarts-layout-core/examples/index.html', import.meta.url), 'utf8');
+  const demoPageCss = readFileSync(new URL('../docs/shared/demo-page.css', import.meta.url), 'utf8');
+  const layoutCoreHtml = readFileSync(new URL('../docs/packages/echarts-layout-core/index.html', import.meta.url), 'utf8');
 
   assert.match(demoPageCss, /\.demo-control-button[^{]*\{[^}]*white-space:\s*nowrap/s);
   assert.match(layoutCoreHtml, /\.layout-card__button[^{]*\{[^}]*white-space:\s*nowrap/s);

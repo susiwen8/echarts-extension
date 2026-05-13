@@ -7,6 +7,7 @@ import { test, vi } from 'vitest';
 
 import * as beeswarmLayout from '../packages/echarts-beeswarm/src/layout.ts';
 import { __test__ as beeswarmRenderer } from '../packages/echarts-beeswarm/src/beeswarm.ts';
+import { __test__ as causeEffectLayout, resolveCauseEffectLayout } from '../packages/echarts-cause-effect/src/layout.ts';
 import * as circlePackingLayout from '../packages/echarts-circle-packing/src/layout.ts';
 import { __test__ as circlePackingRenderer } from '../packages/echarts-circle-packing/src/circle-packing.ts';
 import * as flameLayout from '../packages/echarts-flame/src/layout.ts';
@@ -17,10 +18,13 @@ import * as mosaicLayout from '../packages/echarts-mosaic/src/layout.ts';
 import { __test__ as mosaicRenderer } from '../packages/echarts-mosaic/src/mosaic.ts';
 import * as nestedCircleLayout from '../packages/echarts-nested-circle/src/layout.ts';
 import { __test__ as nestedCircleRenderer } from '../packages/echarts-nested-circle/src/nested-circle.ts';
+import { __test__ as organizationLayout, layoutOrganizationChart, resolveOrganizationChartLayout } from '../packages/echarts-organization-chart/src/layout.ts';
 import * as packBubbleLayout from '../packages/echarts-pack-bubble/src/layout.ts';
 import { __test__ as packBubbleRenderer } from '../packages/echarts-pack-bubble/src/pack-bubble.ts';
 import * as spiralLayout from '../packages/echarts-spiral/src/layout.ts';
 import { __test__ as spiralRenderer } from '../packages/echarts-spiral/src/spiral.ts';
+import { __test__ as sequenceDsl } from '../packages/echarts-sequence-diagram/src/dsl.ts';
+import { __test__ as sequenceLayout, layoutSequenceDiagram, resolveSequenceDiagramLayout } from '../packages/echarts-sequence-diagram/src/layout.ts';
 import * as smithLayout from '../packages/echarts-smith/src/layout.ts';
 import { __test__ as smithRenderer } from '../packages/echarts-smith/src/smith.ts';
 import * as vectorFieldLayout from '../packages/echarts-vector-field/src/layout.ts';
@@ -1620,6 +1624,308 @@ test('private renderer helpers cover label, animation, style, and fallback branc
   assert.equal(vector.formatPathNumber(1.23456), '1.235');
   assert.equal(JSON.stringify(vector.asRecord(null)), '{}');
   assert.equal(vector.finiteNumber('8', 1), 1);
+});
+
+test('new diagram source helpers cover data normalization and edge layout branches', () => {
+  const cause = causeEffectLayout.normalizeDiagram({
+    outcome: { key: 'outcome', label: 'Outcome' },
+    data: [
+      [null, null, [null], ['Nested', ['too deep']]],
+      {
+        id: 'category-id',
+        text: 'Category Text',
+        items: [
+          { key: 'cause-key', value: 4, children: ['ignored by depth'] },
+          true
+        ]
+      }
+    ]
+  }, 0);
+  assert.equal(cause.effect.name, 'Outcome');
+  assert.deepEqual(cause.categories.map((category) => category.name), ['Category 1', 'Category Text']);
+  assert.deepEqual(cause.categories[0].causes.map((item) => item.name), ['Cause 2', 'Nested']);
+  assert.equal(cause.categories[1].causes[0].children.length, 0);
+  assert.equal(resolveCauseEffectLayout({
+    layout: { width: 200, height: 120, padding: 10 },
+    layoutOptions: { effectWidth: 40 },
+    data: [['A', 'B']]
+  }).width, 200);
+  assert.deepEqual(causeEffectLayout.normalizePadding(-2), { top: 0, right: 0, bottom: 0, left: 0 });
+  assert.deepEqual(causeEffectLayout.normalizePadding({ top: '5', right: -1, bottom: 2, left: null }), {
+    top: 5,
+    right: 0,
+    bottom: 2,
+    left: 42
+  });
+  assert.deepEqual(causeEffectLayout.createCategorySlots(0, 0, 20, 8), []);
+  assert.equal(causeEffectLayout.createCategorySlots(5, 0, 20, 100).length, 5);
+  assert.deepEqual(causeEffectLayout.readCauseItems(['Group', 'A']), ['A']);
+  assert.deepEqual(causeEffectLayout.readCauseItems({ children: ['child'] }), ['child']);
+  assert.deepEqual(causeEffectLayout.readCauseItems('nope'), []);
+  assert.equal(causeEffectLayout.readCategoryName(['Array Category'], 'Fallback'), 'Array Category');
+  assert.equal(causeEffectLayout.readCategoryName(true, 'Fallback'), 'true');
+  assert.equal(causeEffectLayout.readCategoryName({ id: 'id-only' }, 'Fallback'), 'id-only');
+  assert.equal(causeEffectLayout.readCategoryName({}, 'Fallback'), 'Fallback');
+  assert.equal(causeEffectLayout.readName([null], 'Fallback'), 'Fallback');
+  assert.equal(causeEffectLayout.readId({ key: 'key-id' }, 'fallback'), 'key-id');
+  assert.equal(causeEffectLayout.readId({}, 'fallback'), 'fallback');
+  assert.equal(causeEffectLayout.slugName('!!!', 'fallback'), 'fallback');
+  assert.equal(causeEffectLayout.stringifyName(null), '');
+  assert.equal(causeEffectLayout.stringifyName(3n), '3');
+  assert.equal(causeEffectLayout.stringifyName({}), '');
+  assert.equal(causeEffectLayout.readPaddingOption('bad'), undefined);
+  assert.equal(causeEffectLayout.finiteNumber('6', 1), 6);
+
+  const flat = organizationLayout.normalizeOrganizationData(null, {
+    nodes: [
+      ['root', 'Root'],
+      ['child', 'Child'],
+      ['child', 'Duplicate Child']
+    ],
+    links: [
+      ['root', 'child'],
+      ['child', 'child'],
+      { from: 'missing', to: 'root' }
+    ],
+    idField: 0,
+    nameField: 1
+  });
+  assert.deepEqual(flat.nodes.map((node) => node.id), ['root', 'child', 'child-2']);
+  assert.deepEqual(flat.links.map((link) => [link.source.id, link.target.id]), [['root', 'child']]);
+  const parentReferenced = organizationLayout.normalizeOrganizationData([
+    { id: 'lead', name: 'Lead' },
+    { id: 'report', parent: 'lead', name: 'Report' },
+    { id: 'orphan', parent: 'missing', name: 'Orphan' }
+  ], {});
+  assert.equal(parentReferenced.links.length, 1);
+  const primitiveTree = organizationLayout.normalizeOrganizationData([true, {}], {});
+  assert.deepEqual(primitiveTree.nodes.map((node) => node.name), ['true', 'node-2']);
+  assert.deepEqual(organizationLayout.normalizeOrganizationData(null, {
+    nodes: [{ key: 'key-node' }, { name: 'named-node' }, {}]
+  }).nodes.map((node) => node.id), ['key-node', 'named-node', 'node-3']);
+  assert.equal(resolveOrganizationChartLayout({
+    layout: { width: 200, orient: 'bottomToTop' },
+    layoutOptions: { height: 160, orient: 'rightToLeft' },
+    data: [{ id: 'root' }]
+  }).orient, 'RL');
+  assert.equal(resolveOrganizationChartLayout({
+    layout: { orient: 'leftToRight' },
+    data: [{ id: 'root' }]
+  }).orient, 'LR');
+  assert.equal(layoutOrganizationChart([{ id: 'a' }, { id: 'b' }], { width: 240, height: 160 }).rootIds.length, 2);
+  assert.equal(layoutOrganizationChart([{ id: 'top' }, { id: 'bottom', parentId: 'top' }], { orient: 'BT' }).links[0].points[0].y > layoutOrganizationChart([{ id: 'top' }, { id: 'bottom', parentId: 'top' }], { orient: 'BT' }).links[0].points.at(-1).y, true);
+  assert.equal(layoutOrganizationChart([{ id: 'right' }, { id: 'left', parentId: 'right' }], { orient: 'RL' }).links[0].points[0].x > layoutOrganizationChart([{ id: 'right' }, { id: 'left', parentId: 'right' }], { orient: 'RL' }).links[0].points.at(-1).x, true);
+  assert.equal(organizationLayout.normalizeOrganizationData([{ id: 'a', parentId: 'b' }, { id: 'b', parentId: 'a' }], {}).roots.length, 2);
+  assert.equal(organizationLayout.normalizeOrient('bottom-top'), 'BT');
+  assert.equal(organizationLayout.normalizeOrient('right-left'), 'RL');
+  assert.equal(organizationLayout.normalizeOrient('unknown'), 'TB');
+  assert.equal(organizationLayout.readPaddingOption('bad'), undefined);
+  assert.deepEqual(organizationLayout.readPaddingOption({ top: 2, right: 'bad', bottom: 3 }), { top: 2, bottom: 3 });
+  assert.equal(organizationLayout.readField(['a', 'b'], 1, -1), 'b');
+  assert.equal(organizationLayout.readField(['a', 'b'], 'name', 0), 'a');
+  assert.equal(organizationLayout.readField(['a', 'b'], 'name', -1), undefined);
+  assert.equal(organizationLayout.readField('bad', 'name', -1), undefined);
+  assert.equal(organizationLayout.readFieldOption(2), 2);
+  assert.equal(organizationLayout.readFieldOption(null), undefined);
+  assert.deepEqual(organizationLayout.normalizeUnknownArray('bad'), []);
+  assert.equal(organizationLayout.ensureUniqueId('', []), 'node-1');
+  assert.equal(organizationLayout.ensureUniqueId('node', [{ id: 'node' }, { id: 'node-2' }]), 'node-3');
+  assert.equal(organizationLayout.stringifyMaybe(''), undefined);
+  assert.equal(organizationLayout.stringifyName(null), '');
+  assert.equal(organizationLayout.readString(2), undefined);
+  assert.equal(organizationLayout.isPrimitive(false), true);
+  assert.ok(Number.isNaN(organizationLayout.finiteNumber('2', undefined)));
+  assert.equal(organizationLayout.toPublicLink({ source: { id: 'missing' }, target: { id: 'target' }, raw: null }, 7, new Map([['target', { id: 'target' }]]), 'TB'), null);
+  assert.equal(organizationLayout.toPublicLink({
+    source: { id: 'source' },
+    target: { id: 'target' },
+    raw: null
+  }, 7, new Map([
+    ['source', { id: 'source', x: 0, y: 0, width: 20, height: 10 }],
+    ['target', { id: 'target', x: 40, y: 40, width: 20, height: 10 }]
+  ]), 'TB').raw, 7);
+});
+
+test('sequence DSL and layout private helpers cover parser and placement edge branches', () => {
+  const parsed = sequenceDsl.parseSequenceDiagramDsl?.(`
+    sequenceDiagram
+      autonumber
+      participant "" as Missing
+      participant A as Alpha
+      participant A as Alpha Again
+      note right of A
+        first line
+        second line
+      end note
+      note over A
+        dangling note
+      end note
+      alt
+        A->>+B: call
+      else fallback
+        bad message head
+      constraint over A,B: <= 2s
+      {SLO}
+  `);
+  assert.equal(parsed?.notes.length, 2);
+  assert.equal(parsed?.fragments.length, 1);
+  assert.equal(parsed?.constraints.length, 2);
+  assert.equal(sequenceDsl.parseSequenceDiagramDsl(null).participants.length, 0);
+  assert.equal(sequenceDsl.parseSequenceDiagramDsl('sequenceDiagram\nparticipant ""').participants.length, 0);
+  assert.equal(sequenceDsl.parseSequenceDiagramDsl('sequenceDiagram\nnote over A\n  dangling').notes[0].text, 'dangling');
+  assert.equal(sequenceDsl.parseParticipantDeclaration('participant "" as X', 'mermaid'), null);
+  assert.equal(sequenceDsl.parseActivationStatement('activate ""', 0), null);
+  assert.equal(sequenceDsl.parseMessageHead('A:B'), null);
+  assert.equal(sequenceDsl.parseMessageHead('A ~~ B: nope'), null);
+  assert.equal(sequenceDsl.parseMessageHead('A -> : nope'), null);
+  assert.deepEqual(sequenceDsl.stripEndpointMarker('+A+'), {
+    value: 'A',
+    activate: true,
+    deactivate: false,
+    create: false
+  });
+  assert.deepEqual(sequenceDsl.stripEndpointMarker('-A-'), {
+    value: 'A',
+    activate: false,
+    deactivate: true,
+    create: false
+  });
+  assert.equal(sequenceDsl.parseSequenceDiagramDsl('sequenceDiagram\nnote over A\n\nend note').notes[0].text, '');
+  assert.equal(sequenceDsl.parseMessageHead('A -> "": nope'), null);
+  assert.deepEqual(sequenceDsl.stripEndpointMarker('-+A-'), {
+    value: 'A',
+    activate: true,
+    deactivate: true,
+    create: false
+  });
+  const emptyFragment = { id: 'f', type: 'alt', text: '', start: 0, operands: [], raw: 'alt' };
+  sequenceDsl.closeCurrentFragmentOperand(emptyFragment, 0);
+  assert.deepEqual(sequenceDsl.closeFragment(emptyFragment, 0).operands, []);
+  assert.equal(sequenceDsl.parseFragmentOperand('else')?.text, '');
+  assert.deepEqual(sequenceDsl.parseConstraint('... wait ...', 2)?.text, 'wait');
+  assert.deepEqual(sequenceDsl.parseConstraint('constraint : now', 1)?.participants, []);
+  assert.deepEqual(sequenceDsl.splitParticipants('"A", B to C'), ['A', 'B', 'C']);
+  assert.deepEqual(sequenceDsl.splitAs('Left as Right'), { left: 'Left', right: 'Right' });
+  assert.equal(sequenceDsl.splitAs('No alias'), null);
+  assert.equal(sequenceDsl.shouldIgnoreLine('rect rgb(0,0,0)'), true);
+  assert.equal(sequenceDsl.stripInlineComment(' // hidden'), '');
+  assert.equal(sequenceDsl.isQuoted("'quoted'"), true);
+  assert.equal(sequenceDsl.unquote('"quoted"'), 'quoted');
+
+  assert.equal(resolveSequenceDiagramLayout({
+    layout: { width: 300, padding: 20 },
+    layoutOptions: { height: 200 },
+    source: 'sequenceDiagram\nA->B: hi'
+  }).messages.length, 1);
+  assert.equal(layoutSequenceDiagram([{ from: 'A', to: 'B', text: 'array input' }]).messages.length, 1);
+  assert.equal(layoutSequenceDiagram({ participants: ['Solo'] }, { width: 200, height: 120 }).messages.length, 0);
+
+  const participants = [
+    { id: 'A', name: 'Alpha', kind: 'participant', dataIndex: 0, raw: {}, x: 40, y: 10, createdAt: null, destroyedAt: null, header: { x: 0, y: 10, width: 80, height: 30 }, lifeline: { x1: 40, y1: 40, x2: 40, y2: 300 } },
+    { id: 'B', name: 'Beta', kind: 'participant', dataIndex: 1, raw: {}, x: 180, y: 10, createdAt: null, destroyedAt: null, header: { x: 140, y: 10, width: 80, height: 30 }, lifeline: { x1: 180, y1: 40, x2: 180, y2: 300 } }
+  ];
+  const participantById = new Map(participants.map((participant) => [participant.id, participant]));
+  const messages = [
+    { id: 'm0', name: 'call', text: 'call', from: 'A', to: 'B', type: 'sync', direction: 'right', x1: 40, x2: 180, y: 100, points: [{ x: 40, y: 100 }, { x: 180, y: 100 }], dataIndex: 0, raw: {} },
+    { id: 'm1', name: 'reply', text: 'reply', from: 'B', to: 'A', type: 'return', direction: 'left', x1: 180, x2: 40, y: 190, points: [{ x: 180, y: 190 }, { x: 40, y: 190 }], dataIndex: 1, raw: {} }
+  ];
+
+  assert.deepEqual(sequenceLayout.readParticipants({ participants: ['A'] }, { participants: ['B'] }), ['A']);
+  assert.deepEqual(sequenceLayout.readMessages({ data: ['m'] }, { messages: ['parsed'] }), ['m']);
+  assert.deepEqual(sequenceLayout.readMessages({}, { messages: ['parsed'] }), ['parsed']);
+  assert.deepEqual(sequenceLayout.readActivations({ activations: [] }, { activations: ['parsed'] }), ['parsed']);
+  assert.deepEqual(sequenceLayout.readNotes({ notes: [] }, { notes: ['parsed'] }), ['parsed']);
+  assert.deepEqual(sequenceLayout.readFragments({ fragments: [] }, { fragments: ['parsed'] }), ['parsed']);
+  assert.deepEqual(sequenceLayout.readConstraints({ constraints: [] }, { constraints: ['parsed'] }), ['parsed']);
+  assert.equal(sequenceLayout.readParsedDsl({ source: 'A->B: hi' })?.messages?.length, 1);
+  assert.equal(sequenceLayout.layoutParticipants([
+    { id: 'Solo', name: 'Solo', kind: 'participant', dataIndex: 0, raw: {} }
+  ], {
+    width: 200,
+    height: 180,
+    padding: { top: 20, right: 20, bottom: 20, left: 20 },
+    headerHeight: 30,
+    headerWidth: 80,
+    messages: [],
+    messageTop: 80,
+    messageGap: 40,
+    messageOffsets: []
+  })[0].x, 100);
+  assert.equal(sequenceLayout.layoutMessage(messages[0], 0, new Map(), 80, 40, 50, 20, []), null);
+  assert.equal(sequenceLayout.layoutMessage({ ...messages[1], from: 'B', to: 'A' }, 0, participantById, 80, 40, 50, 20, [])?.direction, 'left');
+  assert.equal(sequenceLayout.layoutActivation({ id: 'a', participantId: 'A', start: 0, end: 0, depth: 2, raw: {} }, [], participantById, 10, 4).height, 10);
+  assert.equal(sequenceLayout.layoutNote({ id: 'n', text: 'orphan', position: 'over', participants: ['missing'], start: 0, end: 0, raw: {} }, messages, participantById, 240, { top: 20, right: 20, bottom: 20, left: 20 }).x, 50);
+  assert.equal(sequenceLayout.layoutNote({ id: 'n2', text: 'single', position: 'over', participants: ['A'], start: 0, end: 0, raw: {} }, messages, participantById, 240, { top: 20, right: 20, bottom: 20, left: 20 }).participants[0], 'A');
+  assert.equal(sequenceLayout.layoutNote({ id: 'n3', text: 'two', position: 'over', participants: ['A', 'B'], start: 0, end: 0, raw: {} }, messages, participantById, 260, { top: 20, right: 20, bottom: 20, left: 20 }).participants.length, 2);
+  assert.deepEqual(sequenceLayout.placeNoteHorizontally('over', 100, 400, participants, 220, { top: 0, right: 20, bottom: 0, left: 20 }), {
+    x: 20,
+    width: 180
+  });
+  assert.equal(sequenceLayout.placeNoteHorizontally('right', 180, 120, participants, 240, { top: 0, right: 20, bottom: 0, left: 20 }).x < 180, true);
+  assert.equal(sequenceLayout.placeNoteHorizontally('right', 50, 120, participants, 120, { top: 0, right: 20, bottom: 0, left: 20 }).x >= 20, true);
+  assert.equal(sequenceLayout.placeNoteHorizontally('left', 180, 120, participants, 240, { top: 0, right: 20, bottom: 0, left: 20 }).x < 180, true);
+  assert.equal(sequenceLayout.placeNoteHorizontally('left', 100, 120, participants, 240, { top: 0, right: 20, bottom: 0, left: 20 }).x > 100, true);
+  assert.equal(sequenceLayout.placeNoteVertically(1, 20, messages, { top: 20, right: 20, bottom: 20, left: 20 }), 108);
+  assert.equal(sequenceLayout.placeNoteVertically(0, 20, [], { top: 20, right: 20, bottom: 20, left: 20 }), 92);
+  assert.equal(sequenceLayout.placeNoteInMessageGap(messages[1], messages[0], 20), null);
+  assert.equal(sequenceLayout.avoidHeaderOverlap({ x: 0, y: 15, width: 60, height: 20 }, participants), 48);
+  assert.equal(sequenceLayout.avoidHeaderOverlap({ x: 0, y: 0, width: 60, height: 20 }, participants), -18);
+  assert.equal(sequenceLayout.rectanglesOverlap({ x: 0, y: 0, width: 10, height: 10 }, { x: 20, y: 20, width: 10, height: 10 }), false);
+  assert.ok(sequenceLayout.estimateNoteTextWidth('abc') > 0);
+  assert.deepEqual(sequenceLayout.splitNoteText(' one\n\n two '), ['one', 'two']);
+  assert.deepEqual(sequenceLayout.wrapLine('tiny words again', 11), ['tiny words', 'again']);
+  assert.deepEqual(sequenceLayout.wrapLine('superlongword tiny words', 5), ['super', 'longw', 'ord', 'tiny', 'words']);
+  assert.deepEqual(sequenceLayout.wrapLine('abcdefghij', 5), ['abcde', 'fghij']);
+  assert.deepEqual(sequenceLayout.wrapLine('      ', 5), []);
+  assert.equal(sequenceLayout.layoutFragment({ id: 'f', type: 'alt', text: '', start: 0, end: 1, operands: [{ text: '', start: 0, end: 0 }, { text: 'else', start: 1, end: 1 }], raw: {} }, messages, [], 40, 90).width, 118);
+  assert.equal(sequenceLayout.layoutFragment({ id: 'empty', type: 'opt', text: '', start: 0, end: 1, operands: [], raw: {} }, [], [], 40, 90).height, 44);
+  assert.equal(sequenceLayout.layoutConstraint({ id: 'c', type: 'timing', text: 'soon', participants: [], start: 0, end: 0, raw: {} }, [], [], new Map()).labelY, -16);
+  assert.equal(sequenceLayout.layoutConstraint({ id: 'c2', type: 'timing', text: 'soon', participants: [], start: 0, end: 0, raw: {} }, messages, participants, participantById).x1, 110);
+  assert.equal(sequenceLayout.layoutConstraint({ id: 'c3', type: 'duration', text: 'soon', participants: [], start: 0, end: 0, raw: {} }, [], [], new Map()).y2, 0);
+  assert.equal(sequenceLayout.normalizeParticipants([], [sequenceLayout.normalizeMessage({ from: 'A', to: 'B' }, 0)]).length, 2);
+  assert.equal(sequenceLayout.normalizeParticipants([], []).length, 1);
+  assert.equal(sequenceLayout.normalizeParticipant(2, 0)?.id, '2');
+  assert.equal(sequenceLayout.normalizeParticipant(['A', 'Alpha', 'actor'], 0)?.kind, 'actor');
+  assert.equal(sequenceLayout.normalizeParticipant([], 3)?.id, 'participant-3');
+  assert.equal(sequenceLayout.normalizeParticipant({ label: 'Only Label' }, 2)?.name, 'Only Label');
+  assert.equal(sequenceLayout.normalizeParticipant({}, 4)?.id, 'participant-4');
+  assert.equal(sequenceLayout.normalizeParticipant(null, 0), null);
+  assert.equal(sequenceLayout.normalizeMessage('bad', 0), null);
+  assert.equal(sequenceLayout.normalizeMessage({ from: '', to: 'B' }, 0), null);
+  assert.equal(sequenceLayout.normalizeMessage({ from: 'A', type: 'self' }, 0)?.to, 'A');
+  assert.equal(sequenceLayout.normalizeActivation('bad', 0, messages, participantById), null);
+  assert.equal(sequenceLayout.normalizeActivation({ participant: 'missing' }, 0, messages, participantById), null);
+  assert.equal(sequenceLayout.normalizeActivation({ participant: 'A' }, 0, [], participantById)?.end, 0);
+  assert.equal(sequenceLayout.normalizeNote('bad', 0, messages, participantById), null);
+  assert.equal(sequenceLayout.normalizeNote({ participant: 'A' }, 0, messages, participantById), null);
+  assert.equal(sequenceLayout.normalizeNote({ participant: 'A', text: 'empty messages' }, 0, [], participantById)?.start, 0);
+  assert.equal(sequenceLayout.normalizeFragment('bad', 0, messages), null);
+  assert.equal(sequenceLayout.normalizeFragment({ type: 'opt', start: 'm0', end: 'm1' }, 0, messages)?.operands.length, 1);
+  assert.equal(sequenceLayout.normalizeFragment({}, 0, [])?.type, 'fragment');
+  assert.equal(sequenceLayout.normalizeFragment({ type: '' }, 0, [])?.type, 'fragment');
+  assert.equal(sequenceLayout.normalizeFragmentOperand('bad', 0, messages, 0, 1, 'fallback'), null);
+  assert.equal(sequenceLayout.normalizeConstraint('bad', 0, messages, participantById), null);
+  assert.equal(sequenceLayout.normalizeConstraint({ participant: 'A' }, 0, messages, participantById), null);
+  assert.equal(sequenceLayout.normalizeConstraint({ text: 'empty messages', type: 'timing' }, 0, [], participantById)?.type, 'timing');
+  assert.equal(sequenceLayout.resolveMessageIndex('m1', messages, 0), 1);
+  assert.equal(sequenceLayout.resolveMessageIndex('1', messages, 0), 1);
+  assert.equal(sequenceLayout.resolveMessageIndex('bad', messages, 3), 3);
+  assert.equal(sequenceLayout.messageOffsetAt(8, []), 0);
+  assert.equal(sequenceLayout.clampMessageIndex(99, messages), 1);
+  assert.equal(sequenceLayout.firstLifecycleMessageIndex([{ to: 'B', type: 'create' }], 'B', 'create'), 0);
+  assert.deepEqual(sequenceLayout.normalizeParticipantIds({ participants: ['A', 'A', 'missing'] }, participantById), ['A']);
+  assert.equal(sequenceLayout.normalizeParticipantKind('queue'), 'queue');
+  assert.equal(sequenceLayout.normalizeParticipantKind('unknown'), 'participant');
+  assert.equal(sequenceLayout.normalizeNotePosition('elsewhere'), 'over');
+  assert.equal(sequenceLayout.normalizeConstraintType('duration'), 'duration');
+  assert.equal(sequenceLayout.normalizeMessageType('response', 'A', 'B'), 'return');
+  assert.equal(sequenceLayout.normalizeMessageType('creation', 'A', 'B'), 'create');
+  assert.equal(sequenceLayout.normalizeMessageType('delete', 'A', 'B'), 'destroy');
+  assert.equal(sequenceLayout.normalizePadding({ top: '6', right: -2, bottom: 4, left: null }).top, 6);
+  assert.equal(sequenceLayout.clamp(1, 5, 2), 5);
+  assert.equal(sequenceLayout.stringifyName(null), '');
+  assert.equal(sequenceLayout.firstDefined(undefined, null, 'x'), 'x');
+  assert.equal(sequenceLayout.isPlainObject([]), false);
 });
 
 function loadPrivateSource(relativeFile, names, requireMap = {}) {

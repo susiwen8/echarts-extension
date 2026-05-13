@@ -1,18 +1,22 @@
-# echarts-beeswarm
+# @echarts-extension/beeswarm
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for beeswarm plots. Import this package for side effects to register `series.type = 'beeswarm'`.
+
+![Beeswarm chart](../../tests/browser-visual/__snapshots__/echarts-beeswarm.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-beeswarm
+npm install echarts @echarts-extension/beeswarm
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-beeswarm';
+import '@echarts-extension/beeswarm';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -54,24 +58,3 @@ Use objects or array rows:
 - `symbolSize`: circle diameter.
 - `collisionPadding` and `swarmRadius`: tune overlap avoidance.
 - `valueAxis`, `categoryAxis`, `grid`, `itemStyle`, `label`, `emphasis`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-beeswarm.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-beeswarm run build:ts
-npm --workspace echarts-beeswarm run test:unit
-npm --workspace echarts-beeswarm run build
-```

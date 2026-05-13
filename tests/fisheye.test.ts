@@ -15,7 +15,7 @@ import {
   __test__ as fisheyeInternals
 } from '../packages/echarts-layout-core/src/fisheye.ts';
 
-import 'echarts-fisheye';
+import '@echarts-extension/fisheye';
 
 echarts.use([SVGRenderer]);
 

@@ -1,18 +1,22 @@
-# echarts-pack-bubble
+# @echarts-extension/pack-bubble
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for flat packed bubble diagrams. Import this package for side effects to register `series.type = 'packBubble'`.
+
+![Pack Bubble chart](../../tests/browser-visual/__snapshots__/echarts-pack-bubble.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-pack-bubble
+npm install echarts @echarts-extension/pack-bubble
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-pack-bubble';
+import '@echarts-extension/pack-bubble';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -52,24 +56,3 @@ Use an array of objects:
 - `sort`: `asc`, `desc`, `none`, `true`, or `false`.
 - `colors`, `itemStyle`, `label`, `emphasis`, `enterAnimation`: presentation controls.
 - `layout` or `layoutOptions` can hold the same layout settings.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-pack-bubble.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-pack-bubble run build:ts
-npm --workspace echarts-pack-bubble run test:unit
-npm --workspace echarts-pack-bubble run build
-```

@@ -1,18 +1,22 @@
-# echarts-lollipop
+# @echarts-extension/lollipop
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for lollipop plots. Import this package for side effects to register `series.type = 'lollipop'`.
+
+![Lollipop chart](../../tests/browser-visual/__snapshots__/echarts-lollipop.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-lollipop
+npm install echarts @echarts-extension/lollipop
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-lollipop';
+import '@echarts-extension/lollipop';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -54,24 +58,3 @@ Use objects or array rows:
 - `min`, `max`, `tickCount`, `nice`: value-axis controls.
 - `symbolSize`: lollipop head diameter.
 - `stemStyle`, `itemStyle`, `label`, `valueAxis`, `categoryAxis`, `grid`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-lollipop.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-lollipop run build:ts
-npm --workspace echarts-lollipop run test:unit
-npm --workspace echarts-lollipop run build
-```

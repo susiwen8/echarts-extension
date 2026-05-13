@@ -81,11 +81,7 @@ export function parseSequenceDiagramDsl(source: unknown): ParsedSequenceDiagramD
 
   const addParticipant = (id: string, name = id, raw?: unknown, kind = 'participant') => {
     if (!id) return;
-    if (declaredParticipants.has(id)) {
-      const existing = participants.find((participant) => participant.id === id);
-      if (existing && !existing.kind) existing.kind = kind;
-      return;
-    }
+    if (declaredParticipants.has(id)) return;
     declaredParticipants.add(id);
     participants.push({ id, name, kind, raw });
   };
@@ -140,8 +136,7 @@ export function parseSequenceDiagramDsl(source: unknown): ParsedSequenceDiagramD
         id: `dsl-note-${notes.length}`,
         ...note.value
       });
-      const noteParticipants = Array.isArray(note.value.participants) ? note.value.participants : [];
-      noteParticipants.forEach((participant) => addParticipant(String(participant)));
+      (note.value.participants as string[]).forEach((participant: string) => addParticipant(String(participant)));
       continue;
     }
 
@@ -169,19 +164,18 @@ export function parseSequenceDiagramDsl(source: unknown): ParsedSequenceDiagramD
         id: `dsl-constraint-${constraints.length}`,
         ...constraint
       });
-      const constraintParticipants = Array.isArray(constraint.participants) ? constraint.participants : [];
-      constraintParticipants.forEach((participant) => addParticipant(String(participant)));
+      (constraint.participants as string[]).forEach((participant: string) => addParticipant(String(participant)));
       continue;
     }
 
     const activation = parseActivationStatement(line, messages.length);
     if (activation?.kind === 'activate') {
-      pushActivation(activationStack, activation.participant, activation.start ?? Math.max(0, messages.length - 1));
+      pushActivation(activationStack, activation.participant, activation.start as number);
       addParticipant(activation.participant);
       continue;
     }
     if (activation?.kind === 'deactivate') {
-      closeActivation(activationStack, activations, activation.participant, activation.end ?? Math.max(0, messages.length - 1));
+      closeActivation(activationStack, activations, activation.participant, activation.end as number);
       addParticipant(activation.participant);
       continue;
     }
@@ -562,9 +556,25 @@ function unquote(value: string): string {
 }
 
 export const __test__ = {
+  closeActivation,
+  closeCurrentFragmentOperand,
+  closeFragment,
+  closeRemainingActivations,
   inferMessageType,
+  parseActivationStatement,
+  parseConstraint,
+  parseFragmentOperand,
+  parseFragmentStart,
   parseMessageHead,
   parseNote,
   parseParticipantDeclaration,
-  stripEndpointMarker
+  parseSequenceDiagramDsl,
+  pushActivation,
+  shouldIgnoreLine,
+  splitAs,
+  splitParticipants,
+  stripEndpointMarker,
+  stripInlineComment,
+  isQuoted,
+  unquote
 };

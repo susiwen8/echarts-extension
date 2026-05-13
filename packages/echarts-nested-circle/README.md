@@ -1,18 +1,22 @@
-# echarts-nested-circle
+# @echarts-extension/nested-circle
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for bottom-aligned nested circle diagrams. Import this package for side effects to register `series.type = 'nestedCircle'`.
+
+![Nested Circle chart](../../tests/browser-visual/__snapshots__/echarts-nested-circle.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-nested-circle
+npm install echarts @echarts-extension/nested-circle
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-nested-circle';
+import '@echarts-extension/nested-circle';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -48,24 +52,3 @@ Use an ordered array of circle layers:
 - `centerRadiusRatio`, `labelRadiusRatio`, `titleRadiusRatio`: text and ring placement.
 - `minRingThickness`: protects readability for many layers.
 - `colors`, `ringStyle`, `itemStyle`, `titleLabel`, `label`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-nested-circle.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-nested-circle run build:ts
-npm --workspace echarts-nested-circle run test:unit
-npm --workspace echarts-nested-circle run build
-```

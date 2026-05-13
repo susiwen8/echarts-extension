@@ -1,5 +1,5 @@
 {
-  "name": "echarts-grid",
+  "name": "@echarts-extension/grid",
   "version": "0.1.0",
   "description": "ECharts extension chart using the grid graph layout",
   "type": "module",
@@ -16,5 +16,8 @@
   },
   "peerDependencies": {
     "echarts": "^5.0.1 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

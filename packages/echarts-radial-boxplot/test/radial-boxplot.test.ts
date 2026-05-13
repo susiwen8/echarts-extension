@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
 import * as echarts from 'echarts';
-import 'echarts-radial-boxplot';
+import '@echarts-extension/radial-boxplot';
 
 import {
   layoutRadialBoxplot,

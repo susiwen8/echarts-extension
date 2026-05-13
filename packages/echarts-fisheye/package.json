@@ -1,5 +1,5 @@
 {
-  "name": "echarts-fisheye",
+  "name": "@echarts-extension/fisheye",
   "version": "0.1.0",
   "description": "Reusable fisheye magnifier component for ECharts charts",
   "type": "module",
@@ -16,5 +16,8 @@
   },
   "peerDependencies": {
     "echarts": "^5.0.1 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

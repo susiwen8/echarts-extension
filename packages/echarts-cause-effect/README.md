@@ -1,10 +1,14 @@
-# echarts-cause-effect
+# @echarts-extension/cause-effect
+
+Language: English | [中文](./README_CN.md)
 
 Cause and effect (fishbone / Ishikawa) diagram extension for ECharts.
 
+![Cause and Effect chart](../../tests/browser-visual/__snapshots__/echarts-cause-effect.png)
+
 ```js
 import * as echarts from 'echarts';
-import 'echarts-cause-effect';
+import '@echarts-extension/cause-effect';
 
 chart.setOption({
   series: [

@@ -4,19 +4,19 @@ import path from 'node:path';
 
 import * as echarts from 'echarts';
 
-import 'echarts-radial';
-import 'echarts-radial-area';
-import 'echarts-radial-boxplot';
-import 'echarts-concentric';
-import 'echarts-mds';
-import 'echarts-arc';
-import 'echarts-venn';
-import 'echarts-nested-circle';
-import 'echarts-mosaic';
-import 'echarts-subway';
-import 'echarts-flame';
-import 'echarts-sunrise-sunset';
-import 'echarts-lollipop';
+import '@echarts-extension/radial';
+import '@echarts-extension/radial-area';
+import '@echarts-extension/radial-boxplot';
+import '@echarts-extension/concentric';
+import '@echarts-extension/mds';
+import '@echarts-extension/arc';
+import '@echarts-extension/venn';
+import '@echarts-extension/nested-circle';
+import '@echarts-extension/mosaic';
+import '@echarts-extension/subway';
+import '@echarts-extension/flame';
+import '@echarts-extension/sunrise-sunset';
+import '@echarts-extension/lollipop';
 
 export const snapshotPath = path.resolve('tests/visual/__snapshots__/graph-layouts.svg');
 export const actualPath = path.resolve('test-results/visual/graph-layouts.actual.svg');

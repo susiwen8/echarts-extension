@@ -1,18 +1,22 @@
-# echarts-subway
+# @echarts-extension/subway
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for schematic subway route maps. Import this package for side effects to register `series.type = 'subway'`.
+
+![Subway chart](../../tests/browser-visual/__snapshots__/echarts-subway.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-subway
+npm install echarts @echarts-extension/subway
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-subway';
+import '@echarts-extension/subway';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -92,24 +96,3 @@ chart.setOption({
 - `lineStyle.type`, `lineStyle.dashArray`, `lineStyle.dashOffset`: dashed or dotted route styling.
 - `label` and `routeLabel`: station and route text.
 - `routes` can be used as an alias for `data`.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-subway.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-subway run build:ts
-npm --workspace echarts-subway run test:unit
-npm --workspace echarts-subway run build
-```

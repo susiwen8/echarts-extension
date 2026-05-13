@@ -1,5 +1,5 @@
 {
-  "name": "echarts-fractal",
+  "name": "@echarts-extension/fractal",
   "version": "0.1.0",
   "description": "ECharts extension chart for zoomable fractal rendering",
   "type": "module",
@@ -13,6 +13,8 @@
   },
   "peerDependencies": {
     "echarts": "^5.0.1 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
-

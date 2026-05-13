@@ -1,5 +1,5 @@
 {
-  "name": "echarts-flame",
+  "name": "@echarts-extension/flame",
   "version": "0.1.0",
   "description": "ECharts extension chart for hierarchical flame graphs",
   "type": "module",
@@ -18,5 +18,8 @@
   },
   "peerDependencies": {
     "echarts": "^5.0.1 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

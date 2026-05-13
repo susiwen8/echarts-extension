@@ -1,18 +1,22 @@
-# echarts-grid
+# @echarts-extension/grid
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a deterministic grid graph layout. Import this package for side effects to register `series.type = 'grid'`.
+
+![Grid chart](../../tests/browser-visual/__snapshots__/echarts-grid.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-grid
+npm install echarts @echarts-extension/grid
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-grid';
+import '@echarts-extension/grid';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -59,23 +63,3 @@ Use ECharts graph-style input:
 - `layout.position`: function returning `{ row, col }` for a node.
 - `layout.sortBy`: field name or function. Field names can read nested data, such as `data.cluster`.
 - `layout.preventOverlap` and `layout.nodeSpacing`: keep adjacent cells readable.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-grid.js"></script>
-```
-
-See `examples/index.html` for a runnable demo.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-grid run build:ts
-npm --workspace echarts-grid run build
-```

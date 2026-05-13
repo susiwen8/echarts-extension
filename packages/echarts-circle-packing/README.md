@@ -1,18 +1,22 @@
-# echarts-circle-packing
+# @echarts-extension/circle-packing
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for hierarchical circle packing diagrams. Import this package for side effects to register `series.type = 'circlePacking'`.
+
+![Circle Packing chart](../../tests/browser-visual/__snapshots__/echarts-circle-packing.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-circle-packing
+npm install echarts @echarts-extension/circle-packing
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-circle-packing';
+import '@echarts-extension/circle-packing';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -51,24 +55,3 @@ Use one root object or an array of roots:
 - `rootName`, `rootVisible`: root behavior.
 - `sort`: `value`, `name`, `asc`, `desc`, `none`, `true`, or `false`.
 - `colors`, `itemStyle`, `label`, `emphasis`, `enterAnimation`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-circle-packing.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-circle-packing run build:ts
-npm --workspace echarts-circle-packing run test:unit
-npm --workspace echarts-circle-packing run build
-```

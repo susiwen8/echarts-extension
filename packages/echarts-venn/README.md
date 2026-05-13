@@ -1,18 +1,24 @@
-# echarts-venn
+# @echarts-extension/venn
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for hollow and bubble Venn diagrams. Import this package for side effects to register `series.type = 'venn'`.
+
+| Hollow Venn | Bubble Venn |
+| --- | --- |
+| ![Hollow Venn chart](../../tests/browser-visual/__snapshots__/echarts-venn-hollow.png) | ![Bubble Venn chart](../../tests/browser-visual/__snapshots__/echarts-venn-bubble.png) |
 
 ## Install
 
 ```bash
-npm install echarts echarts-venn
+npm install echarts @echarts-extension/venn
 ```
 
 ## Hollow Venn
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-venn';
+import '@echarts-extension/venn';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -70,24 +76,3 @@ chart.setOption({
 - `padding`, `minRadius`, `maxRadius`: layout bounds.
 - `layoutOptions`: nested layout settings.
 - `itemStyle`, `hollowStyle`, `label`, `emphasis`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-venn.js"></script>
-```
-
-See `examples/hollow.html`, `examples/bubble.html`, and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-venn run build:ts
-npm --workspace echarts-venn run test:unit
-npm --workspace echarts-venn run build
-```

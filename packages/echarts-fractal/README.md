@@ -1,18 +1,22 @@
-# echarts-fractal
+# @echarts-extension/fractal
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for zoomable fractal rendering. Import this package for side effects to register `series.type = 'fractal'`.
+
+![Fractal chart](../../tests/browser-visual/__snapshots__/echarts-fractal.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-fractal
+npm install echarts @echarts-extension/fractal
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-fractal';
+import '@echarts-extension/fractal';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -52,23 +56,3 @@ Useful controls:
 - `fractalType`: `mandelbrot`, `julia`, or `burningShip`.
 - `juliaConstant`: complex constant for Julia sets.
 - `insideColor`, `backgroundColor`, `colorStops`: palette controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-fractal.js"></script>
-```
-
-See `examples/index.html` for a runnable demo.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-fractal run build:ts
-npm --workspace echarts-fractal run build
-```

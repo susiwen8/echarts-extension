@@ -1,8 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
+import { __test__ as causeEffect } from '../packages/echarts-cause-effect/src/cause-effect.ts';
+import { layoutCauseEffect } from '../packages/echarts-cause-effect/src/layout.ts';
+import { __test__ as organizationChart } from '../packages/echarts-organization-chart/src/organization-chart.ts';
 import { __test__ as radialArea } from '../packages/echarts-radial-area/src/radial-area.ts';
 import { __test__ as radialBoxplot } from '../packages/echarts-radial-boxplot/src/radial-boxplot.ts';
+import { __test__ as sequenceDiagram } from '../packages/echarts-sequence-diagram/src/sequence-diagram.ts';
+import { layoutSequenceDiagram } from '../packages/echarts-sequence-diagram/src/layout.ts';
 import { __test__ as subway } from '../packages/echarts-subway/src/subway.ts';
 import { layoutSunriseSunset } from '../packages/echarts-sunrise-sunset/src/layout.ts';
 import { __test__ as sunriseSunset } from '../packages/echarts-sunrise-sunset/src/sunrise-sunset.ts';
@@ -771,6 +776,387 @@ test('sunrise sunset private renderer helpers cover full draw and disabled anima
   assert.equal(sunriseSunset.formatHeaderText(() => 123, 'fallback', layout), '123');
   assert.equal(sunriseSunset.asRecord({ ok: true }).ok, true);
   assert.equal(sunriseSunset.isPlainObject([]), false);
+});
+
+test('new diagram private renderer helpers cover fallback rendering and animation branches', () => {
+  const host = createGraphicHost();
+  const causeData = createData([{ name: 'Effect' }, { name: 'People' }, { name: 'Slow handoff' }]);
+  const causeSeries = createSeriesModel({
+    problem: 'Problem',
+    outcome: 'Outcome',
+    effect: 'Effect',
+    categories: [{ name: 'People', causes: ['Slow handoff'] }],
+    causes: [{ name: 'Alias' }],
+    data: [{ name: 'Data' }],
+    label: { show: true, formatter: ({ name }) => `fn:${name}` },
+    causeLabel: { fontSize: 10 },
+    lineStyle: { type: [4, 'bad', 2], width: '3' },
+    enterAnimation: { duration: () => 5, delay: () => 2, stagger: 1, easing: 'linear' }
+  }, causeData);
+  const causeOption = causeEffect.readLayoutOption(causeSeries, { width: 320, height: 180 });
+  assert.equal(causeOption.problem, 'Problem');
+  assert.deepEqual(causeOption.categories, causeSeries.option.categories);
+  const noOptionCauseSeries = createSeriesModel();
+  delete noOptionCauseSeries.option;
+  assert.equal(causeEffect.readLayoutOption(noOptionCauseSeries, { width: 12, height: 8 }).width, 12);
+  const causeLayout = layoutCauseEffect({
+    effect: { id: 'effect', name: 'Effect', itemStyle: { color: '', fill: '#abc', borderColor: '', stroke: '#def' } },
+    categories: [{ id: 'people', name: 'People', causes: [{ id: 'slow', name: 'Slow handoff' }] }]
+  }, { width: 320, height: 180, padding: 20, spineArrowSize: 8 });
+  const causeGroup = new host.graphic.Group();
+  const causeHover = causeEffect.drawCauseEffect(host, causeGroup, causeSeries, causeLayout, { x: 4, y: 5, width: 320, height: 180 }, causeSeries);
+  assert.equal(causeHover.length, 3);
+  assert.deepEqual(causeData.layouts.get(0), [causeLayout.effect.label.x + 4, causeLayout.effect.label.y + 5]);
+  const fallbackCauseLayout = layoutCauseEffect({
+    effect: { id: 'effect', name: 'Effect', itemStyle: { color: '', fill: '', borderColor: '', stroke: '' } },
+    categories: [{ id: 'people', name: 'People', causes: [{ id: 'slow', name: 'Slow handoff' }] }]
+  }, { width: 320, height: 180, padding: 20, spineArrowSize: 8 });
+  causeEffect.drawCauseEffect(host, new host.graphic.Group(), createSeriesModel({
+    label: { show: false },
+    enterAnimation: false
+  }, causeData), fallbackCauseLayout, { x: 0, y: 0, width: 320, height: 180 });
+  const noPolygonDrawHost = createGraphicHost();
+  noPolygonDrawHost.graphic.Polygon = null;
+  causeEffect.drawCauseEffect(noPolygonDrawHost, new noPolygonDrawHost.graphic.Group(), createSeriesModel({
+    label: { show: false },
+    enterAnimation: false
+  }, causeData), fallbackCauseLayout, { x: 0, y: 0, width: 320, height: 180 });
+  const noPolygonHost = createGraphicHost();
+  noPolygonHost.graphic.Polygon = null;
+  assert.equal(causeEffect.createArrow(noPolygonHost, causeSeries, causeLayout), null);
+  assert.equal(causeEffect.createLabel(host, createSeriesModel({ label: { show: false } }), 'cause', {
+    id: 'hidden',
+    name: 'Hidden',
+    dataIndex: 0,
+    raw: {},
+    label: { x: 1, y: 2 }
+  }, {}), null);
+  const rawLabel = causeEffect.createLabel(host, createSeriesModel({ label: { formatter: '{kind}:{b}:{id}' } }), 'category', {
+    id: 'cat',
+    name: 'Category',
+    dataIndex: 1,
+    raw: { labelStyle: { color: '#123' } },
+    label: { x: 2, y: 3, align: 'left', verticalAlign: 'top' }
+  }, { labelStyle: { color: '#123' } });
+  assert.equal(rawLabel.style.text, 'category:Category:cat');
+  assert.equal(causeEffect.formatLabel(null, { id: 'id', name: 'Name', kind: 'cause', dataIndex: 0, data: {} }), 'Name');
+  assert.equal(causeEffect.createMergedModel({ nested: { value: 2 } }).getModel('nested').get('value'), 2);
+  assert.equal(causeEffect.createMergedModel({}).get(['missing', 'deep']), undefined);
+  assert.equal(causeEffect.readLineStyle(createSeriesModel({ color: '#111', lineWidth: 2 }).getModel([]), { stroke: '#000', lineWidth: 1 }, { stroke: '#222', width: 3 }).stroke, '#222');
+  assert.equal(causeEffect.readLineStyle(createSeriesModel({ stroke: '#333' }).getModel([]), { color: '#444', lineWidth: 1 }).stroke, '#333');
+  assert.equal(causeEffect.readLineStyle(createSeriesModel({}).getModel([]), { color: '#444', lineWidth: 1 }).stroke, '#444');
+  assert.deepEqual(causeEffect.readLineDash([1, 'bad', 3]), [1, 3]);
+  assert.equal(causeEffect.readEnterAnimation(createSeriesModel({ animation: false }), 0).enabled, false);
+  assert.equal(causeEffect.readEnterAnimation(createSeriesModel({ enterAnimation: { show: false } }), 0).enabled, false);
+  assert.equal(causeEffect.resolveAnimationNumber(() => 'bad', {}, 0, 7), 7);
+  assert.equal(causeEffect.resolveAnimationEasing(''), 'cubicOut');
+  causeEffect.applyLineEnterAnimation({}, { x1: 0, y1: 0, x2: 10, y2: 0 }, enabledAnimation);
+  const animatedLine = createAnimatable({ shape: {} });
+  causeEffect.applyLineEnterAnimation(animatedLine, { x1: 0, y1: 0, x2: 10, y2: 2 }, enabledAnimation);
+  assert.equal(animatedLine.shape.x2, 10);
+  const animatedLineWithoutShape = createAnimatable({});
+  delete animatedLineWithoutShape.shape;
+  causeEffect.applyLineEnterAnimation(animatedLineWithoutShape, { x1: 0, y1: 0, x2: 8, y2: 2 }, enabledAnimation);
+  assert.equal(animatedLineWithoutShape.shape.x2, 8);
+  causeEffect.applyFadeEnterAnimation({}, enabledAnimation);
+  const animatedFade = createAnimatable({ style: { opacity: 0.4 } });
+  causeEffect.applyFadeEnterAnimation(animatedFade, enabledAnimation);
+  assert.equal(animatedFade.animations[0].target.opacity, 0.4);
+  const animatedFadeWithoutStyle = createAnimatable({});
+  delete animatedFadeWithoutStyle.style;
+  causeEffect.applyFadeEnterAnimation(animatedFadeWithoutStyle, enabledAnimation);
+  assert.equal(animatedFadeWithoutStyle.animations[0].target.opacity, 1);
+  causeEffect.animateGraphicProperty({ style: {}, animate: () => null }, 'style', enabledAnimation, { opacity: 0.8 });
+  causeEffect.bindData(causeData, 99, [1, 2], {});
+  causeEffect.bindData(causeData, 1, [1, 2], undefined);
+  assert.deepEqual(causeEffect.asRecord([]), {});
+  assert.equal(causeEffect.finiteNumber('9', 1), 9);
+
+  const orgData = createData([{ name: 'CEO', itemStyle: { color: '#123' } }, { name: 'CTO' }]);
+  const orgSeries = createSeriesModel({
+    data: orgData.source,
+    label: { show: true, formatter: ({ name }) => `label:${name}` },
+    lineStyle: { type: 'dotted', width: 2 },
+    itemStyle: { color: '#999', borderRadius: 4 },
+    enterAnimation: { duration: () => 4, delay: () => 1, stagger: 2 }
+  }, orgData);
+  assert.equal(organizationChart.readLayoutOption(orgSeries, { width: 200, height: 100 }).width, 200);
+  const noOptionOrgSeries = createSeriesModel();
+  delete noOptionOrgSeries.option;
+  assert.equal(organizationChart.readLayoutOption(noOptionOrgSeries, { width: 12, height: 8 }).height, 8);
+  const noPolylineHost = createGraphicHost();
+  noPolylineHost.graphic.Polyline = null;
+  assert.equal(organizationChart.createLinkElement(noPolylineHost, [], {}).shape.x1, 0);
+  assert.equal(organizationChart.createLinkElement(noPolylineHost, [{ x: 2, y: 3 }], {}).shape.x2, 2);
+  const orgGroup = new host.graphic.Group();
+  const orgHover = organizationChart.drawNodes(host, orgGroup, orgSeries, [
+    { id: 'skip', name: 'Skip', depth: 0, parentId: null, childIds: [], x: 0, y: 0, width: 0, height: 20, dataIndex: 0, raw: {} },
+    { id: 'ceo', name: 'CEO', depth: 0, parentId: null, childIds: ['cto'], x: 10, y: 10, width: 80, height: 40, dataIndex: 0, raw: { itemStyle: { borderColor: '#abc' } } },
+    { id: 'ghost', name: 'Ghost', depth: 1, parentId: null, childIds: [], x: 10, y: 70, width: 80, height: 40, dataIndex: -1, raw: {} }
+  ]);
+  assert.equal(orgHover.length, 1);
+  organizationChart.drawLabels(host, orgGroup, createSeriesModel({ label: { show: false } }, orgData), orgData, [], new Map());
+  orgData.source[0].label = { show: false };
+  organizationChart.drawLabels(host, orgGroup, createSeriesModel({ label: { show: true } }, orgData), orgData, [
+    { id: 'hidden', name: 'Hidden', depth: 0, parentId: null, childIds: [], x: 0, y: 0, width: 80, height: 30, dataIndex: 0, raw: { label: { show: false } } }
+  ], new Map());
+  assert.equal(organizationChart.readNodeStyle(orgData, createSeriesModel({ itemStyle: {} }, orgData), null, {
+    id: 'fallback',
+    name: 'Fallback',
+    depth: 0,
+    parentId: null,
+    childIds: [],
+    x: 0,
+    y: 0,
+    width: 80,
+    height: 40,
+    dataIndex: -1,
+    raw: {}
+  }, 3).fill, '#fce7f3');
+  assert.equal(organizationChart.readBorderRadius(null, createSeriesModel({ itemStyle: { borderRadius: -1 } })), 0);
+  assert.deepEqual(organizationChart.normalizeLineDash(['bad'], 2), undefined);
+  assert.deepEqual(organizationChart.normalizeLineDash([1, 'bad', 2], 2), [1, 2]);
+  assert.deepEqual(organizationChart.normalizeLineDash('dashed', 2), [8, 6]);
+  assert.deepEqual(organizationChart.normalizeLineDash('dotted', 2), [2, 6]);
+  assert.equal(organizationChart.formatLabel(null, {
+    id: 'n',
+    name: 'Node',
+    depth: 2,
+    parentId: null,
+    childIds: [],
+    x: 0,
+    y: 0,
+    width: 80,
+    height: 40,
+    dataIndex: 0,
+    raw: {}
+  }), 'Node');
+  assert.equal(organizationChart.formatLabel('{b}:{id}:{depth}:{c}', {
+    id: 'n',
+    name: 'Node',
+    depth: 2,
+    parentId: null,
+    childIds: ['a', 'b'],
+    x: 0,
+    y: 0,
+    width: 80,
+    height: 40,
+    dataIndex: 0,
+    raw: {}
+  }), 'Node:n:2:2');
+  const orgProvider = organizationChart.createLegendVisualProvider(orgSeries);
+  assert.deepEqual(orgProvider.getAllNames(), ['CEO', 'CTO']);
+  assert.equal(orgProvider.getItemVisual(0, 'legendIcon'), null);
+  assert.equal(orgProvider.getItemVisual(0, 'style').fill, '#123');
+  assert.equal(orgProvider.getItemVisual(1, 'style').fill, '#dcfce7');
+  assert.equal(orgProvider.getItemVisual(0, 'color'), undefined);
+  assert.equal(organizationChart.readEnterAnimation(createSeriesModel({ animation: false }), 0).enabled, false);
+  assert.equal(organizationChart.readEnterAnimation(createSeriesModel({ enterAnimation: { enabled: false } }), 0).enabled, false);
+  assert.equal(organizationChart.readEnterAnimation(createSeriesModel({ enterAnimation: true, animationDuration: 7 }), 0).duration, 7);
+  assert.equal(organizationChart.readEnterAnimation(createSeriesModel({ enterAnimation: { easing: 'linear', duration: () => 5 } }), 0).easing, 'linear');
+  assert.equal(organizationChart.resolveAnimationEasing(''), 'cubicOut');
+  const animatedRect = createAnimatable({ shape: {}, style: { opacity: 0.5 } });
+  organizationChart.applyRectEnterAnimation(animatedRect, { y: 10, height: 30 }, enabledAnimation);
+  assert.equal(animatedRect.shape.height, 30);
+  const animatedRectWithoutTargets = createAnimatable({});
+  delete animatedRectWithoutTargets.shape;
+  delete animatedRectWithoutTargets.style;
+  organizationChart.applyRectEnterAnimation(animatedRectWithoutTargets, { y: 3, height: 9 }, enabledAnimation);
+  assert.equal(animatedRectWithoutTargets.shape.height, 9);
+  const animatedFadeOnly = createAnimatable({});
+  delete animatedFadeOnly.style;
+  organizationChart.applyFadeEnterAnimation(animatedFadeOnly, enabledAnimation);
+  assert.equal(animatedFadeOnly.style.opacity, 1);
+  const fallbackRect = { shape: {}, animate: () => null };
+  organizationChart.animateGraphicProperty(fallbackRect, 'shape', enabledAnimation, { height: 8 });
+  assert.equal(fallbackRect.shape.height, 8);
+  organizationChart.animateGraphicProperty({ animate: () => null }, 'style', enabledAnimation, { opacity: 0.2 });
+  assert.equal(organizationChart.ellipsize('abcdef', 4), 'abc...');
+  const hoverItem = { elements: [] };
+  organizationChart.addHoverElement(undefined, {});
+  organizationChart.addHoverElement(hoverItem, {});
+  assert.equal(hoverItem.triggerElements.length, 1);
+  assert.equal(JSON.stringify(organizationChart.asRecord(null)), '{}');
+
+  const sequenceData = createData([
+    { text: 'call', label: { formatter: '{from}->{to}:{type}' }, lineStyle: { color: '#123' } },
+    { text: 'reply' }
+  ]);
+  const sequenceSeries = createSeriesModel({
+    participants: [{ id: 'A' }, { id: 'B' }],
+    data: [{ from: 'A', to: 'B', text: 'call' }],
+    messages: [{ from: 'A', to: 'B', text: 'call' }],
+    activations: [{ participant: 'B' }],
+    notes: [{ participant: 'A', text: 'note' }],
+    fragments: [{ type: 'opt' }],
+    constraints: [{ text: 'soon' }],
+    label: { show: true },
+    participantLabel: { show: true },
+    enterAnimation: { duration: () => 4, delay: () => 1, stagger: 2 }
+  }, sequenceData);
+  const sequenceOption = sequenceDiagram.readLayoutOption(sequenceSeries, { width: 360, height: 220 });
+  assert.deepEqual(sequenceOption.messages, sequenceSeries.option.messages);
+  const dataOnlySequenceSeries = createSeriesModel({ data: [{ from: 'A', to: 'B', text: 'data' }] }, sequenceData);
+  assert.deepEqual(sequenceDiagram.readLayoutOption(dataOnlySequenceSeries, { width: 1, height: 1 }).data, dataOnlySequenceSeries.option.data);
+  const noOptionSequenceSeries = createSeriesModel();
+  delete noOptionSequenceSeries.option;
+  assert.equal(sequenceDiagram.readLayoutOption(noOptionSequenceSeries, { width: 12, height: 8 }).height, 8);
+  const sequenceLayout = layoutSequenceDiagram({
+    participants: [
+      { id: 'A', name: 'Alpha', kind: 'actor' },
+      { id: 'B', name: 'Beta' }
+    ],
+    messages: [
+      { id: 'm0', from: 'A', to: 'B', text: 'call', type: 'create' },
+      { id: 'm1', from: 'B', to: 'A', text: 'reply', type: 'return' },
+      { id: 'm2', from: 'B', to: 'B', text: 'loop', type: 'self' },
+      { id: 'm3', from: 'A', to: 'B', text: 'destroy', type: 'destroy' }
+    ],
+    activations: [{ participant: 'B', start: 0, end: 2 }],
+    notes: [{ participant: 'A', text: 'short note', position: 'right', start: 1 }],
+    fragments: [{ type: 'alt', text: 'branch', start: 0, end: 2, operands: [{ text: 'yes', start: 0, end: 1 }, { text: 'no', start: 2, end: 2 }] }],
+    constraints: [{ type: 'duration', participants: ['A', 'B'], text: '<1s', start: 0, end: 2 }]
+  }, { width: 420, height: 280, padding: 30, messageGap: 46 });
+  const sequenceGroup = new host.graphic.Group();
+  const sequenceHover = sequenceDiagram.drawSequenceDiagram(host, sequenceGroup, sequenceSeries, sequenceLayout, { x: 3, y: 4, width: 420, height: 280 });
+  assert.equal(sequenceHover.length, 4);
+  assert.equal(sequenceDiagram.drawSequenceDiagram(host, new host.graphic.Group(), createSeriesModel({
+    ...sequenceSeries.option,
+    silent: true
+  }, sequenceData), sequenceLayout, { x: 0, y: 0, width: 420, height: 280 }).length, 0);
+  const noCircleHost = createGraphicHost();
+  noCircleHost.graphic.Circle = null;
+  assert.equal(sequenceDiagram.drawSequenceDiagram(host, new host.graphic.Group(), sequenceSeries, {
+    ...sequenceLayout,
+    activations: [{ id: 'missing', participantId: 'missing', x: 0, y: 0, width: 4, height: 4, depth: 0, start: 0, end: 0, raw: {} }]
+  }, { x: 0, y: 0, width: 1, height: 1 }).length, 4);
+  assert.ok(sequenceDiagram.drawActorParticipant(noCircleHost, new noCircleHost.graphic.Group(), createSeriesModel({ participantLabel: { show: false } }), sequenceLayout.participants[0]).length >= 5);
+  assert.ok(sequenceDiagram.drawActorParticipant(host, new host.graphic.Group(), createSeriesModel({ participantStyle: { borderColor: '', borderWidth: 2 } }), sequenceLayout.participants[0]).length >= 6);
+  const hiddenParticipantLabel = sequenceDiagram.drawParticipant(host, new host.graphic.Group(), createSeriesModel({ participantLabel: { show: false } }), sequenceLayout.participants[1]);
+  assert.equal(hiddenParticipantLabel.some((element) => element.type === 'text'), false);
+  const lineMessage = sequenceLayout.messages[0];
+  const selfMessage = sequenceLayout.messages.find((message) => message.direction === 'self');
+  assert.equal(sequenceDiagram.createMessagePath(host, lineMessage, {}, false).type, 'line');
+  const noPolylineSequenceHost = createGraphicHost();
+  noPolylineSequenceHost.graphic.Polyline = null;
+  assert.equal(sequenceDiagram.createMessagePath(noPolylineSequenceHost, selfMessage, {}, false).type, 'path');
+  noPolylineSequenceHost.graphic.makePath = null;
+  assert.equal(sequenceDiagram.createMessagePath(noPolylineSequenceHost, selfMessage, {}, false).type, 'line');
+  assert.equal(sequenceDiagram.createArrowHead(host, { ...lineMessage, type: 'destroy' }, {}, false), null);
+  const noArrowHost = createGraphicHost();
+  noArrowHost.graphic.Polygon = null;
+  assert.equal(sequenceDiagram.createArrowHead(noArrowHost, lineMessage, {}, false), null);
+  assert.equal(sequenceDiagram.createArrowHead(host, { ...lineMessage, type: 'sync' }, { stroke: '#111', lineWidth: 2 }, false).style.fill, '#111');
+  assert.deepEqual(sequenceDiagram.createDestroyMarker(host, { ...lineMessage, points: [] }, {}, false), []);
+  assert.equal(sequenceDiagram.createDestroyMarker(host, { ...lineMessage, type: 'destroy' }, { stroke: '#111', lineWidth: 2 }, false).length, 2);
+  assert.equal(sequenceDiagram.drawMessage(host, new host.graphic.Group(), createSeriesModel({ label: { show: false } }, sequenceData), {
+    ...lineMessage,
+    dataIndex: -1
+  }, 0).some((element) => element.type === 'text'), false);
+  const noteGroup = new host.graphic.Group();
+  assert.equal(sequenceDiagram.drawNote(host, noteGroup, sequenceSeries, {
+    id: 'note',
+    text: 'fallback text',
+    lines: [],
+    position: 'over',
+    participants: [],
+    x: 0,
+    y: 0,
+    width: 120,
+    height: 40,
+    start: 0,
+    end: 0,
+    raw: {}
+  }).at(-1).style.text, 'fallback text');
+  const fragmentGroup = new host.graphic.Group();
+  assert.ok(sequenceDiagram.drawFragment(host, fragmentGroup, sequenceSeries, {
+    id: 'fragment',
+    type: 'opt',
+    text: '',
+    x: 0,
+    y: 0,
+    width: 120,
+    height: 80,
+    start: 0,
+    end: 1,
+    operands: [{ text: '', start: 0, end: 0, separatorY: null }, { text: 'else', start: 1, end: 1, separatorY: null }],
+    raw: {}
+  }).some((element) => element.type === 'text'));
+  const constraintGroup = new host.graphic.Group();
+  assert.equal(sequenceDiagram.drawConstraint(host, constraintGroup, sequenceSeries, {
+    id: 'timing',
+    type: 'timing',
+    text: 'soon',
+    participants: [],
+    x1: 20,
+    x2: 20,
+    y1: 30,
+    y2: 30,
+    labelX: 20,
+    labelY: 10,
+    start: 0,
+    end: 0,
+    raw: {}
+  }).length, 1);
+  assert.equal(sequenceDiagram.createMessageLabel(host, createSeriesModel({ label: { show: false } }, sequenceData), {
+    ...lineMessage,
+    dataIndex: -1
+  }), null);
+  sequenceDiagram.bindMessageData(sequenceSeries, { ...lineMessage, dataIndex: 99 }, { x: 0, y: 0, width: 1, height: 1 }, {});
+  sequenceDiagram.bindMessageData(sequenceSeries, lineMessage, { x: 3, y: 4, width: 1, height: 1 }, {});
+  sequenceDiagram.bindMessageData(sequenceSeries, lineMessage, { x: 0, y: 0, width: 1, height: 1 }, undefined);
+  assert.deepEqual(sequenceData.layouts.get(0), [lineMessage.x1 + (lineMessage.x2 - lineMessage.x1) / 2, lineMessage.y]);
+  assert.equal(sequenceDiagram.readParticipantStyle(createSeriesModel({ participantStyle: { color: '#111' } }), { raw: { itemStyle: { borderColor: '#222' } } }).borderColor, '#222');
+  assert.deepEqual(sequenceDiagram.readLifelineStyle(createSeriesModel({ lifelineStyle: { type: 'dotted', width: 2 } })).lineDash, [2, 6]);
+  assert.equal(sequenceDiagram.readActivationStyle(createSeriesModel({ activationStyle: { color: '#111' } }), { raw: { itemStyle: { opacity: 0.4 } } }).opacity, 0.4);
+  assert.equal(sequenceDiagram.readBoxStyle(createSeriesModel({ noteStyle: { color: '#111' } }), { raw: { itemStyle: { borderColor: '#222' } } }, 'noteStyle', {}).borderColor, '#222');
+  assert.deepEqual(sequenceDiagram.readConstraintStyle(createSeriesModel({ constraintStyle: { type: [2, 'bad', 4] } }), { raw: {} }).lineDash, [2, 4]);
+  assert.equal(sequenceDiagram.readConstraintStyle(createSeriesModel({ constraintStyle: { color: null, stroke: '#333', width: null, lineWidth: 2 } }), { raw: {} }).stroke, '#333');
+  assert.equal(sequenceDiagram.readMessageLineStyle(createSeriesModel({ lineStyle: { color: '#222' } }), { ...lineMessage, raw: { lineStyle: { width: 3 } } }).stroke, '#222');
+  assert.equal(sequenceDiagram.readMessageLineStyle(createSeriesModel({ lineStyle: { color: null, stroke: '#555', width: null, lineWidth: 4, type: null } }), { ...lineMessage, type: 'return', raw: {} }).stroke, '#555');
+  assert.deepEqual(sequenceDiagram.readMessageLineStyle(createSeriesModel({ lineStyle: { color: null, stroke: '#555', type: null } }), { ...lineMessage, type: 'sync', raw: {} }).lineDash, null);
+  assert.deepEqual(sequenceDiagram.readLineDash([0, 'bad'], 2), null);
+  assert.equal(sequenceDiagram.readLineDash(null, 2), null);
+  assert.equal(sequenceDiagram.messageLabelPosition(selfMessage).align, 'center');
+  assert.ok(sequenceDiagram.messageLabelWidth(selfMessage) >= 120);
+  assert.equal(sequenceDiagram.messageTooltipPoint(selfMessage).align, 'center');
+  assert.equal(sequenceDiagram.formatParticipantLabel(({ id }) => id, sequenceLayout.participants[0]), 'A');
+  assert.equal(sequenceDiagram.formatParticipantLabel('{b}:{id}', sequenceLayout.participants[0]), 'Alpha:A');
+  assert.equal(sequenceDiagram.formatMessageLabel(({ type }) => type, lineMessage), 'create');
+  assert.equal(sequenceDiagram.formatMessageLabel('{from}->{to}:{type}:{b}', lineMessage), 'A->B:create:call');
+  assert.equal(sequenceDiagram.getMessageItemModel(sequenceSeries, { ...lineMessage, dataIndex: -1 }), null);
+  sequenceDiagram.applyPathEnterAnimation({}, lineMessage, enabledAnimation);
+  const animatedPathLine = createAnimatable({ shape: {} });
+  sequenceDiagram.applyPathEnterAnimation(animatedPathLine, lineMessage, enabledAnimation);
+  assert.equal(animatedPathLine.shape.x2, lineMessage.x2);
+  const animatedPathLineWithoutShape = createAnimatable({});
+  delete animatedPathLineWithoutShape.shape;
+  sequenceDiagram.applyPathEnterAnimation(animatedPathLineWithoutShape, lineMessage, enabledAnimation);
+  assert.equal(animatedPathLineWithoutShape.shape.x2, lineMessage.x2);
+  const animatedPathStyle = createAnimatable({ style: {} });
+  sequenceDiagram.applyPathEnterAnimation(animatedPathStyle, selfMessage, enabledAnimation);
+  assert.equal(animatedPathStyle.style.opacity, 1);
+  const animatedPathWithoutStyle = createAnimatable({});
+  delete animatedPathWithoutStyle.style;
+  sequenceDiagram.applyPathEnterAnimation(animatedPathWithoutStyle, selfMessage, enabledAnimation);
+  assert.equal(animatedPathWithoutStyle.style.opacity, 1);
+  sequenceDiagram.applyFadeEnterAnimation({}, enabledAnimation);
+  const animatedSequenceFade = createAnimatable({ style: { opacity: 0.3 } });
+  sequenceDiagram.applyFadeEnterAnimation(animatedSequenceFade, enabledAnimation);
+  assert.equal(animatedSequenceFade.animations[0].target.opacity, 0.3);
+  const animatedSequenceFadeWithoutStyle = createAnimatable({});
+  delete animatedSequenceFadeWithoutStyle.style;
+  sequenceDiagram.applyFadeEnterAnimation(animatedSequenceFadeWithoutStyle, enabledAnimation);
+  assert.equal(animatedSequenceFadeWithoutStyle.animations[0].target.opacity, 1);
+  assert.equal(sequenceDiagram.readEnterAnimation(createSeriesModel({ animation: false }), 0).enabled, false);
+  assert.equal(sequenceDiagram.readEnterAnimation(createSeriesModel({ enterAnimation: { easing: 'linear' } }), 0).easing, 'linear');
+  assert.equal(sequenceDiagram.resolveAnimationValue(() => -5, 0, 2), 0);
+  assert.equal(sequenceDiagram.pointsToPath([{ x: 1.2, y: 2 }, { x: 3, y: 4.5 }]), 'M1.2 2L3 4.5');
+  assert.equal(sequenceDiagram.formatNumber(1.2300), '1.23');
+  assert.equal(sequenceDiagram.stringifyLabel(null), '');
+  assert.equal(sequenceDiagram.replaceTemplateTokens('{a}{b}', { '{a}': 'A', '{b}': 'B' }), 'AB');
+  assert.deepEqual(sequenceDiagram.asRecord([]), {});
+  assert.equal(sequenceDiagram.finiteNumber('6', 1), 6);
 });
 
 function createVoronoiNode(overrides = {}) {

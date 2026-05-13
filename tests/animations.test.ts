@@ -4,20 +4,20 @@ import { test } from 'vitest';
 import * as echarts from 'echarts/lib/echarts';
 import { SVGRenderer } from 'echarts/renderers';
 
-import 'echarts-radial';
-import 'echarts-concentric';
-import 'echarts-grid';
-import 'echarts-mds';
-import 'echarts-arc';
-import 'echarts-radial-area';
-import 'echarts-radial-boxplot';
-import 'echarts-venn';
-import 'echarts-nested-circle';
-import 'echarts-mosaic';
-import 'echarts-subway';
-import 'echarts-sequence-diagram';
-import 'echarts-flame';
-import 'echarts-sunrise-sunset';
+import '@echarts-extension/radial';
+import '@echarts-extension/concentric';
+import '@echarts-extension/grid';
+import '@echarts-extension/mds';
+import '@echarts-extension/arc';
+import '@echarts-extension/radial-area';
+import '@echarts-extension/radial-boxplot';
+import '@echarts-extension/venn';
+import '@echarts-extension/nested-circle';
+import '@echarts-extension/mosaic';
+import '@echarts-extension/subway';
+import '@echarts-extension/sequence-diagram';
+import '@echarts-extension/flame';
+import '@echarts-extension/sunrise-sunset';
 
 echarts.use([SVGRenderer]);
 

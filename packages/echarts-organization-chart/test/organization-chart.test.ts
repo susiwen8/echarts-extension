@@ -31,8 +31,8 @@ const company = {
 function loadDemoNamespace() {
   const window = {};
   const document = { addEventListener() {} };
-  runInNewContext(readFileSync(new URL('../../../examples/shared/demo-data.js', import.meta.url), 'utf8'), { window });
-  runInNewContext(readFileSync(new URL('../../../examples/shared/demo-runner.js', import.meta.url), 'utf8'), { window, document });
+  runInNewContext(readFileSync(new URL('../../../docs/shared/demo-data.js', import.meta.url), 'utf8'), { window });
+  runInNewContext(readFileSync(new URL('../../../docs/shared/demo-runner.js', import.meta.url), 'utf8'), { window, document });
   return window.EChartsExtensionExamples;
 }
 

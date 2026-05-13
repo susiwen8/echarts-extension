@@ -1,18 +1,22 @@
-# echarts-vector-field
+# @echarts-extension/vector-field
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for vector field and wind data. Import this package for side effects to register `series.type = 'vectorField'`.
+
+![Vector Field chart](../../tests/browser-visual/__snapshots__/echarts-vector-field.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-vector-field
+npm install echarts @echarts-extension/vector-field
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-vector-field';
+import '@echarts-extension/vector-field';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -58,23 +62,3 @@ Use objects or tuples:
 - `minLength`, `maxLength`, `lengthScale`: arrow length controls.
 - `arrowHeadLength`, `arrowHeadAngle`: arrow head geometry.
 - `lineStyle`, `emphasis`, `enterAnimation`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-vector-field.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-vector-field run build:ts
-npm --workspace echarts-vector-field run build
-```

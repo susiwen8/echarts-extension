@@ -1,18 +1,22 @@
-# echarts-organization-chart
+# @echarts-extension/organization-chart
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for organization charts. Import this package for side effects to register `series.type = 'organizationChart'`.
+
+![Organization Chart chart](../../tests/browser-visual/__snapshots__/echarts-organization-chart.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-organization-chart
+npm install echarts @echarts-extension/organization-chart
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-organization-chart';
+import '@echarts-extension/organization-chart';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -61,24 +65,3 @@ Use one nested root, an array of nested roots, flat rows with `id` and `parentId
 - `nodeWidth`, `nodeHeight`, `levelGap`, `siblingGap`, and `subtreeGap`: layout geometry.
 - `idField`, `parentIdField`, `nameField`, and `childrenField`: custom data field names.
 - `itemStyle`, `lineStyle`, `label`, and `emphasis`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-organization-chart.js"></script>
-```
-
-See `examples/index.html` for a runnable demo.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-organization-chart run build:ts
-npm --workspace echarts-organization-chart run test:unit
-npm --workspace echarts-organization-chart run build
-```

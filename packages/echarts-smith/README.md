@@ -1,18 +1,22 @@
-# echarts-smith
+# @echarts-extension/smith
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for Smith charts. Import this package for side effects to register `series.type = 'smith'`.
+
+![Smith chart](../../tests/browser-visual/__snapshots__/echarts-smith.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-smith
+npm install echarts @echarts-extension/smith
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-smith';
+import '@echarts-extension/smith';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -51,13 +55,3 @@ By default rows are read as impedance values and normalized by `referenceImpedan
 - `grid.label.resistanceFormatter`, `grid.label.reactanceFormatter`: optional label templates such as `{ohms}` and `{ohms}j`.
 - `cursor`: interactive readout for arbitrary mouse positions, including the dashed VSWR circle, constant-reactance curve, and impedance/admittance tooltip.
 - `grid`, `lineStyle`, `itemStyle`, `label`, `swrStyle`: presentation controls.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-smith run build:ts
-npm --workspace echarts-smith run test:unit
-npm --workspace echarts-smith run build
-```

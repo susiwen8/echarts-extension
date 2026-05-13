@@ -1,10 +1,14 @@
-# echarts-sequence-diagram
+# @echarts-extension/sequence-diagram
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for UML sequence diagrams.
 
+![Sequence Diagram chart](../../tests/browser-visual/__snapshots__/echarts-sequence-diagram.png)
+
 ```js
 import * as echarts from 'echarts';
-import 'echarts-sequence-diagram';
+import '@echarts-extension/sequence-diagram';
 
 const chart = echarts.init(document.getElementById('main'));
 chart.setOption({

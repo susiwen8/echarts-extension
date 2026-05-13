@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>echarts-fractal example</title>
+  <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../shared/demo-page.css?v=interactions-4">
+  <style>
+    .fractal-option-panel .demo-option-editor {
+      border-top: 0;
+      padding-top: 14px;
+    }
+
+    .fractal-option-panel .demo-option-editor__textarea {
+      height: calc(min(74vh, 760px) - 72px);
+      min-height: 360px;
+      resize: none;
+    }
+  </style>
+</head>
+<body class="demo-page" data-example="fractal">
+  <main class="demo-shell">
+    <header class="demo-header">
+      <div>
+        <p class="eyebrow">echarts-fractal</p>
+        <h1>Fractal Explorer</h1>
+        <p>Wheel to zoom and drag to pan; each view is recomputed from the complex plane.</p>
+      </div>
+      <nav class="demo-links" aria-label="Example navigation">
+        <a href="../../">All examples</a>
+      </nav>
+    </header>
+    <section class="demo-stage demo-stage--with-controls">
+      <div class="chart-frame"><div id="chart" class="demo-chart--interactive"></div></div>
+      <aside class="demo-controls fractal-option-panel" aria-label="Chart option">
+        <div class="demo-controls__header">
+          <h2>Option</h2>
+        </div>
+        <div class="demo-option-editor">
+          <textarea id="option-json" class="demo-option-editor__textarea" readonly spellcheck="false"></textarea>
+        </div>
+      </aside>
+    </section>
+  </main>
+  <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
+  <script src="../../../packages/echarts-fractal/dist/echarts-fractal.js?v=fractal"></script>
+  <script>
+    const chart = echarts.init(document.getElementById('chart'));
+    const option = {
+      animation: false,
+      backgroundColor: '#ffffff',
+      series: [
+        {
+          type: 'fractal',
+          name: 'Mandelbrot',
+          width: '100%',
+          height: '100%',
+          fractalType: 'mandelbrot',
+          roam: true,
+          viewport: {
+            center: [-0.743643887037151, 0.13182590420533],
+            viewWidth: 3.2,
+            scale: 1
+          },
+          pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+          maxPixelCount: 520000,
+          interactivePixelRatio: 0.52,
+          interactiveMaxPixelCount: 60000,
+          interactiveIterationScale: 0.32,
+          minInteractiveIterations: 56,
+          refineDelay: 220,
+          worker: true,
+          baseIterations: 180,
+          iterationBoost: 48,
+          iterationLimit: 3000,
+          insideColor: '#050609',
+          backgroundColor: '#050609',
+          colorStops: [
+            [0, '#07111f'],
+            [0.16, '#2454a6'],
+            [0.38, '#16a3a3'],
+            [0.68, '#e6a13d'],
+            [1, '#fff7d6']
+          ]
+        }
+      ]
+    };
+
+    chart.setOption(option);
+    document.getElementById('option-json').value = JSON.stringify(option, null, 2);
+    window.addEventListener('resize', () => chart.resize());
+  </script>
+</body>
+</html>

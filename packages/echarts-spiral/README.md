@@ -1,18 +1,22 @@
-# echarts-spiral
+# @echarts-extension/spiral
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for segmented spiral heatmaps. Import this package for side effects to register `series.type = 'spiral'`.
+
+![Spiral chart](../../tests/browser-visual/__snapshots__/echarts-spiral.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-spiral
+npm install echarts @echarts-extension/spiral
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-spiral';
+import '@echarts-extension/spiral';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -54,24 +58,3 @@ Use objects or array rows:
 - `startAngle`, `clockwise`, `gapAngle`, `radialGap`, `bandWidth`: segment shape controls.
 - `sort`: `asc`, `desc`, `none`, or `false`.
 - `minOpacity`, `maxOpacity`, `itemStyle`, `label`, `enterAnimation`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-spiral.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-spiral run build:ts
-npm --workspace echarts-spiral run test:unit
-npm --workspace echarts-spiral run build
-```

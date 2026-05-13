@@ -33,6 +33,34 @@ test('extension bundles are built with the shared Vite 8 config', () => {
   }
 });
 
+test('workspace package names use the @echarts-extension scope', () => {
+  for (const packageName of readdirSync(packagesDir)) {
+    const packageDir = path.join(packagesDir, packageName);
+    if (!statSync(packageDir).isDirectory()) continue;
+    if (!exists(path.join(packageDir, 'package.json'))) continue;
+
+    const packageJson = readJson(path.join(packageDir, 'package.json'));
+    assert.match(packageJson.name, /^@echarts-extension\//);
+    assert.ok(!packageJson.name.startsWith('@echarts-extension/echarts-'));
+    assert.equal(packageJson.publishConfig?.access, 'public');
+  }
+});
+
+test('shared Vite config keeps scoped package names out of bundle filenames', async () => {
+  const originalCwd = process.cwd();
+  const { default: createConfig } = await import('../vite.config.js');
+
+  try {
+    process.chdir(path.join(packagesDir, 'echarts-radial'));
+    const config = createConfig({ command: 'build', mode: 'production' });
+
+    assert.equal(config.build.lib.name, 'echartsRadial');
+    assert.equal(config.build.lib.fileName(), 'echarts-radial.min.js');
+  } finally {
+    process.chdir(originalCwd);
+  }
+});
+
 test('test tooling runs through Vitest and browser test scripts', () => {
   const rootPackage = readJson(path.join(root, 'package.json'));
   const devDependencies = rootPackage.devDependencies ?? {};
@@ -87,6 +115,30 @@ test('GitHub Pages workflow deploys built examples through a Pages artifact', ()
   assert.match(workflow, /pages: write/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /uses: actions\/deploy-pages@v5/);
+});
+
+test('npm publish workflow only publishes allowlisted packages', () => {
+  const workflow = readFileSync(path.join(root, '.github/workflows/npm-publish.yml'), 'utf8');
+  const allowlist = readJson(path.join(root, '.github/npm-publish-allowlist.json'));
+  const layoutCorePackage = readJson(path.join(root, 'packages/echarts-layout-core/package.json'));
+
+  assert.ok(Array.isArray(allowlist));
+  assert.equal(allowlist[0], '@echarts-extension/layout-core');
+  assert.ok(allowlist.includes('@echarts-extension/radial'));
+  assert.equal(layoutCorePackage.private, undefined);
+  assert.equal(layoutCorePackage.publishConfig?.access, 'public');
+  assert.match(workflow, /release:\n\s+types:\s+\[published\]/);
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /uses: actions\/checkout@v6/);
+  assert.match(workflow, /uses: actions\/setup-node@v6/);
+  assert.match(workflow, /registry-url: https:\/\/registry\.npmjs\.org/);
+  assert.match(workflow, /NODE_AUTH_TOKEN: \$\{\{ secrets\.NPM_TOKEN \}\}/);
+  assert.match(workflow, /id-token: write/);
+  assert.match(workflow, /run: npm run test:unit/);
+  assert.match(workflow, /run: npm run release/);
+  assert.match(workflow, /node scripts\/npm-publish-plan\.mjs/);
+  assert.match(workflow, /node scripts\/npm-publish-packages\.mjs/);
+  assert.match(workflow, /--provenance/);
 });
 
 test('release builds keep minified and development bundles together', async () => {

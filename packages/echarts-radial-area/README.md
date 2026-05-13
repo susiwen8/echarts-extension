@@ -1,18 +1,22 @@
-# echarts-radial-area
+# @echarts-extension/radial-area
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for radial area and radial range-area time series. Import this package for side effects to register `series.type = 'radialArea'`.
+
+![Radial Area chart](../../tests/browser-visual/__snapshots__/echarts-radial-area.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-radial-area
+npm install echarts @echarts-extension/radial-area
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-radial-area';
+import '@echarts-extension/radial-area';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -56,24 +60,3 @@ Use objects or array rows:
 - `min`, `max`, `tickCount`, `nice`: radial value-axis controls.
 - `grid`, `radialAxis`, `angleAxis`: axis and guide-line controls.
 - `rangeAreaStyle`, `areaStyle`, `lineStyle`, `itemStyle`, `showSymbol`, `symbolSize`: series styling.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-radial-area.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-radial-area run build:ts
-npm --workspace echarts-radial-area run test:unit
-npm --workspace echarts-radial-area run build
-```

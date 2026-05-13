@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
 import * as echarts from 'echarts';
-import 'echarts-radial-area';
+import '@echarts-extension/radial-area';
 
 import {
   layoutRadialArea,

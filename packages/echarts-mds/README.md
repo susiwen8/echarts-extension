@@ -1,18 +1,22 @@
-# echarts-mds
+# @echarts-extension/mds
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart using a custom multidimensional-scaling graph layout. Import this package for side effects to register `series.type = 'mds'`.
+
+![MDS chart](../../tests/browser-visual/__snapshots__/echarts-mds.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-mds
+npm install echarts @echarts-extension/mds
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-mds';
+import '@echarts-extension/mds';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -58,23 +62,3 @@ Use ECharts graph-style input:
 - `layout.center`: center point of the final layout.
 - `layout.preventOverlap`: nudges nodes apart after solving.
 - `layout.preventOverlapPadding`: extra spacing used by overlap prevention.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-mds.js"></script>
-```
-
-See `examples/index.html` for a runnable demo.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-mds run build:ts
-npm --workspace echarts-mds run build
-```

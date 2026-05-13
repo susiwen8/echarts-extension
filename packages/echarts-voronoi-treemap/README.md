@@ -1,18 +1,22 @@
-# echarts-voronoi-treemap
+# @echarts-extension/voronoi-treemap
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for weighted Voronoi treemaps. Import this package for side effects to register `series.type = 'voronoiTreemap'`.
+
+![Voronoi Treemap chart](../../tests/browser-visual/__snapshots__/echarts-voronoi-treemap.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-voronoi-treemap
+npm install echarts @echarts-extension/voronoi-treemap
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-voronoi-treemap';
+import '@echarts-extension/voronoi-treemap';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -52,24 +56,3 @@ Use one root object, an array of roots, or array rows:
 - `maxIteration`: local Voronoi relaxation iteration count.
 - `colors`, `itemStyle`, `label`, `emphasis`: presentation controls.
 - Label formatter params include `name`, `value`, `percent`, `depth`, `isLeaf`, and `parentId`.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-voronoi-treemap.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-voronoi-treemap run build:ts
-npm --workspace echarts-voronoi-treemap run test:unit
-npm --workspace echarts-voronoi-treemap run build
-```

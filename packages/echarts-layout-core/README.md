@@ -1,6 +1,10 @@
 # @echarts-extension/layout-core
 
+Language: English | [中文](./README_CN.md)
+
 Shared layout and rendering helpers for the ECharts extension packages in this monorepo. Most chart users do not import this package directly; use it when you are building a new extension or testing the local graph layouts.
+
+![Layout Core chart](../../tests/browser-visual/__snapshots__/layout-core.png)
 
 ## Install
 
@@ -58,12 +62,3 @@ The registered series accepts ECharts graph-style `data`/`links` or `nodes`/`edg
 - `installGraphLayout`: registers a graph-style ECharts series.
 - `installFisheyeController`, `resolveFisheyeOptions`, `fisheyeTransform`: reusable fisheye magnifier primitives for chart packages.
 - `installElementHover`, `renderAlive`, `clearAliveRender`, `setAliveRenderKey`: shared rendering helpers used by custom chart packages.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace @echarts-extension/layout-core run build:ts
-npm --workspace @echarts-extension/layout-core run test:unit
-```

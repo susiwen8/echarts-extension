@@ -636,5 +636,15 @@ export const __test__ = {
   normalizePadding,
   readPaddingOption,
   normalizeOrient,
-  createLinkPoints
+  createLinkPoints,
+  toPublicLink,
+  readField,
+  readFieldOption,
+  normalizeUnknownArray,
+  ensureUniqueId,
+  stringifyMaybe,
+  stringifyName,
+  readString,
+  isPrimitive,
+  finiteNumber
 };

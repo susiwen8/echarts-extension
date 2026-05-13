@@ -1,5 +1,5 @@
 {
-  "name": "echarts-voronoi-treemap",
+  "name": "@echarts-extension/voronoi-treemap",
   "version": "0.1.0",
   "description": "ECharts extension chart for weighted Voronoi treemaps",
   "type": "module",
@@ -18,5 +18,8 @@
   },
   "peerDependencies": {
     "echarts": "^5.0.1 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

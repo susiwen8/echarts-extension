@@ -11,23 +11,16 @@ await rm(outputDir, { recursive: true, force: true });
 await mkdir(outputDir, { recursive: true });
 
 await copyRequired('favicon.svg');
-await copyRequired('examples');
+await copyRequired('docs');
 await copyRequired('node_modules/echarts/dist/echarts.min.js');
 await writeFile(path.join(outputDir, '.nojekyll'), '');
 await writeRootRedirect();
 
-for (const packageName of packageNamesWithExamples()) {
+for (const packageName of packageNamesWithBuilds()) {
   await copyRequired(
-    `packages/${packageName}/examples`,
-    `packages/${packageName}/examples`
+    `packages/${packageName}/dist`,
+    `packages/${packageName}/dist`
   );
-
-  if (packageHasBuild(packageName)) {
-    await copyRequired(
-      `packages/${packageName}/dist`,
-      `packages/${packageName}/dist`
-    );
-  }
 }
 
 console.log(`Built GitHub Pages example artifact at ${path.relative(rootDir, outputDir)}`);
@@ -44,13 +37,13 @@ export async function copyRequired(source, destination = source) {
   await cp(sourcePath, destinationPath, { recursive: true, filter: shouldCopy });
 }
 
-export function packageNamesWithExamples() {
+export function packageNamesWithBuilds() {
   return readdirSync(packagesDir)
     .filter((entry) => {
       const packageDir = path.join(packagesDir, entry);
       return statSync(packageDir).isDirectory()
         && existsSync(path.join(packageDir, 'package.json'))
-        && existsSync(path.join(packageDir, 'examples'));
+        && packageHasBuild(entry);
     })
     .sort();
 }
@@ -69,13 +62,13 @@ export async function writeRootRedirect() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=./examples/">
-  <link rel="canonical" href="./examples/">
+  <meta http-equiv="refresh" content="0; url=./docs/">
+  <link rel="canonical" href="./docs/">
   <title>ECharts Extension Examples</title>
-  <script>location.replace('./examples/');</script>
+  <script>location.replace('./docs/');</script>
 </head>
 <body>
-  <p><a href="./examples/">Open ECharts Extension examples</a></p>
+  <p><a href="./docs/">Open ECharts Extension examples</a></p>
 </body>
 </html>
 `;

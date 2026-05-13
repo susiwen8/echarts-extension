@@ -1,0 +1,53 @@
+name: Publish Packages to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: Comma or newline separated npm package names, or "all" for the allowlist.
+        required: true
+        default: all
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      REQUESTED_PACKAGES: ${{ github.event.inputs.packages || 'all' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve allowlisted publish plan
+        id: publish-plan
+        run: node scripts/npm-publish-plan.mjs --packages "$REQUESTED_PACKAGES" --github-output
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Build release bundles
+        run: npm run release
+
+      - name: Publish allowlisted packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node scripts/npm-publish-packages.mjs --packages "$REQUESTED_PACKAGES" --provenance

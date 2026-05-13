@@ -1,18 +1,22 @@
-# echarts-mosaic
+# @echarts-extension/mosaic
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for categorical mosaic plots. Import this package for side effects to register `series.type = 'mosaic'`.
+
+![Mosaic chart](../../tests/browser-visual/__snapshots__/echarts-mosaic.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-mosaic
+npm install echarts @echarts-extension/mosaic
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-mosaic';
+import '@echarts-extension/mosaic';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -55,24 +59,3 @@ Use objects or array rows:
 - `sort`: `value`, `name`, `none`, `true`, or `false`.
 - `colors`, `itemStyle`, `label`, `emphasis`: presentation controls.
 - Label formatter params include `xCategory`, `yCategory`, `value`, `percent`, and `columnPercent`.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-mosaic.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-mosaic run build:ts
-npm --workspace echarts-mosaic run test:unit
-npm --workspace echarts-mosaic run build
-```

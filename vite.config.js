@@ -7,7 +7,7 @@ const echartsRuntimeId = 'echarts/lib/echarts';
 export default defineConfig(({ mode }) => {
   const packageDir = process.cwd();
   const packageJson = JSON.parse(readFileSync(path.join(packageDir, 'package.json'), 'utf8'));
-  const packageName = packageJson.name;
+  const bundleName = path.basename(packageDir);
   const isProduction = mode === 'production';
 
   return {
@@ -21,9 +21,9 @@ export default defineConfig(({ mode }) => {
       minify: isProduction ? 'oxc' : false,
       lib: {
         entry: path.join(packageDir, 'index.ts'),
-        name: toGlobalName(packageName),
+        name: toGlobalName(bundleName),
         formats: ['umd'],
-        fileName: () => `${packageName}${isProduction ? '.min' : ''}.js`
+        fileName: () => `${bundleName}${isProduction ? '.min' : ''}.js`
       },
       rolldownOptions: {
         external: [echartsRuntimeId],
@@ -54,7 +54,6 @@ function resolveTypeScriptJsImports() {
 
 function toGlobalName(packageName) {
   return packageName
-    .replace(/^@[^/]+\//, '')
     .split(/[^A-Za-z0-9_$]+/)
     .filter(Boolean)
     .map((part, index) => (index === 0 ? part : capitalize(part)))

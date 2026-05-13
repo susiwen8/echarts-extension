@@ -28,7 +28,7 @@ test('does not depend on external layout packages', () => {
 test('does not render or expose a spiral guide line', () => {
   const source = readFileSync(new URL('../src/spiral.ts', import.meta.url), 'utf8');
   const types = readFileSync(new URL('../index.d.ts', import.meta.url), 'utf8');
-  const demoRunner = readFileSync(new URL('../../../examples/shared/demo-runner.js', import.meta.url), 'utf8');
+  const demoRunner = readFileSync(new URL('../../../docs/shared/demo-runner.js', import.meta.url), 'utf8');
 
   assert.equal(source.includes('createGuideLineElement'), false);
   assert.equal(source.includes('showLine'), false);
@@ -38,7 +38,7 @@ test('does not render or expose a spiral guide line', () => {
 
 test('demo uses a one-by-one spiral-path enter stagger instead of ring-like burst timing', () => {
   const source = readFileSync(new URL('../src/spiral.ts', import.meta.url), 'utf8');
-  const demoRunner = readFileSync(new URL('../../../examples/shared/demo-runner.js', import.meta.url), 'utf8');
+  const demoRunner = readFileSync(new URL('../../../docs/shared/demo-runner.js', import.meta.url), 'utf8');
 
   assert.equal(source.includes('resolveEnterAnimation(seriesModel, segment.animationOrder)'), true);
   assert.equal(source.includes("seriesModel.get(['enterAnimation', 'replayKey'])"), true);

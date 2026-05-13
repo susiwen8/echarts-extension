@@ -1,5 +1,5 @@
 {
-  "name": "echarts-sequence-diagram",
+  "name": "@echarts-extension/sequence-diagram",
   "version": "0.1.0",
   "description": "ECharts extension chart for UML sequence diagrams",
   "type": "module",
@@ -18,5 +18,8 @@
   },
   "peerDependencies": {
     "echarts": "^5.0.1 || ^6.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

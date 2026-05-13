@@ -1,18 +1,22 @@
-# echarts-flame
+# @echarts-extension/flame
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for hierarchical flame graphs. Import this package for side effects to register `series.type = 'flame'`.
+
+![Flame chart](../../tests/browser-visual/__snapshots__/echarts-flame.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-flame
+npm install echarts @echarts-extension/flame
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-flame';
+import '@echarts-extension/flame';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -52,24 +56,3 @@ Use one root object or an array of roots:
 - `rootName`, `rootVisible`: root behavior.
 - `sort`: `value`, `name`, `none`, `true`, or `false`.
 - `colors`, `itemStyle`, `label`, `emphasis`: presentation controls.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-flame.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-flame run build:ts
-npm --workspace echarts-flame run test:unit
-npm --workspace echarts-flame run build
-```

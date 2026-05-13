@@ -1,18 +1,22 @@
-# echarts-sunrise-sunset
+# @echarts-extension/sunrise-sunset
+
+Language: English | [中文](./README_CN.md)
 
 ECharts extension chart for sunrise, sunset, moonrise, and moonset paths. Import this package for side effects to register `series.type = 'sunriseSunset'`.
+
+![Sunrise Sunset chart](../../tests/browser-visual/__snapshots__/echarts-sunrise-sunset.png)
 
 ## Install
 
 ```bash
-npm install echarts echarts-sunrise-sunset
+npm install echarts @echarts-extension/sunrise-sunset
 ```
 
 ## Basic Usage
 
 ```js
 import * as echarts from 'echarts';
-import 'echarts-sunrise-sunset';
+import '@echarts-extension/sunrise-sunset';
 
 const chart = echarts.init(document.getElementById('main'));
 
@@ -49,24 +53,3 @@ You can pass values directly on the series or in `data`:
 - `backgroundStyle`, `baselineStyle`, `dayLineStyle`, `moonLineStyle`, `dayAreaStyle`, `moonAreaStyle`: styling.
 - `titleLabel`, `remainingLabel`, `updatedLabel`, `eventLabel`: text controls.
 - `enterAnimation`: controls the moving sun/moon reveal animation.
-
-## Browser Build
-
-After building this package, load ECharts first and then the bundle:
-
-```html
-<script src="../../node_modules/echarts/dist/echarts.min.js"></script>
-<script src="../dist/echarts-sunrise-sunset.js"></script>
-```
-
-See `examples/index.html` and `examples/large.html` for runnable demos.
-
-## Local Development
-
-From the repository root:
-
-```bash
-npm --workspace echarts-sunrise-sunset run build:ts
-npm --workspace echarts-sunrise-sunset run test:unit
-npm --workspace echarts-sunrise-sunset run build
-```

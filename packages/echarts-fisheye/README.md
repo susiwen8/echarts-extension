@@ -1,10 +1,14 @@
-# echarts-fisheye
+# @echarts-extension/fisheye
+
+Language: English | [中文](./README_CN.md)
 
 Reusable fisheye magnifier component for ECharts. Import it once, then add a top-level `fisheye` option to any chart.
 
+![Fisheye chart](../../tests/browser-visual/__snapshots__/echarts-fisheye.png)
+
 ```js
 import * as echarts from 'echarts';
-import 'echarts-fisheye';
+import '@echarts-extension/fisheye';
 
 const chart = echarts.init(document.getElementById('main'));
 chart.setOption({

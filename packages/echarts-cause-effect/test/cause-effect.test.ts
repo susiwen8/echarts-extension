@@ -47,13 +47,13 @@ const sampleDiagram = {
 function loadDemoNamespace() {
   const window = {};
   const document = { addEventListener() {} };
-  runInNewContext(readFileSync(new URL('../../../examples/shared/demo-data.js', import.meta.url), 'utf8'), { window });
-  runInNewContext(readFileSync(new URL('../../../examples/shared/demo-runner.js', import.meta.url), 'utf8'), { window, document });
+  runInNewContext(readFileSync(new URL('../../../docs/shared/demo-data.js', import.meta.url), 'utf8'), { window });
+  runInNewContext(readFileSync(new URL('../../../docs/shared/demo-runner.js', import.meta.url), 'utf8'), { window, document });
   return window.EChartsExtensionExamples;
 }
 
 test('example uses the shared form controls and add data flow', () => {
-  const html = readFileSync(new URL('../examples/index.html', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../../../docs/packages/echarts-cause-effect/index.html', import.meta.url), 'utf8');
   const namespace = loadDemoNamespace();
   const data = namespace.cloneExampleData(namespace.data);
   const state = namespace.createAddDataState('cause-effect');
@@ -65,8 +65,8 @@ test('example uses the shared form controls and add data flow', () => {
   const updatedOption = namespace.createDemoOption('cause-effect', data, {}, result);
 
   assert.match(html, /data-example="cause-effect"/);
-  assert.match(html, /examples\/shared\/demo-data\.js/);
-  assert.match(html, /examples\/shared\/demo-runner\.js/);
+  assert.match(html, /\.\.\/\.\.\/shared\/demo-data\.js/);
+  assert.match(html, /\.\.\/\.\.\/shared\/demo-runner\.js/);
   assert.equal(firstOption.series[0].type, 'causeEffect');
   assert.equal(firstOption.series[0].categories, data.causeEffect.categories);
   assert.equal(firstOption.series[0].enterAnimation, false);
