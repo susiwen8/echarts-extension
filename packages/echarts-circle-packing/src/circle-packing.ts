@@ -107,6 +107,18 @@ interface EnterAnimationConfig {
 
 type AnimationTargetKey = 'shape' | 'style';
 
+interface LabelPosition {
+  x: number;
+  y: number;
+}
+
+interface LabelBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 const echartsHost = echarts as unknown as EChartsHost;
 const optionKeys = [
   'padding',
@@ -269,6 +281,7 @@ function drawCirclePacking(
   const chartGroup = new echartsInstance.graphic.Group();
   const hoverItems: ElementHoverItem[] = [];
   const hoverItemsByDataIndex = new Map<number, ElementHoverItem>();
+  const hoverItemsByNodeId = new Map<string, ElementHoverItem>();
   chartGroup.x = rect.x;
   chartGroup.y = rect.y;
 
@@ -292,12 +305,14 @@ function drawCirclePacking(
       const hoverItem = createHoverItem(circleEl);
       hoverItems.push(hoverItem);
       hoverItemsByDataIndex.set(node.dataIndex, hoverItem);
+      hoverItemsByNodeId.set(node.id, hoverItem);
     }
 
     chartGroup.add(circleEl);
   });
 
   drawLabels(echartsInstance, chartGroup, seriesModel, data, layout.nodes, hoverItemsByDataIndex);
+  includeDescendantsInHoverItems(layout.nodes, hoverItemsByNodeId);
   group.add(chartGroup);
   return hoverItems;
 }
@@ -324,11 +339,13 @@ function drawLabels(
     const fontSize = Math.min(requestedFontSize, Math.max(8, node.r * 0.32));
     const lineHeight = finiteNumber(itemLabelModel?.get('lineHeight') ?? seriesLabelModel.get('lineHeight'), fontSize + 2);
     const text = formatLabel(itemLabelModel?.get('formatter') || seriesLabelModel.get('formatter'), node);
+    const wrappedText = wrapText(String(text), node.r * 1.5, fontSize, node.r);
+    const position = resolveLabelPosition(node, wrappedText, fontSize, lineHeight);
     const textEl = new echartsInstance.graphic.Text({
       style: {
-        x: node.x,
-        y: node.y,
-        text: wrapText(String(text), node.r * 1.5, fontSize, node.r),
+        x: position.x,
+        y: position.y,
+        text: wrappedText,
         fill: itemLabelModel?.get('color') || seriesLabelModel.get('color') || '#101828',
         fontSize,
         fontWeight: itemLabelModel?.get('fontWeight') || seriesLabelModel.get('fontWeight') || 650,
@@ -423,6 +440,166 @@ function wrapText(text: string, maxWidth: number, fontSize: number, radius: numb
   }
 
   return visible.join('\n');
+}
+
+function resolveLabelPosition(
+  node: CirclePackingNode,
+  text: string,
+  fontSize: number,
+  lineHeight: number
+): LabelPosition {
+  if (!node.children.length) {
+    return {
+      x: node.x,
+      y: node.y
+    };
+  }
+
+  const size = measureLabelText(text, fontSize, lineHeight);
+  const candidates = createParentLabelCandidates(node, size);
+  let best = candidates[0];
+  let bestScore = Infinity;
+
+  candidates.forEach((candidate) => {
+    const box = createCenteredLabelBox(candidate, size);
+    const score = scoreParentLabelCandidate(node, box);
+    if (score < bestScore) {
+      best = candidate;
+      bestScore = score;
+    }
+  });
+
+  return best;
+}
+
+function measureLabelText(text: string, fontSize: number, lineHeight: number): { width: number; height: number } {
+  const lines = text.split('\n');
+  return {
+    width: Math.max(...lines.map((line) => line.length), 1) * fontSize * 0.56,
+    height: lines.length * lineHeight
+  };
+}
+
+function createParentLabelCandidates(
+  node: CirclePackingNode,
+  size: { width: number; height: number }
+): LabelPosition[] {
+  const gap = Math.max(4, Math.min(12, node.r * 0.08));
+  const childBounds = getChildCircleBounds(node.children);
+  const radialFactors = [0.86, 0.72, 0.58, 0.44, 0.3];
+  const angles = [
+    -Math.PI / 2,
+    -Math.PI * 0.72,
+    -Math.PI * 0.28,
+    Math.PI / 2,
+    Math.PI,
+    0,
+    -Math.PI * 0.86,
+    -Math.PI * 0.14,
+    Math.PI * 0.14,
+    Math.PI * 0.86
+  ];
+  const candidates: LabelPosition[] = [
+    {
+      x: node.x,
+      y: childBounds.minY - size.height / 2 - gap
+    },
+    {
+      x: node.x,
+      y: childBounds.maxY + size.height / 2 + gap
+    },
+    {
+      x: childBounds.minX - size.width / 2 - gap,
+      y: node.y
+    },
+    {
+      x: childBounds.maxX + size.width / 2 + gap,
+      y: node.y
+    }
+  ];
+  radialFactors.forEach((factor) => {
+    angles.forEach((angle) => {
+      candidates.push({
+        x: node.x + Math.cos(angle) * node.r * factor,
+        y: node.y + Math.sin(angle) * node.r * factor
+      });
+    });
+  });
+  candidates.push({
+    x: node.x,
+    y: node.y - node.r - size.height / 2 - gap
+  });
+  candidates.push({
+    x: node.x,
+    y: node.y
+  });
+  return dedupeLabelCandidates(candidates);
+}
+
+function getChildCircleBounds(children: CirclePackingNode[]): { minX: number; maxX: number; minY: number; maxY: number } {
+  return children.reduce((bounds, child) => ({
+    minX: Math.min(bounds.minX, child.x - child.r),
+    maxX: Math.max(bounds.maxX, child.x + child.r),
+    minY: Math.min(bounds.minY, child.y - child.r),
+    maxY: Math.max(bounds.maxY, child.y + child.r)
+  }), {
+    minX: Infinity,
+    maxX: -Infinity,
+    minY: Infinity,
+    maxY: -Infinity
+  });
+}
+
+function dedupeLabelCandidates(candidates: LabelPosition[]): LabelPosition[] {
+  const seen = new Set<string>();
+  return candidates.filter((candidate) => {
+    const key = `${candidate.x.toFixed(3)},${candidate.y.toFixed(3)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function createCenteredLabelBox(position: LabelPosition, size: { width: number; height: number }): LabelBox {
+  return {
+    x: position.x - size.width / 2,
+    y: position.y - size.height / 2,
+    width: size.width,
+    height: size.height
+  };
+}
+
+function scoreParentLabelCandidate(node: CirclePackingNode, box: LabelBox): number {
+  const distances = node.children.map((child) => distanceFromBoxToCircle(box, child));
+  const overlapPenalty = distances.reduce((sum, distance, index) => (
+    sum + (distance < 0 ? 100000 + Math.abs(distance) * 1000 + node.children[index].r : 0)
+  ), 0);
+  const clearance = Math.min(...distances);
+  const parentOverflow = labelBoxOverflowFromCircle(box, node);
+  const centerDistance = Math.hypot(box.x + box.width / 2 - node.x, box.y + box.height / 2 - node.y);
+  return overlapPenalty + parentOverflow * 50 - clearance + centerDistance * 0.01;
+}
+
+function distanceFromBoxToCircle(box: LabelBox, circle: CirclePackingNode): number {
+  const closestX = Math.max(box.x, Math.min(circle.x, box.x + box.width));
+  const closestY = Math.max(box.y, Math.min(circle.y, box.y + box.height));
+  return Math.hypot(closestX - circle.x, closestY - circle.y) - circle.r;
+}
+
+function labelBoxOverflowFromCircle(box: LabelBox, circle: CirclePackingNode): number {
+  const points = [
+    [box.x, box.y],
+    [box.x + box.width / 2, box.y],
+    [box.x + box.width, box.y],
+    [box.x, box.y + box.height / 2],
+    [box.x + box.width, box.y + box.height / 2],
+    [box.x, box.y + box.height],
+    [box.x + box.width / 2, box.y + box.height],
+    [box.x + box.width, box.y + box.height]
+  ];
+  return points.reduce((overflow, [x, y]) => (
+    Math.max(overflow, Math.hypot(x - circle.x, y - circle.y) - circle.r)
+  ), 0);
 }
 
 function createLegendVisualProvider(seriesModel: CirclePackingSeriesModel) {
@@ -578,6 +755,30 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
   item.triggerElements.push(element);
 }
 
+function includeDescendantsInHoverItems(
+  nodes: CirclePackingNode[],
+  hoverItemsByNodeId: Map<string, ElementHoverItem>
+): void {
+  const nodesById = new Map(nodes.map((node) => [node.id, node]));
+  nodes.forEach((node) => {
+    const hoverItem = hoverItemsByNodeId.get(node.id);
+    if (!hoverItem) return;
+
+    let parentId = node.parentId;
+    while (parentId) {
+      const parentHoverItem = hoverItemsByNodeId.get(parentId);
+      if (parentHoverItem) addHoverElements(parentHoverItem, hoverItem.elements);
+      parentId = nodesById.get(parentId)?.parentId ?? null;
+    }
+  });
+}
+
+function addHoverElements(item: ElementHoverItem, elements: GraphicElement[]): void {
+  elements.forEach((element) => {
+    if (!item.elements.includes(element)) item.elements.push(element);
+  });
+}
+
 export const __test__ = {
   readInitialDataOptions,
   readLayoutOption,
@@ -600,5 +801,7 @@ export const __test__ = {
   isPlainObject,
   asRecord,
   createHoverItem,
-  addHoverElement
+  addHoverElement,
+  includeDescendantsInHoverItems,
+  addHoverElements
 };

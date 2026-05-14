@@ -2,11 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
+import * as echarts from 'echarts/lib/echarts';
+import { SVGRenderer } from 'echarts/renderers';
+
+import '../src/circle-packing.ts';
 import {
   flattenCirclePackingData,
   layoutCirclePacking,
   resolveCirclePackingLayout
 } from '../src/layout.ts';
+
+echarts.use([SVGRenderer]);
 
 const portfolio = {
   name: 'Portfolio',
@@ -26,6 +32,29 @@ const portfolio = {
         { name: 'Campaigns', value: 32 },
         { name: 'Referrals', value: 22 },
         { name: 'Activation', value: 18 }
+      ]
+    },
+    {
+      name: 'Platform',
+      children: [
+        { name: 'API', value: 42 },
+        { name: 'Billing', value: 24 }
+      ]
+    }
+  ]
+};
+
+const productData = {
+  name: 'root',
+  children: [
+    {
+      name: 'Core Experience',
+      value: 120,
+      children: [
+        { name: 'Sync', value: 18 },
+        { name: 'Center Experience', value: 54 },
+        { name: 'Search', value: 38 },
+        { name: 'Other', value: 20 }
       ]
     },
     {
@@ -158,12 +187,146 @@ test('resolves layout aliases and flattened raw data order', () => {
   );
 });
 
+test('keeps descendant circles highlighted when hovering a parent circle', () => {
+  const chart = createSsrChart();
+
+  chart.setOption({
+    animation: false,
+    series: [{
+      type: 'circlePacking',
+      data: portfolio,
+      sort: false,
+      label: {
+        show: true,
+        minRadius: 0
+      },
+      itemStyle: {
+        opacity: 0.88
+      }
+    }]
+  });
+
+  const circles = chart.getZr().storage.getDisplayList().filter((element) => element.type === 'circle');
+  assert.equal(circles.length, 12);
+
+  const core = circles[1];
+  const platform = circles[9];
+  const api = circles[10];
+  const billing = circles[11];
+
+  platform.trigger('mouseover', {
+    target: platform
+  });
+
+  assert.equal(lastHoverTargetOpacity(platform), 0.88);
+  assert.equal(lastHoverTargetOpacity(api), 0.88);
+  assert.equal(lastHoverTargetOpacity(billing), 0.88);
+  assert.equal(lastHoverTargetOpacity(core), 0.12);
+
+  platform.trigger('mouseout', {
+    target: platform
+  });
+
+  assert.equal(lastHoverTargetOpacity(api), 0.88);
+  assert.equal(lastHoverTargetOpacity(billing), 0.88);
+  assert.equal(lastHoverTargetOpacity(core), 0.88);
+
+  chart.dispose();
+});
+
+test('places parent labels away from child circles', () => {
+  const chart = createSsrChart();
+
+  chart.setOption({
+    animation: false,
+    series: [{
+      type: 'circlePacking',
+      data: productData,
+      sort: false,
+      label: {
+        show: true,
+        minRadius: 0
+      }
+    }]
+  });
+
+  const circles = chart.getZr().storage.getDisplayList().filter((element) => element.type === 'circle');
+  const parentLabel = collectTextElements(chart)
+    .find((element) => element.style.text === 'Core Experience');
+  assert.ok(parentLabel);
+
+  const parentLabelBox = textBoxFromStyle(parentLabel.style);
+  const childCircles = circles.slice(2, 6);
+  childCircles.forEach((childCircle, childIndex) => {
+    assert.equal(
+      boxIntersectsCircle(parentLabelBox, childCircle.shape),
+      false,
+      `parent label overlaps child circle ${childIndex}`
+    );
+  });
+
+  chart.dispose();
+});
+
 function assertNodeInsideParent(node, parent) {
   const distance = Math.hypot(node.x - parent.x, node.y - parent.y);
   assert.ok(
     distance + node.r <= parent.r + 0.001,
     `${node.name} is outside ${parent.name}`
   );
+}
+
+function createSsrChart(width = 640, height = 420) {
+  return echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width,
+    height
+  });
+}
+
+function lastHoverTargetOpacity(element) {
+  const animator = element.animators
+    ?.filter((item) => item.scope === 'element-hover')
+    .at(-1);
+  return animator?._tracks?.opacity?.keyframes?.at(-1)?.value;
+}
+
+function collectTextElements(chart) {
+  const elements = [];
+  chart.getZr().storage.getRoots().forEach((root) => visitTextElements(root, elements));
+  return elements;
+}
+
+function visitTextElements(element, elements) {
+  if (element.style?.text != null) elements.push(element);
+  element.children?.().forEach((child) => visitTextElements(child, elements));
+}
+
+function textBoxFromStyle(style) {
+  const fontSize = Number(style.fontSize) || 12;
+  const lineHeight = Number(style.lineHeight) || fontSize + 2;
+  const lines = String(style.text).split('\n');
+  const width = Math.max(...lines.map((line) => line.length), 1) * fontSize * 0.56;
+  const height = lines.length * lineHeight;
+  let x = Number(style.x) || 0;
+  let y = Number(style.y) || 0;
+  if (style.align === 'center') x -= width / 2;
+  if (style.align === 'right') x -= width;
+  if (style.verticalAlign === 'middle') y -= height / 2;
+  if (style.verticalAlign === 'bottom') y -= height;
+  return {
+    x,
+    y,
+    width,
+    height
+  };
+}
+
+function boxIntersectsCircle(box, circle) {
+  const closestX = Math.max(box.x, Math.min(circle.cx, box.x + box.width));
+  const closestY = Math.max(box.y, Math.min(circle.cy, box.y + box.height));
+  return Math.hypot(closestX - circle.cx, closestY - circle.cy) < circle.r;
 }
 
 function assertNodeWithinChart(node, layout) {
