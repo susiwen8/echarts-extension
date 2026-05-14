@@ -20,8 +20,9 @@ import '@echarts-extension/fisheye';
 echarts.use([SVGRenderer]);
 
 class FakeElement {
-  constructor(rect) {
+  constructor(rect, localRect = rect) {
     this.rect = rect;
+    this.localRect = localRect;
     this.x = 0;
     this.y = 0;
     this.scaleX = 1;
@@ -33,6 +34,10 @@ class FakeElement {
 
   getPaintRect() {
     return this.rect;
+  }
+
+  getBoundingRect() {
+    return this.localRect;
   }
 
   attr(keyOrObj, value) {
@@ -121,6 +126,55 @@ test('generic fisheye controller magnifies and resets arbitrary display elements
 
   controller.dispose();
   assert.equal(zr.handlers.size, 0);
+});
+
+test('generic fisheye controller keeps child displayables anchored to local origins', () => {
+  const symbol = new FakeElement(
+    { x: 315, y: 195, width: 10, height: 10 },
+    { x: -1, y: -1, width: 2, height: 2 }
+  );
+  symbol.scaleX = 4;
+  symbol.scaleY = 4;
+  symbol.parent = {
+    x: 300,
+    y: 200,
+    transformCoordToLocal(x, y) {
+      return [(x - this.x) / 2, (y - this.y) / 2];
+    }
+  };
+  const zr = new FakeZRender([symbol]);
+  const fisheye = resolveFisheyeOptions({ show: true, radius: 100, scale: 3 }, {
+    x: 0,
+    y: 0,
+    width: 600,
+    height: 400
+  });
+  const controller = installFisheyeController({
+    zrender: zr,
+    viewport: { x: 0, y: 0, width: 600, height: 400 },
+    fisheye
+  });
+
+  assert.ok(controller);
+  const expected = fisheyeTransform([320, 200], fisheye, [300, 200]);
+  controller.apply([300, 200]);
+
+  assert.equal(symbol.originX, 0);
+  assert.equal(symbol.originY, 0);
+  assert.ok(Math.abs(symbol.x - (expected.x - 320) / 2) < 1e-10);
+  assert.equal(symbol.y, 0);
+  assert.equal(symbol.scaleX, 4 * expected.scale);
+  assert.equal(symbol.scaleY, 4 * expected.scale);
+
+  controller.apply([0, 0]);
+  assert.equal(symbol.x, 0);
+  assert.equal(symbol.y, 0);
+  assert.equal(symbol.scaleX, 4);
+  assert.equal(symbol.scaleY, 4);
+  assert.equal(symbol.originX, 0);
+  assert.equal(symbol.originY, 0);
+
+  controller.dispose();
 });
 
 test('echarts-fisheye registers a top-level option component', () => {

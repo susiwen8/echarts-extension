@@ -38,6 +38,7 @@ export interface FisheyeGraphicElement {
   scaleY?: number;
   originX?: number;
   originY?: number;
+  transform?: ArrayLike<number> | null;
   ignore?: boolean;
   invisible?: boolean;
   shape?: Record<string, unknown>;
@@ -49,6 +50,8 @@ export interface FisheyeGraphicElement {
   dirty?: () => void;
   getPaintRect?: () => FisheyeRect | null;
   getBoundingRect?: () => FisheyeRect | null;
+  getComputedTransform?: () => ArrayLike<number> | null;
+  transformCoordToLocal?: (x: number, y: number) => FisheyePoint | number[];
 }
 
 export interface FisheyeZRenderLike {
@@ -257,9 +260,25 @@ function applyGenericFisheyeTargets(
     if (!baseline) return;
 
     const transform = fisheyeTransform(baseline.center, fisheye, focus);
+    if (transform.influence <= 0) {
+      setFisheyeElementTransform(element, {
+        x: baseline.x,
+        y: baseline.y,
+        scaleX: baseline.scaleX,
+        scaleY: baseline.scaleY,
+        originX: baseline.originX,
+        originY: baseline.originY
+      });
+      return;
+    }
+    const localDelta = globalDeltaToParentLocal(
+      element,
+      transform.x - baseline.center[0],
+      transform.y - baseline.center[1]
+    );
     setFisheyeElementTransform(element, {
-      x: baseline.x + transform.x - baseline.center[0],
-      y: baseline.y + transform.y - baseline.center[1],
+      x: baseline.x + localDelta[0],
+      y: baseline.y + localDelta[1],
       scaleX: baseline.scaleX * transform.scale,
       scaleY: baseline.scaleY * transform.scale,
       originX: baseline.localOriginX,
@@ -296,6 +315,7 @@ function resolveTargetBaseline(
   ];
   const x = finiteNumber(element.x, 0);
   const y = finiteNumber(element.y, 0);
+  const localOrigin = resolveElementLocalOrigin(element, center, x, y);
   const baseline = {
     element,
     x,
@@ -304,8 +324,8 @@ function resolveTargetBaseline(
     scaleY: finiteNumber(element.scaleY, 1),
     originX: typeof element.originX === 'number' && Number.isFinite(element.originX) ? element.originX : undefined,
     originY: typeof element.originY === 'number' && Number.isFinite(element.originY) ? element.originY : undefined,
-    localOriginX: center[0] - x,
-    localOriginY: center[1] - y,
+    localOriginX: localOrigin[0],
+    localOriginY: localOrigin[1],
     center
   };
   baselines.set(element, baseline);
@@ -387,7 +407,21 @@ function setFisheyeElementTransform(
 }
 
 function readElementRect(element: FisheyeGraphicElement): FisheyeRect | null {
-  const rect = element.getPaintRect?.() || element.getBoundingRect?.() || null;
+  const rect = readFiniteRect(element.getPaintRect?.() || null);
+  if (rect) return rect;
+
+  const localRect = readElementLocalRect(element);
+  if (!localRect) return null;
+  const transform = readTransformMatrix(element);
+  if (!transform) return localRect;
+  return transformRect(localRect, transform);
+}
+
+function readElementLocalRect(element: FisheyeGraphicElement): FisheyeRect | null {
+  return readFiniteRect(element.getBoundingRect?.() || null);
+}
+
+function readFiniteRect(rect: FisheyeRect | null): FisheyeRect | null {
   if (!rect) return null;
   const x = finiteNumber(rect.x, NaN);
   const y = finiteNumber(rect.y, NaN);
@@ -396,6 +430,117 @@ function readElementRect(element: FisheyeGraphicElement): FisheyeRect | null {
   if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(width) || !Number.isFinite(height)) return null;
   if (width <= 0 && height <= 0) return null;
   return { x, y, width, height };
+}
+
+function resolveElementLocalOrigin(
+  element: FisheyeGraphicElement,
+  globalCenter: FisheyePoint,
+  x: number,
+  y: number
+): FisheyePoint {
+  const localRect = readElementLocalRect(element);
+  if (localRect) {
+    return [
+      localRect.x + localRect.width / 2,
+      localRect.y + localRect.height / 2
+    ];
+  }
+
+  const parentLocalCenter = globalPointToParentLocal(element, globalCenter);
+  if (parentLocalCenter) {
+    return [
+      parentLocalCenter[0] - x,
+      parentLocalCenter[1] - y
+    ];
+  }
+
+  return [
+    globalCenter[0] - x,
+    globalCenter[1] - y
+  ];
+}
+
+function globalDeltaToParentLocal(element: FisheyeGraphicElement, dx: number, dy: number): FisheyePoint {
+  const parent = element.parent;
+  if (!parent) return [dx, dy];
+
+  const origin = globalPointToLocal(parent, [0, 0]);
+  const moved = globalPointToLocal(parent, [dx, dy]);
+  if (!origin || !moved) return [dx, dy];
+  return [
+    moved[0] - origin[0],
+    moved[1] - origin[1]
+  ];
+}
+
+function globalPointToParentLocal(element: FisheyeGraphicElement, point: FisheyePoint): FisheyePoint | null {
+  return element.parent ? globalPointToLocal(element.parent, point) : point;
+}
+
+function globalPointToLocal(element: FisheyeGraphicElement, point: FisheyePoint): FisheyePoint | null {
+  if (typeof element.transformCoordToLocal === 'function') {
+    const local = element.transformCoordToLocal(point[0], point[1]);
+    if (isFinitePoint(local)) return [local[0], local[1]];
+  }
+
+  const transform = readTransformMatrix(element);
+  if (!transform) return point;
+  return invertTransformPoint(point, transform);
+}
+
+function readTransformMatrix(element: FisheyeGraphicElement): number[] | null {
+  const transform = element.getComputedTransform?.() || element.transform;
+  if (!transform || transform.length < 6) return null;
+  const matrix = Array.from(transform).slice(0, 6);
+  return matrix.every((value) => typeof value === 'number' && Number.isFinite(value))
+    ? matrix as number[]
+    : null;
+}
+
+function transformRect(rect: FisheyeRect, matrix: number[]): FisheyeRect {
+  const points = [
+    transformPoint([rect.x, rect.y], matrix),
+    transformPoint([rect.x + rect.width, rect.y], matrix),
+    transformPoint([rect.x, rect.y + rect.height], matrix),
+    transformPoint([rect.x + rect.width, rect.y + rect.height], matrix)
+  ];
+  const xs = points.map((point) => point[0]);
+  const ys = points.map((point) => point[1]);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return {
+    x,
+    y,
+    width: Math.max(...xs) - x,
+    height: Math.max(...ys) - y
+  };
+}
+
+function transformPoint(point: FisheyePoint, matrix: number[]): FisheyePoint {
+  return [
+    matrix[0] * point[0] + matrix[2] * point[1] + matrix[4],
+    matrix[1] * point[0] + matrix[3] * point[1] + matrix[5]
+  ];
+}
+
+function invertTransformPoint(point: FisheyePoint, matrix: number[]): FisheyePoint | null {
+  const determinant = matrix[0] * matrix[3] - matrix[1] * matrix[2];
+  if (!Number.isFinite(determinant) || Math.abs(determinant) < 1e-12) return null;
+  const dx = point[0] - matrix[4];
+  const dy = point[1] - matrix[5];
+  return [
+    (matrix[3] * dx - matrix[2] * dy) / determinant,
+    (-matrix[1] * dx + matrix[0] * dy) / determinant
+  ];
+}
+
+function isFinitePoint(point: unknown): point is FisheyePoint {
+  return Array.isArray(point)
+    && point.length >= 2
+    && typeof point[0] === 'number'
+    && typeof point[1] === 'number'
+    && Number.isFinite(point[0])
+    && Number.isFinite(point[1]);
 }
 
 function eventPoint(event: FisheyeZRenderEvent): FisheyePoint | null {
