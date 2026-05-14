@@ -198,12 +198,57 @@ test('echarts-fisheye registers a top-level option component', () => {
   chart.dispose();
 });
 
+test('echarts-fisheye component view covers disabled render, remove, and exclusion guards', () => {
+  const FisheyeView = echarts.ComponentView.getClass('fisheye');
+  const view = new FisheyeView();
+  view.group = {
+    elements: [],
+    removeCount: 0,
+    add(element) {
+      this.elements.push(element);
+    },
+    removeAll() {
+      this.elements = [];
+      this.removeCount += 1;
+    }
+  };
+  const zr = new FakeZRender([]);
+  const api = {
+    getWidth: () => 240,
+    getHeight: () => 160,
+    getZr: () => zr
+  };
+
+  view.render({ option: { show: false } }, null, api);
+  assert.equal(view.group.removeCount, 1);
+  assert.equal(view.__fisheyeController, undefined);
+
+  view.render({ option: { show: true, radius: 60, scale: 2 } }, null, api);
+  const lens = view.__fisheyeLens;
+  const childOfLens = new FakeElement({ x: 95, y: 75, width: 10, height: 10 });
+  childOfLens.parent = lens;
+  zr.elements = [childOfLens];
+  zr.emit('mousemove', { offsetX: 100, offsetY: 80 });
+  assert.equal(childOfLens.scaleX, 1);
+
+  view.remove();
+  assert.equal(lens.ignore, true);
+  assert.equal(view.__fisheyeController, undefined);
+  assert.equal(view.__fisheyeLens, undefined);
+  view.remove();
+
+  view.dispose();
+  assert.equal(view.__fisheyeLens, undefined);
+});
+
 test('layout-core fisheye options and utility fallbacks cover disabled and invalid inputs', () => {
   const viewport = { x: 0, y: 0, width: 120, height: 80 };
 
   assert.equal(resolveFisheyeOptions(false, viewport), null);
   assert.equal(resolveFisheyeOptions({ show: false }, viewport), null);
   assert.equal(resolveFisheyeOptions({ enabled: false }, viewport), null);
+  assert.equal(resolveFisheyeOptions(null, viewport).radius, 48);
+  assert.equal(resolveFisheyeOptions(true, viewport).scale, 2.2);
 
   const defaults = {
     radius: 20,
@@ -413,6 +458,76 @@ test('layout-core fisheye private helpers cover graphic setters and geometry gua
   assert.equal(baseline.originY, 7);
   assert.equal(fisheyeInternals.resolveTargetBaseline({ getPaintRect: () => null }, new Map()), null);
 
+  const transformedRectElement = {
+    getPaintRect: () => null,
+    getBoundingRect: () => ({ x: 1, y: 2, width: 3, height: 4 }),
+    transform: [2, 0, 0, 3, 10, 20]
+  };
+  assert.deepEqual(fisheyeInternals.readElementRect(transformedRectElement), {
+    x: 12,
+    y: 26,
+    width: 6,
+    height: 12
+  });
+  assert.deepEqual(fisheyeInternals.readElementRect({
+    getPaintRect: () => null,
+    getBoundingRect: () => ({ x: 1, y: 2, width: 3, height: 4 }),
+    transform: [2, 0]
+  }), { x: 1, y: 2, width: 3, height: 4 });
+  assert.deepEqual(fisheyeInternals.readElementRect({
+    getPaintRect: () => null,
+    getBoundingRect: () => ({ x: 1, y: 2, width: 3, height: 4 }),
+    getComputedTransform: () => [1, 0, 0, 1, Number.NaN, 0]
+  }), { x: 1, y: 2, width: 3, height: 4 });
+
+  const parentLocalBaseline = fisheyeInternals.resolveTargetBaseline({
+    x: 2,
+    y: 3,
+    originY: Number.NaN,
+    parent: {
+      transformCoordToLocal: (x, y) => [x / 2, y / 2]
+    },
+    getPaintRect: () => ({ x: 20, y: 30, width: 10, height: 10 }),
+    getBoundingRect: () => null
+  }, new Map());
+  assert.deepEqual(parentLocalBaseline.center, [25, 35]);
+  assert.equal(parentLocalBaseline.localOriginX, 10.5);
+  assert.equal(parentLocalBaseline.localOriginY, 14.5);
+  assert.equal(parentLocalBaseline.originY, undefined);
+
+  const globalOriginBaseline = fisheyeInternals.resolveTargetBaseline({
+    x: 2,
+    y: 3,
+    parent: {
+      transformCoordToLocal: () => [Number.NaN, Number.NaN]
+    },
+    getPaintRect: () => ({ x: 20, y: 30, width: 10, height: 10 }),
+    getBoundingRect: () => null
+  }, new Map());
+  assert.equal(globalOriginBaseline.localOriginX, 23);
+  assert.equal(globalOriginBaseline.localOriginY, 32);
+
+  const singularParentBaseline = fisheyeInternals.resolveTargetBaseline({
+    x: 2,
+    y: 3,
+    parent: {
+      transform: [0, 0, 0, 0, 0, 0]
+    },
+    getPaintRect: () => ({ x: 20, y: 30, width: 10, height: 10 }),
+    getBoundingRect: () => null
+  }, new Map());
+  assert.equal(singularParentBaseline.localOriginX, 23);
+  assert.equal(singularParentBaseline.localOriginY, 32);
+
+  const rootLocalBaseline = fisheyeInternals.resolveTargetBaseline({
+    x: 2,
+    y: 3,
+    getPaintRect: () => ({ x: 20, y: 30, width: 10, height: 10 }),
+    getBoundingRect: () => null
+  }, new Map());
+  assert.equal(rootLocalBaseline.localOriginX, 23);
+  assert.equal(rootLocalBaseline.localOriginY, 32);
+
   const target = {
     originX: 1,
     originY: 2,
@@ -464,4 +579,49 @@ test('layout-core fisheye private helpers cover graphic setters and geometry gua
   assert.equal(fisheyeInternals.eventPoint({ offsetX: NaN, zrX: NaN }), null);
   assert.equal(fisheyeInternals.pointInRect([2, 2], { x: 0, y: 0, width: 4, height: 4 }), true);
   assert.equal(fisheyeInternals.pointInRect([-1, 2], { x: 0, y: 0, width: 4, height: 4 }), false);
+});
+
+test('layout-core fisheye controller handles parent matrix transforms and invalid local conversion fallbacks', () => {
+  const matrixChild = new FakeElement(
+    { x: 115, y: 125, width: 10, height: 10 },
+    { x: -1, y: -1, width: 2, height: 2 }
+  );
+  matrixChild.parent = {
+    transformCoordToLocal: () => [Number.NaN, Number.NaN],
+    transform: [2, 0, 0, 2, 10, 20]
+  };
+
+  const singularChild = new FakeElement(
+    { x: 135, y: 125, width: 10, height: 10 },
+    { x: -1, y: -1, width: 2, height: 2 }
+  );
+  singularChild.parent = {
+    transform: [0, 0, 0, 0, 0, 0]
+  };
+
+  const zr = new FakeZRender([matrixChild, singularChild]);
+  const fisheye = resolveFisheyeOptions({ show: true, radius: 80, scale: 2 }, {
+    x: 0,
+    y: 0,
+    width: 240,
+    height: 200
+  });
+  const controller = installFisheyeController({
+    zrender: zr,
+    viewport: { x: 0, y: 0, width: 240, height: 200 },
+    fisheye
+  });
+
+  assert.ok(controller);
+  controller.apply([100, 120]);
+
+  assert.ok(matrixChild.x > 0);
+  assert.ok(matrixChild.x < singularChild.x);
+  assert.ok(singularChild.x > 0);
+  assert.equal(matrixChild.originX, 0);
+  assert.equal(matrixChild.originY, 0);
+  assert.equal(singularChild.originX, 0);
+  assert.equal(singularChild.originY, 0);
+
+  controller.dispose();
 });
