@@ -140,7 +140,7 @@ echartsHost.extendSeriesModel({
   visualDrawType: 'fill',
 
   getInitialData(this: LollipopSeriesModel, option: LollipopLayoutOption) {
-    const source = Array.isArray(option.data) ? option.data : [];
+    const source = createSeriesDataSource(option);
     const dimensions = echartsHost.helper.createDimensions(source, {
       coordDimensions: ['value']
     });
@@ -323,6 +323,68 @@ function readLayoutOption(seriesModel: LollipopSeriesModel, rect: ViewRect): Lol
   });
 
   return layoutOption;
+}
+
+function createSeriesDataSource(option: LollipopLayoutOption): unknown[] {
+  const source = Array.isArray(option.data) ? option.data : [];
+  const dimensions = normalizeSeriesDimensions(option.dimensions);
+  return source.map((item, dataIndex) => createSeriesDataItem(item, dataIndex, option, dimensions));
+}
+
+function createSeriesDataItem(
+  item: unknown,
+  dataIndex: number,
+  option: LollipopLayoutOption,
+  dimensions: string[] | undefined
+): Record<string, unknown> {
+  const categoryValue = readSeriesField(item, option.categoryField ?? 'category', dimensions, 0, ['name', 'country', 'label']);
+  const value = finiteNumber(readSeriesField(item, option.valueField ?? 'value', dimensions, 1, [
+    'population',
+    'amount',
+    'count',
+    'users',
+    'total'
+  ]), NaN);
+  const nameValue = readSeriesField(item, option.nameField ?? 'name', dimensions, -1, []);
+  const name = stringifySeriesName(nameValue ?? categoryValue ?? `item-${dataIndex}`);
+
+  return {
+    ...(asRecord(item)),
+    name,
+    value
+  };
+}
+
+function readSeriesField(
+  item: unknown,
+  field: string | number,
+  dimensions: string[] | undefined,
+  fallbackIndex: number,
+  fallbackNames: string[]
+): unknown {
+  if (Array.isArray(item)) {
+    const index = typeof field === 'number' ? field : dimensions?.indexOf(field);
+    const resolvedIndex = index != null && index >= 0 ? index : fallbackIndex;
+    return resolvedIndex >= 0 ? item[resolvedIndex] : undefined;
+  }
+
+  const record = asRecord(item);
+  if (typeof field === 'string' && record[field] != null) return record[field];
+  if (typeof field === 'number') return undefined;
+  for (const fallbackName of fallbackNames) {
+    if (record[fallbackName] != null) return record[fallbackName];
+  }
+  return undefined;
+}
+
+function normalizeSeriesDimensions(value: unknown): string[] | undefined {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : undefined;
+}
+
+function stringifySeriesName(value: unknown): string {
+  if (typeof value === 'string' && value.length) return value;
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return '';
 }
 
 function drawLollipop(
@@ -872,7 +934,12 @@ function addHoverElement(item: ElementHoverItem | undefined, element: GraphicEle
 }
 
 function finiteNumber(value: unknown, fallback: number): number {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -881,6 +948,11 @@ function asRecord(value: unknown): Record<string, unknown> {
 
 export const __test__ = {
   readLayoutOption,
+  createSeriesDataSource,
+  createSeriesDataItem,
+  readSeriesField,
+  normalizeSeriesDimensions,
+  stringifySeriesName,
   drawLollipop,
   drawAxes,
   drawValueAxisLabels,

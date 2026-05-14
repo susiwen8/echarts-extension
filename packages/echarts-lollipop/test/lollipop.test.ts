@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import * as echarts from 'echarts';
 import { test } from 'vitest';
 
+import { __test__ as rendererInternals } from '../src/lollipop.ts';
 import {
   layoutLollipop,
   resolveLollipopLayout
@@ -107,4 +109,86 @@ test('supports array rows, explicit category ordering, and negative baselines', 
   assert.ok(loss.y > loss.baseY, 'negative value appears below the baseline');
   assert.equal(flat.y, flat.baseY);
   assert.ok(profit.y < profit.baseY, 'positive value appears above the baseline');
+});
+
+test('maps configured fields into ECharts data for tooltip hover values', () => {
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 480,
+    height: 320
+  });
+
+  try {
+    chart.setOption({
+      series: [
+        {
+          type: 'lollipop',
+          data: populationData,
+          categoryField: 'country',
+          valueField: 'population'
+        }
+      ]
+    });
+
+    const seriesModel = chart.getModel().getSeriesByIndex(0);
+    const data = seriesModel.getData();
+
+    assert.equal(data.getName(0), 'India');
+    assert.equal(data.get('value', 0), 1441);
+    assert.equal(data.getName(1), 'China');
+    assert.equal(data.get('value', 1), 1425);
+  } finally {
+    chart.dispose();
+  }
+});
+
+test('normalizes object and array rows for ECharts tooltip data', () => {
+  assert.deepEqual(rendererInternals.createSeriesDataSource({
+    data: [
+      ['Loss', -20],
+      ['Profit', 40]
+    ],
+    dimensions: ['metric', 'amount'],
+    categoryField: 'metric',
+    valueField: 'amount'
+  }), [
+    { name: 'Loss', value: -20 },
+    { name: 'Profit', value: 40 }
+  ]);
+
+  assert.deepEqual(rendererInternals.createSeriesDataItem({
+    name: 'Named point',
+    value: 9
+  }, 0, {}, undefined), {
+    name: 'Named point',
+    value: 9
+  });
+
+  assert.deepEqual(rendererInternals.createSeriesDataItem({
+    label: 2024,
+    total: '18',
+    itemStyle: { color: '#123456' }
+  }, 0, {}, undefined), {
+    itemStyle: { color: '#123456' },
+    label: 2024,
+    name: '2024',
+    total: '18',
+    value: 18
+  });
+
+  assert.deepEqual(rendererInternals.createSeriesDataItem({}, 3, {}, undefined), {
+    name: 'item-3',
+    value: NaN
+  });
+
+  assert.equal(rendererInternals.readSeriesField(['A', 'B'], 1, undefined, 0, []), 'B');
+  assert.equal(rendererInternals.readSeriesField(['Only'], 'missing', [], -1, []), undefined);
+  assert.equal(rendererInternals.readSeriesField({ population: 1441 }, 'value', undefined, 0, ['population']), 1441);
+  assert.equal(rendererInternals.readSeriesField({ population: 1441 }, 0, undefined, 0, ['population']), undefined);
+  assert.deepEqual(rendererInternals.normalizeSeriesDimensions(['category', 1, 'value']), ['category', 'value']);
+  assert.equal(rendererInternals.normalizeSeriesDimensions(null), undefined);
+  assert.equal(rendererInternals.stringifySeriesName(7), '7');
+  assert.equal(rendererInternals.stringifySeriesName(null), '');
+  assert.equal(rendererInternals.finiteNumber('not-a-number', 5), 5);
 });
