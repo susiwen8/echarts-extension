@@ -3,7 +3,7 @@ import { clearAliveRender, installElementHover, renderAlive, setAliveRenderKey }
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
 import { resolveRadialBoxplotLayout } from './layout.js';
-import type { RadialBoxplotBox, RadialBoxplotLayoutOption, RadialBoxplotLayoutResult } from './layout.js';
+import type { RadialBoxplotBox, RadialBoxplotField, RadialBoxplotLayoutOption, RadialBoxplotLayoutResult } from './layout.js';
 
 interface ViewRect {
   x: number;
@@ -26,6 +26,7 @@ interface EChartsModel {
 interface SeriesData {
   initData(source: unknown[]): void;
   count(): number;
+  getName?: (index: number) => string;
   getItemModel(index: number): EChartsModel;
   getItemLayout(dataIndex: number): unknown;
   getItemVisual(dataIndex: number, key: string): unknown;
@@ -111,7 +112,40 @@ interface EnterAnimationConfig {
 
 type AnimationTargetKey = 'shape' | 'style';
 
+type TooltipMarkupNameValueBlock = {
+  type: 'nameValue';
+  markerType?: string;
+  markerColor?: string;
+  name?: string;
+  value?: unknown;
+  noValue?: boolean;
+  dataIndex?: number;
+};
+
+type TooltipMarkupSection = {
+  type: 'section';
+  header?: unknown;
+  noHeader?: boolean;
+  sortBlocks?: boolean;
+  blocks?: TooltipMarkupNameValueBlock[];
+};
+
+type TooltipSummaryField = {
+  name: 'min' | 'q1' | 'q2' | 'q3' | 'max';
+  optionKey: 'minField' | 'q1Field' | 'medianField' | 'q3Field' | 'maxField';
+  defaultField: RadialBoxplotField;
+  fallbackIndex: number;
+  fallbackNames: string[];
+};
+
 const echartsHost = echarts as unknown as EChartsHost;
+const tooltipSummaryFields: TooltipSummaryField[] = [
+  { name: 'min', optionKey: 'minField', defaultField: 'min', fallbackIndex: 1, fallbackNames: ['low', 'lower', 'minimum'] },
+  { name: 'q1', optionKey: 'q1Field', defaultField: 'q1', fallbackIndex: 2, fallbackNames: ['quartile1', 'lowerQuartile'] },
+  { name: 'q2', optionKey: 'medianField', defaultField: 'median', fallbackIndex: 3, fallbackNames: ['med', 'value'] },
+  { name: 'q3', optionKey: 'q3Field', defaultField: 'q3', fallbackIndex: 4, fallbackNames: ['quartile3', 'upperQuartile'] },
+  { name: 'max', optionKey: 'maxField', defaultField: 'max', fallbackIndex: 5, fallbackNames: ['high', 'upper', 'maximum'] }
+];
 const optionKeys = [
   'padding',
   'center',
@@ -166,6 +200,10 @@ echartsHost.extendSeriesModel({
   getTooltipPosition(this: RadialBoxplotSeriesModel, dataIndex: number) {
     const layout = this.getData().getItemLayout(dataIndex);
     return Array.isArray(layout) ? layout : undefined;
+  },
+
+  formatTooltip(this: RadialBoxplotSeriesModel, dataIndex: number) {
+    return formatRadialBoxplotTooltip(this, dataIndex);
   },
 
   defaultOption: {
@@ -743,6 +781,122 @@ function readLineDash(type: unknown): number[] | null {
   return null;
 }
 
+function formatRadialBoxplotTooltip(seriesModel: RadialBoxplotSeriesModel, dataIndex: number): TooltipMarkupSection {
+  const option = seriesModel.option || {};
+  const source = Array.isArray(option.data) ? option.data : [];
+  const raw = source[dataIndex];
+  const dimensions = normalizeTooltipDimensions(option.dimensions);
+  const markerColor = readTooltipMarkerColor(seriesModel, dataIndex);
+
+  return {
+    type: 'section',
+    header: readTooltipHeader(seriesModel, raw, dimensions, dataIndex),
+    noHeader: false,
+    sortBlocks: false,
+    blocks: tooltipSummaryFields.map((field) => {
+      const value = readTooltipSummaryValue(option, raw, dimensions, field);
+      return {
+        type: 'nameValue',
+        markerType: 'subItem',
+        markerColor,
+        name: field.name,
+        value,
+        noValue: isEmptyTooltipValue(value),
+        dataIndex
+      };
+    })
+  };
+}
+
+function readTooltipSummaryValue(
+  option: RadialBoxplotLayoutOption,
+  raw: unknown,
+  dimensions: string[] | undefined,
+  field: TooltipSummaryField
+): unknown {
+  return readRawField(
+    raw,
+    readTooltipField(option[field.optionKey], field.defaultField),
+    dimensions,
+    field.fallbackIndex,
+    field.fallbackNames
+  );
+}
+
+function readTooltipHeader(
+  seriesModel: RadialBoxplotSeriesModel,
+  raw: unknown,
+  dimensions: string[] | undefined,
+  dataIndex: number
+): unknown {
+  const option = seriesModel.option || {};
+  const nameField = readOptionalTooltipField(option.nameField);
+  const categoryField = readTooltipField(option.categoryField, 'name');
+  const header = nameField == null
+    ? undefined
+    : readRawField(raw, nameField, dimensions, 0, ['name', 'category', 'region', 'group']);
+  return header
+    ?? readRawField(raw, categoryField, dimensions, 0, ['name', 'category', 'region', 'group'])
+    ?? seriesModel.getData().getName?.(dataIndex)
+    ?? '';
+}
+
+function readTooltipMarkerColor(seriesModel: RadialBoxplotSeriesModel, dataIndex: number): string {
+  const data = seriesModel.getData();
+  const itemModel = data.getItemModel(dataIndex);
+  const itemStyleModel = itemModel.getModel('itemStyle');
+  const seriesItemStyleModel = seriesModel.getModel('itemStyle');
+  const visualStyle = asRecord(data.getItemVisual(dataIndex, 'style'));
+  const color = itemStyleModel.get('color')
+    || visualStyle.fill
+    || visualStyle.stroke
+    || seriesItemStyleModel.get('color')
+    || '#2f83ed';
+  return typeof color === 'string' ? color : '#2f83ed';
+}
+
+function normalizeTooltipDimensions(value: unknown): string[] | undefined {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : undefined;
+}
+
+function readRawField(
+  raw: unknown,
+  field: RadialBoxplotField,
+  dimensions: string[] | undefined,
+  fallbackIndex: number,
+  fallbackNames: string[]
+): unknown {
+  if (Array.isArray(raw)) {
+    const dimensionIndex = typeof field === 'string' ? dimensions?.indexOf(field) : undefined;
+    const index = typeof field === 'number'
+      ? field
+      : dimensionIndex != null && dimensionIndex >= 0
+        ? dimensionIndex
+        : fallbackIndex;
+    return index >= 0 ? raw[index] : undefined;
+  }
+
+  const record = asRecord(raw);
+  if (!Object.keys(record).length) return undefined;
+  if (typeof field === 'string' && record[field] != null) return record[field];
+  for (const fallbackName of fallbackNames) {
+    if (record[fallbackName] != null) return record[fallbackName];
+  }
+  return undefined;
+}
+
+function readTooltipField(value: unknown, fallback: RadialBoxplotField): RadialBoxplotField {
+  return typeof value === 'string' || typeof value === 'number' ? value : fallback;
+}
+
+function readOptionalTooltipField(value: unknown): RadialBoxplotField | undefined {
+  return typeof value === 'string' || typeof value === 'number' ? value : undefined;
+}
+
+function isEmptyTooltipValue(value: unknown): boolean {
+  return value == null || value === '' || (typeof value === 'number' && Number.isNaN(value));
+}
+
 function formatAxisLabel(formatter: unknown, value: unknown): string {
   if (typeof formatter === 'function') {
     return String(formatter(value));
@@ -891,6 +1045,15 @@ export const __test__ = {
   readBoxStyle,
   readLineStyle,
   readLineDash,
+  formatRadialBoxplotTooltip,
+  readTooltipSummaryValue,
+  readTooltipHeader,
+  readTooltipMarkerColor,
+  normalizeTooltipDimensions,
+  readRawField,
+  readTooltipField,
+  readOptionalTooltipField,
+  isEmptyTooltipValue,
   formatAxisLabel,
   polarPoint,
   readEnterAnimation,

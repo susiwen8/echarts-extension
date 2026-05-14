@@ -294,6 +294,49 @@ test('radial boxplot private renderer helpers cover fallback arcs, grid branches
   assert.deepEqual(radialBoxplot.asRecord([]), {});
   assert.equal(radialBoxplot.nestedOptionValue({ parent: { child: 2 } }, 'parent', 'child'), 2);
   assert.equal(radialBoxplot.finiteNumber('6', 0), 6);
+  assert.deepEqual(radialBoxplot.normalizeTooltipDimensions(['name', 1, 'value']), ['name', 'value']);
+  assert.equal(radialBoxplot.normalizeTooltipDimensions('name'), undefined);
+  assert.equal(radialBoxplot.readRawField(['North', 1, 2, 3, 4, 5], 'median', ['name', 'min', 'q1', 'median', 'q3', 'max'], 0, []), 3);
+  assert.equal(radialBoxplot.readRawField(['North', 1], 1, undefined, 0, []), 1);
+  assert.equal(radialBoxplot.readRawField(['North', 1], 'missing', ['name'], 1, []), 1);
+  assert.equal(radialBoxplot.readRawField(['North', 1], 'missing', undefined, 1, []), 1);
+  assert.equal(radialBoxplot.readRawField(['North'], 'missing', ['name'], -1, []), undefined);
+  assert.equal(radialBoxplot.readRawField({ min: 2 }, 'min', undefined, 0, []), 2);
+  assert.equal(radialBoxplot.readRawField({ low: 1 }, 'min', undefined, 0, ['low']), 1);
+  assert.equal(radialBoxplot.readRawField({ other: 1 }, 'min', undefined, 0, ['low']), undefined);
+  assert.equal(radialBoxplot.readRawField({ 1: 'one' }, 1, undefined, 0, []), undefined);
+  assert.equal(radialBoxplot.readRawField(null, 'min', undefined, 0, []), undefined);
+  assert.equal(radialBoxplot.readTooltipField('low', 'min'), 'low');
+  assert.equal(radialBoxplot.readTooltipField(undefined, 'min'), 'min');
+  assert.equal(radialBoxplot.readOptionalTooltipField('label'), 'label');
+  assert.equal(radialBoxplot.readOptionalTooltipField(null), undefined);
+  assert.equal(radialBoxplot.isEmptyTooltipValue(null), true);
+  assert.equal(radialBoxplot.isEmptyTooltipValue(''), true);
+  assert.equal(radialBoxplot.isEmptyTooltipValue(Number.NaN), true);
+  assert.equal(radialBoxplot.isEmptyTooltipValue(0), false);
+  assert.equal(radialBoxplot.readTooltipHeader(createSeriesModel({ nameField: 'label' }), { label: 'Label', name: 'Name' }, undefined, 0), 'Label');
+  assert.equal(radialBoxplot.readTooltipHeader(createSeriesModel({}), { region: 'Region' }, undefined, 0), 'Region');
+  assert.equal(radialBoxplot.readTooltipHeader(createSeriesModel({}, createData([{ name: 'From data' }])), {}, undefined, 0), 'From data');
+  assert.equal(radialBoxplot.readTooltipHeader({
+    option: {},
+    getData: () => ({})
+  }, {}, undefined, 0), '');
+  assert.equal(radialBoxplot.readTooltipSummaryValue(
+    { minField: 'low' },
+    { low: 4 },
+    undefined,
+    { name: 'min', optionKey: 'minField', defaultField: 'min', fallbackIndex: 1, fallbackNames: ['low'] }
+  ), 4);
+  assert.equal(radialBoxplot.readTooltipMarkerColor(createSeriesModel({}, createData([{ itemStyle: { color: '#item' } }])), 0), '#item');
+  assert.equal(radialBoxplot.readTooltipMarkerColor(createSeriesModel({}, createData([{ itemStyle: { fill: '#fill' } }])), 0), '#fill');
+  assert.equal(radialBoxplot.readTooltipMarkerColor(createSeriesModel({}, createData([{ itemStyle: { stroke: '#stroke' } }])), 0), '#stroke');
+  assert.equal(radialBoxplot.readTooltipMarkerColor(createSeriesModel({ itemStyle: { color: '#series' } }, createData([{}])), 0), '#series');
+  assert.equal(radialBoxplot.readTooltipMarkerColor(createSeriesModel({}, createData([{}])), 0), '#2f83ed');
+  assert.equal(radialBoxplot.readTooltipMarkerColor(createSeriesModel({}, createData([{ itemStyle: { color: { type: 'linear' } } }])), 0), '#2f83ed');
+  assert.equal(radialBoxplot.formatRadialBoxplotTooltip(createSeriesModel({}), 0).header, '0');
+  const noOptionBoxplotModel = createSeriesModel({}, createData([{}]));
+  delete noOptionBoxplotModel.option;
+  assert.equal(radialBoxplot.formatRadialBoxplotTooltip(noOptionBoxplotModel, 0).header, '0');
   const animated = createAnimatable({ shape: {} });
   radialBoxplot.applyLineEnterAnimation(animated, enabledAnimation);
   assert.equal(animated.animations[0].target.percent, 1);

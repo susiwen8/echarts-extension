@@ -187,3 +187,59 @@ test('renders boxplots above axes and wires item tooltips', () => {
     chart.dispose();
   }
 });
+
+test('formats hover tooltip with boxplot summary values', () => {
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 360,
+    height: 360
+  });
+
+  try {
+    chart.setOption({
+      animation: false,
+      series: [
+        {
+          type: 'radialBoxplot',
+          data: continents,
+          categoryField: 'name',
+          min: 0,
+          max: 30
+        }
+      ]
+    });
+
+    const seriesModel = chart.getModel().getSeriesByIndex(0) as unknown as {
+      formatTooltip?: (dataIndex: number, multipleSeries?: boolean, dataType?: string | null) => unknown;
+    };
+    assert.equal(typeof seriesModel.formatTooltip, 'function');
+
+    const tooltip = seriesModel.formatTooltip(0, false, null);
+    const blocks = collectNameValueBlocks(tooltip);
+
+    assert.equal((tooltip as { header?: unknown }).header, 'Oceania');
+    assert.deepEqual(blocks.map((block) => block.name), ['min', 'q1', 'q2', 'q3', 'max']);
+    assert.deepEqual(blocks.map((block) => block.value), [1, 8, 13, 21, 24]);
+    assert.ok(blocks.every((block) => block.markerColor === '#2f83ed'));
+  } finally {
+    chart.dispose();
+  }
+});
+
+function collectNameValueBlocks(
+  fragment: unknown
+): Array<{ name?: unknown; value?: unknown; markerColor?: unknown; noValue?: unknown }> {
+  if (!fragment || typeof fragment !== 'object') return [];
+  const record = fragment as {
+    type?: string;
+    blocks?: unknown[];
+    name?: unknown;
+    value?: unknown;
+    markerColor?: unknown;
+    noValue?: unknown;
+  };
+  if (record.type === 'nameValue') return [record];
+  if (!Array.isArray(record.blocks)) return [];
+  return record.blocks.flatMap((block) => collectNameValueBlocks(block));
+}
