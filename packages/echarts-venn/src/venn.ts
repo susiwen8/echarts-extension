@@ -24,6 +24,7 @@ interface EChartsModel {
 }
 
 interface SeriesData {
+  dataType?: unknown;
   initData(source: unknown[]): void;
   count(): number;
   getName(index: number): string;
@@ -36,6 +37,7 @@ interface SeriesData {
 
 interface VennSeriesModel extends EChartsModel {
   option?: VennLayoutOption;
+  seriesIndex?: number;
   legendVisualProvider?: unknown;
   getBoxLayoutParams(): unknown;
   getData(): SeriesData;
@@ -76,6 +78,12 @@ interface EChartsHost {
   extendChartView(option: Record<string, unknown>): void;
   helper: {
     createDimensions(source: unknown[], options: Record<string, unknown>): unknown;
+    getECData(element: GraphicElement): {
+      dataIndex?: number;
+      dataType?: unknown;
+      seriesIndex?: number;
+      ssrType?: string;
+    };
     getLayoutRect(params: unknown, container: { width: number; height: number }): ViewRect;
   };
   List: new (dimensions: unknown, host: VennSeriesModel) => SeriesData;
@@ -101,6 +109,30 @@ interface EnterAnimationConfig {
   easing: string;
 }
 
+interface TooltipMarkupNameValue {
+  type: 'nameValue';
+  markerType: 'subItem';
+  markerColor: string;
+  name: string;
+  value: unknown;
+  dataIndex: number;
+}
+
+interface TooltipMarkupSection {
+  type: 'section';
+  header: string;
+  noHeader: false;
+  sortBlocks: false;
+  blocks: TooltipMarkupNameValue[];
+}
+
+interface TooltipEntry {
+  name: string;
+  value: unknown;
+  sets: string[];
+  dataIndex: number;
+}
+
 type AnimationTargetKey = 'shape' | 'style';
 
 const echartsHost = echarts as unknown as EChartsHost;
@@ -123,6 +155,10 @@ echartsHost.extendSeriesModel({
     list.initData(source);
     this.legendVisualProvider = createLegendVisualProvider(this);
     return list;
+  },
+
+  formatTooltip(this: VennSeriesModel, dataIndex: number) {
+    return formatVennTooltip(this, dataIndex);
   },
 
   defaultOption: {
@@ -152,6 +188,9 @@ echartsHost.extendSeriesModel({
       fontSize: 12,
       fontWeight: 600,
       formatter: null
+    },
+    tooltip: {
+      trigger: 'item'
     },
     emphasis: {
       itemStyle: {
@@ -350,6 +389,7 @@ function drawLabels(
       },
       silent: true
     });
+    bindTooltipData(echartsInstance, seriesModel, data, label.dataIndex, textEl);
     applyFadeEnterAnimation(textEl, readEnterAnimation(seriesModel, label.dataIndex));
     addLabelHoverElement(label, textEl, hoverItemsByDataIndex, hoverItems, circleElementsBySetKey);
 
@@ -456,6 +496,80 @@ function formatLabel(formatter: unknown, label: VennLabel): unknown {
     return formatter.replace(/\{b\}/g, label.name).replace(/\{c\}/g, String(label.value ?? ''));
   }
   return label.name;
+}
+
+function bindTooltipData(
+  echartsInstance: EChartsHost,
+  seriesModel: VennSeriesModel,
+  data: SeriesData,
+  dataIndex: number,
+  element: GraphicElement
+): void {
+  const ecData = echartsInstance.helper.getECData(element);
+  ecData.dataIndex = dataIndex;
+  ecData.dataType = data.dataType;
+  ecData.seriesIndex = seriesModel.seriesIndex;
+  ecData.ssrType = 'chart';
+}
+
+function formatVennTooltip(seriesModel: VennSeriesModel, dataIndex: number): TooltipMarkupSection {
+  const source = (seriesModel.option?.data || []) as unknown[];
+  const target = createTooltipEntry(seriesModel, source, dataIndex);
+  const entries = target.sets.length > 1
+    ? target.sets.map((setName) => findBaseTooltipEntry(seriesModel, source, setName, dataIndex))
+    : [target];
+
+  return {
+    type: 'section',
+    header: target.name,
+    noHeader: false,
+    sortBlocks: false,
+    blocks: entries.map(createTooltipBlock)
+  };
+}
+
+function createTooltipEntry(
+  seriesModel: VennSeriesModel,
+  source: unknown[],
+  dataIndex: number,
+  fallbackName?: string
+): TooltipEntry {
+  const raw = asRecord(source[dataIndex]);
+  const value = raw.value;
+  return {
+    name: String(raw.name ?? raw.id ?? fallbackName ?? seriesModel.getData().getName(dataIndex)),
+    value: Array.isArray(value) ? value[0] : value,
+    sets: normalizeTooltipSets(raw.sets),
+    dataIndex
+  };
+}
+
+function findBaseTooltipEntry(
+  seriesModel: VennSeriesModel,
+  source: unknown[],
+  setName: string,
+  fallbackDataIndex: number
+): TooltipEntry {
+  const dataIndex = source.findIndex((raw) => {
+    const sets = normalizeTooltipSets(asRecord(raw).sets);
+    return sets.length === 1 && sets[0] === setName;
+  });
+  return createTooltipEntry(seriesModel, source, dataIndex >= 0 ? dataIndex : fallbackDataIndex, setName);
+}
+
+function createTooltipBlock(entry: TooltipEntry): TooltipMarkupNameValue {
+  return {
+    type: 'nameValue',
+    markerType: 'subItem',
+    markerColor: DEFAULT_PALETTE[entry.dataIndex % DEFAULT_PALETTE.length],
+    name: entry.name,
+    value: entry.value,
+    dataIndex: entry.dataIndex
+  };
+}
+
+function normalizeTooltipSets(sets: unknown): string[] {
+  return Array.isArray(sets) ? Array.from(new Set(sets.map(String))) : [];
 }
 
 function createLegendVisualProvider(seriesModel: VennSeriesModel) {
@@ -615,6 +729,12 @@ export const __test__ = {
   readHollowCircleStyle,
   readBubbleCircleStyle,
   formatLabel,
+  bindTooltipData,
+  formatVennTooltip,
+  createTooltipEntry,
+  findBaseTooltipEntry,
+  createTooltipBlock,
+  normalizeTooltipSets,
   createLegendVisualProvider,
   collectDataNames,
   finiteNumber,

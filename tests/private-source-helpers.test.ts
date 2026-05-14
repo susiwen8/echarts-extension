@@ -2209,6 +2209,12 @@ function graphicHost() {
     static elementType = 'arc';
   }
   return {
+    helper: {
+      getECData(element) {
+        element.__ecData ||= {};
+        return element.__ecData;
+      }
+    },
     graphic: {
       Group,
       Circle,

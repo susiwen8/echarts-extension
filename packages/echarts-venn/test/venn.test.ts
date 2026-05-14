@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
 import * as echarts from 'echarts/lib/echarts';
+import { getECData } from 'echarts/lib/util/innerStore.js';
 import { SVGRenderer } from 'echarts/renderers';
 
 import {
@@ -164,6 +165,59 @@ test('highlights related hollow Venn circles when hovering an intersection label
   });
 
   assert.deepEqual(elements.circles.map(lastElementHoverOpacityTarget), baseCircleOpacities);
+
+  chart.dispose();
+});
+
+test('binds hollow Venn labels to tooltip data and expands intersection tooltips', () => {
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 600,
+    height: 420
+  });
+
+  chart.setOption({
+    animation: false,
+    series: [{
+      type: 'venn',
+      layout: 'hollow',
+      data: hollowData,
+      label: {
+        show: true
+      },
+      tooltip: {
+        trigger: 'item'
+      }
+    }]
+  });
+
+  const elements = collectVennElements(chart);
+  const acLabel = elements.labels.find((label) => label.style.text === 'A&C');
+  const aLabel = elements.labels.find((label) => label.style.text === 'A');
+  const seriesModel = chart.getModel().getSeriesByIndex(0);
+
+  assert.ok(acLabel, 'A&C label should render');
+  assert.ok(aLabel, 'A label should render');
+  assert.equal(getECData(acLabel).dataIndex, 4);
+  assert.equal(getECData(aLabel).dataIndex, 0);
+
+  const intersectionTooltip = seriesModel.formatTooltip(4);
+  assert.equal(intersectionTooltip.header, 'A&C');
+  assert.deepEqual(
+    intersectionTooltip.blocks.map((block) => [block.name, block.value]),
+    [
+      ['A', 100],
+      ['C', 82]
+    ]
+  );
+
+  const baseTooltip = seriesModel.formatTooltip(0);
+  assert.equal(baseTooltip.header, 'A');
+  assert.deepEqual(
+    baseTooltip.blocks.map((block) => [block.name, block.value]),
+    [['A', 100]]
+  );
 
   chart.dispose();
 });

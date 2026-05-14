@@ -576,6 +576,23 @@ test('venn private renderer helpers cover bubble rendering and style fallback bo
   assert.equal(venn.readBubbleCircleStyle(createData([{ style: { fill: '#vis' } }]), createSeriesModel({ itemStyle: { borderColor: '#normal' } }), createSeriesModel({ itemStyle: {} }), 0, 0).stroke, '#normal');
   assert.equal(venn.createLegendVisualProvider(seriesModel).getItemVisual(1, 'name'), 'B');
   assert.equal(venn.readEnterAnimation(seriesModel, 0).enabled, false);
+  const tooltipSource = [
+    { id: 'id-only', value: [7, 8], sets: [1, 1, 'B'] },
+    {},
+    { name: 'Named', value: 3, sets: ['A'] }
+  ];
+  const tooltipSeries = createSeriesModel({ data: tooltipSource }, createData(tooltipSource));
+  assert.deepEqual(venn.createTooltipEntry(tooltipSeries, tooltipSource, 0), {
+    name: 'id-only',
+    value: 7,
+    sets: ['1', 'B'],
+    dataIndex: 0
+  });
+  assert.equal(venn.createTooltipEntry(tooltipSeries, tooltipSource, 1).name, '1');
+  assert.equal(venn.createTooltipEntry(tooltipSeries, tooltipSource, -1, 'Missing').name, 'Missing');
+  assert.equal(venn.findBaseTooltipEntry(tooltipSeries, tooltipSource, 'Missing', -1).name, 'Missing');
+  assert.equal(venn.formatVennTooltip(createSeriesModel({}, createData([{ name: 'Solo' }])), 0).blocks[0].name, 'Solo');
+  assert.equal(venn.normalizeTooltipSets(null).length, 0);
   venn.applyCircleEnterAnimation(createAnimatable({ shape: undefined, style: undefined }), 4, enabledAnimation);
   venn.applyFadeEnterAnimation(createAnimatable({ style: undefined }), enabledAnimation);
   const fallbackTarget = { animate: () => null };
@@ -1435,6 +1452,12 @@ function createGraphicHost() {
   class Arc extends Element { static elementType = 'arc'; }
   class Text extends Element { static elementType = 'text'; }
   return {
+    helper: {
+      getECData(element) {
+        element.__ecData ||= {};
+        return element.__ecData;
+      }
+    },
     graphic: {
       Group,
       Circle,

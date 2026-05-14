@@ -65,6 +65,11 @@ declare module 'echarts/types/dist/echarts' {
       fontWeight?: string | number;
       formatter?: string | ((params: { name?: string; value?: number | number[]; data?: VennDataItem }) => string);
     };
+    tooltip?: {
+      trigger?: 'item';
+      show?: boolean;
+      formatter?: string | ((params: unknown) => string);
+    };
     emphasis?: {
       itemStyle?: {
         shadowBlur?: number;
