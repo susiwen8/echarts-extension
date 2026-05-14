@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
+import { normalizeSvgForComparison } from './svg-normalize.ts';
 import {
   actualPath,
   flameActualPath,
@@ -121,13 +122,16 @@ test('SVG visual baselines match rendered fixtures', async () => {
       );
     }
 
-    if (actual !== expected) {
+    const normalizedActual = normalizeSvgForComparison(actual);
+    const normalizedExpected = normalizeSvgForComparison(expected);
+
+    if (normalizedActual !== normalizedExpected) {
       await writeActual(actual, visualCase.actualPath);
     }
 
     assert.equal(
-      actual,
-      expected,
+      normalizedActual,
+      normalizedExpected,
       `${visualCase.name} visual SVG changed. Actual SVG written to ${visualCase.actualPath}.`
     );
     console.log(`Visual baseline matched: ${visualCase.snapshotPath}`);
