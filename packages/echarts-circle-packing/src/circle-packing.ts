@@ -448,7 +448,8 @@ function resolveLabelPosition(
   fontSize: number,
   lineHeight: number
 ): LabelPosition {
-  if (!node.children.length) {
+  const children = node.children ?? [];
+  if (!children.length) {
     return {
       x: node.x,
       y: node.y

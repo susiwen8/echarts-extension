@@ -1060,6 +1060,22 @@ test('direct renderer exports cover hierarchical fallback render branches', () =
     dataIndex: -1,
     color: ''
   }], new Map());
+  circlePackingRenderer.drawLabels(host, group, series({
+    label: { show: true, minRadius: 0 },
+    enterAnimation: false
+  }, []).model, data([]), [{
+    raw: {},
+    name: 'Duplicate Candidates',
+    value: 1,
+    percent: 1,
+    depth: 1,
+    x: 10,
+    y: 10,
+    r: 0,
+    dataIndex: -1,
+    color: '',
+    children: [{ x: 10, y: 10, r: 0 }]
+  }], new Map());
   assert.equal(typeof circlePackingRenderer.readNodeStyle(data([]), model({ itemStyle: {} }), null, {
     raw: {},
     dataIndex: -1,
@@ -1076,6 +1092,17 @@ test('direct renderer exports cover hierarchical fallback render branches', () =
   delete circleMissingStyle.style;
   circlePackingRenderer.applyFadeEnterAnimation(circleMissingStyle, enabled);
   circlePackingRenderer.animateGraphicProperty({ animate: () => null }, 'style', enabled, { opacity: 0.4 });
+  const duplicateHoverElement = {};
+  const parentHover = { elements: [duplicateHoverElement], triggerElements: [] };
+  circlePackingRenderer.addHoverElements(parentHover, [duplicateHoverElement]);
+  assert.equal(parentHover.elements.length, 1);
+  circlePackingRenderer.includeDescendantsInHoverItems([{
+    id: 'parent',
+    parentId: null
+  }, {
+    id: 'child',
+    parentId: 'parent'
+  }], new Map([['child', { elements: [{}], triggerElements: [] }]]));
 
   assert.equal(flameRenderer.readLayoutOption({ get: () => undefined }, rect).height, 80);
   const flameSeries = series({
