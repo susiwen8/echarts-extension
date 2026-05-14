@@ -71,6 +71,7 @@ test('test tooling runs through Vitest and browser test scripts', () => {
     rootPackage.scripts['test:unit'],
     'npm run build:ts && vitest run tests/*.test.ts packages/*/test/*.test.ts'
   );
+  assert.equal(rootPackage.scripts['test:coverage'], 'npm run build:ts && vitest run --coverage');
   assert.equal(
     rootPackage.scripts['test:visual'],
     'npm run build:ts && vitest run tests/visual/visual-regression.test.ts'
@@ -109,6 +110,15 @@ test('test tooling runs through Vitest and browser test scripts', () => {
   assert.ok(exists(path.join(root, 'tests/browser-perf/perf-runner.ts')));
   assert.ok(exists(path.join(root, 'scripts/build-pages.mjs')));
   assert.ok(exists(path.join(root, 'docs/templates/index.tpl')));
+});
+
+test('coverage tooling enforces 100 percent thresholds', () => {
+  const coverage = readVitestConfigText().match(/thresholds:\s*\{(?<body>[\s\S]*?)\n\s*\}/)?.groups?.body ?? '';
+
+  assert.match(coverage, /statements:\s*100/);
+  assert.match(coverage, /branches:\s*100/);
+  assert.match(coverage, /functions:\s*100/);
+  assert.match(coverage, /lines:\s*100/);
 });
 
 test('GitHub Pages workflow deploys built examples through a Pages artifact', () => {
@@ -163,6 +173,7 @@ test('npm publish workflow only publishes allowlisted packages', () => {
   assert.match(workflow, /NODE_AUTH_TOKEN: \$\{\{ secrets\.NPM_TOKEN \}\}/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /run: npm run test:unit/);
+  assert.match(workflow, /run: npm run test:coverage/);
   assert.match(workflow, /run: npm run release/);
   assert.match(workflow, /node scripts\/npm-publish-plan\.mjs/);
   assert.match(workflow, /node scripts\/npm-publish-packages\.mjs/);
@@ -192,6 +203,10 @@ function extensionPackageNames() {
 
 function readJson(filePath) {
   return JSON.parse(readFileSync(filePath, 'utf8'));
+}
+
+function readVitestConfigText() {
+  return readFileSync(path.join(root, 'vitest.config.js'), 'utf8');
 }
 
 function exists(filePath) {
