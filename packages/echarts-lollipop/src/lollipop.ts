@@ -24,6 +24,7 @@ interface EChartsModel {
 }
 
 interface SeriesData {
+  dataType?: unknown;
   initData(source: unknown[]): void;
   count(): number;
   getItemModel(index: number): EChartsModel;
@@ -35,6 +36,7 @@ interface SeriesData {
 
 interface LollipopSeriesModel extends EChartsModel {
   option?: LollipopLayoutOption;
+  seriesIndex: number;
   getBoxLayoutParams(): unknown;
   getData(): SeriesData;
 }
@@ -81,6 +83,12 @@ interface EChartsHost {
   extendChartView(option: Record<string, unknown>): void;
   helper: {
     createDimensions(source: unknown[], options: Record<string, unknown>): unknown;
+    getECData(element: GraphicElement): {
+      dataIndex?: number;
+      dataType?: unknown;
+      seriesIndex?: number;
+      ssrType?: string;
+    };
     getLayoutRect(params: unknown, container: { width: number; height: number }): ViewRect;
   };
   List: new (dimensions: unknown, host: LollipopSeriesModel) => SeriesData;
@@ -599,6 +607,7 @@ function drawPoints(
       });
       applyStemEnterAnimation(stem, point, animation);
       stem.silent = silent;
+      bindTooltipData(echartsInstance, seriesModel, data, point.dataIndex, stem);
       setAliveRenderKey(stem, `lollipop-stem:${pointKey}`);
       group.add(stem);
     }
@@ -617,6 +626,7 @@ function drawPoints(
       });
       applyCircleEnterAnimation(symbol, symbolSize / 2, animation);
       symbol.silent = silent;
+      bindTooltipData(echartsInstance, seriesModel, data, point.dataIndex, symbol);
       if (silent) data.setItemGraphicEl(point.dataIndex, symbol);
       setAliveRenderKey(symbol, `lollipop-symbol:${pointKey}`);
       group.add(symbol);
@@ -638,6 +648,7 @@ function drawPoints(
       z2: layerZ.hit
     });
     data.setItemGraphicEl(point.dataIndex, hitCircle);
+    bindTooltipData(echartsInstance, seriesModel, data, point.dataIndex, hitCircle);
     setAliveRenderKey(hitCircle, `lollipop-hit:${pointKey}`);
     group.add(hitCircle);
 
@@ -691,9 +702,10 @@ function drawPointLabels(
 ): void {
   const seriesLabelModel = seriesModel.getModel('label');
   if (seriesLabelModel.get('show') !== true) return;
+  const data = seriesModel.getData();
 
   points.forEach((point) => {
-    const itemModel = seriesModel.getData().getItemModel(point.dataIndex);
+    const itemModel = data.getItemModel(point.dataIndex);
     const itemLabelModel = itemModel.getModel('label');
     const show = itemLabelModel.get('show') ?? seriesLabelModel.get('show');
     if (show === false) return;
@@ -715,10 +727,25 @@ function drawPointLabels(
       z2: layerZ.label
     });
     applyFadeEnterAnimation(label, readEnterAnimation(seriesModel, point.dataIndex));
+    bindTooltipData(echartsInstance, seriesModel, data, point.dataIndex, label);
     setAliveRenderKey(label, `lollipop-label:${lollipopPointKey(point)}`);
     addHoverElement(hoverItemsByDataIndex.get(point.dataIndex), label);
     group.add(label);
   });
+}
+
+function bindTooltipData(
+  echartsInstance: EChartsHost,
+  seriesModel: LollipopSeriesModel,
+  data: SeriesData,
+  dataIndex: number,
+  element: GraphicElement
+): void {
+  const ecData = echartsInstance.helper.getECData(element);
+  ecData.dataIndex = dataIndex;
+  ecData.dataType = data.dataType;
+  ecData.seriesIndex = seriesModel.seriesIndex;
+  ecData.ssrType = 'chart';
 }
 
 function lollipopPointKey(point: LollipopPoint): string {

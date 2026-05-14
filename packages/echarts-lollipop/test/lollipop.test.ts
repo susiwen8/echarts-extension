@@ -192,3 +192,148 @@ test('normalizes object and array rows for ECharts tooltip data', () => {
   assert.equal(rendererInternals.stringifySeriesName(null), '');
   assert.equal(rendererInternals.finiteNumber('not-a-number', 5), 5);
 });
+
+test('binds lollipop hover trigger elements to tooltip data indexes', () => {
+  const ecData = new WeakMap<object, Record<string, unknown>>();
+  const host = createTooltipBindingHost(ecData);
+  const group = new TestGraphicGroup();
+  const data = createTooltipSeriesData();
+  const seriesModel = createTooltipSeriesModel(data);
+  const layout = {
+    points: [
+      {
+        id: 'india',
+        name: 'India',
+        category: 'India',
+        categoryValue: 'India',
+        value: 1441,
+        x: 20,
+        y: 30,
+        baseX: 20,
+        baseY: 110,
+        dataIndex: 0,
+        raw: populationData[0]
+      }
+    ]
+  };
+
+  const hoverItems = rendererInternals.drawPoints(host as never, group as never, seriesModel as never, layout as never, {
+    x: 8,
+    y: 12,
+    width: 180,
+    height: 160
+  });
+
+  assert.equal(hoverItems.length, 1);
+  assert.equal(data.layout?.[0], 28);
+  assert.equal(data.layout?.[1], 42);
+
+  const triggerElements = hoverItems[0].triggerElements || [];
+  assert.equal(triggerElements.length, 4);
+  triggerElements.forEach((element) => {
+    assert.deepEqual(ecData.get(element), {
+      dataIndex: 0,
+      dataType: 'lollipop',
+      seriesIndex: 2,
+      ssrType: 'chart'
+    });
+  });
+});
+
+class TestGraphicElement {
+  shape?: Record<string, unknown>;
+  style?: Record<string, unknown>;
+  silent?: boolean;
+  z2?: number;
+
+  constructor(options: {
+    shape?: Record<string, unknown>;
+    style?: Record<string, unknown>;
+    silent?: boolean;
+    z2?: number;
+  }) {
+    Object.assign(this, options);
+  }
+}
+
+class TestGraphicGroup {
+  children: TestGraphicElement[] = [];
+
+  add(element: TestGraphicElement) {
+    this.children.push(element);
+  }
+}
+
+function createTooltipBindingHost(ecData: WeakMap<object, Record<string, unknown>>) {
+  return {
+    helper: {
+      getECData(element: object) {
+        let data = ecData.get(element);
+        if (!data) {
+          data = {};
+          ecData.set(element, data);
+        }
+        return data;
+      }
+    },
+    graphic: {
+      Circle: TestGraphicElement,
+      Line: TestGraphicElement,
+      Text: TestGraphicElement
+    }
+  };
+}
+
+function createTooltipSeriesData() {
+  return {
+    dataType: 'lollipop',
+    layout: undefined as [number, number] | undefined,
+    graphicEl: undefined as TestGraphicElement | undefined,
+    count: () => 1,
+    getItemModel: () => createTooltipModel({}),
+    getItemVisual: () => ({}),
+    setItemLayout(_dataIndex: number, layout: [number, number]) {
+      this.layout = layout;
+    },
+    setItemGraphicEl(_dataIndex: number, element: TestGraphicElement) {
+      this.graphicEl = element;
+    }
+  };
+}
+
+function createTooltipSeriesModel(data: ReturnType<typeof createTooltipSeriesData>) {
+  return {
+    seriesIndex: 2,
+    getData: () => data,
+    get(path: string) {
+      const values: Record<string, unknown> = {
+        animation: false,
+        enterAnimation: false,
+        large: false,
+        label: { show: true },
+        silent: false,
+        symbolSize: 12
+      };
+      return values[path];
+    },
+    getModel(path: string) {
+      if (path === 'label') return createTooltipModel({ show: true, formatter: '{c}' });
+      return createTooltipModel({});
+    }
+  };
+}
+
+function createTooltipModel(values: Record<string, unknown>) {
+  return {
+    get(path: string) {
+      return values[path];
+    },
+    getModel(path: string) {
+      return createTooltipModel(asRecord(values[path]));
+    }
+  };
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value != null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
