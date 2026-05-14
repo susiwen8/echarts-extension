@@ -1,4 +1,5 @@
 const HOVER_BASE_STYLE_KEY = '__echartsExtensionHoverBaseStyle';
+const HOVER_DIM_OPACITY_KEY = '__echartsExtensionHoverDimOpacity';
 const HOVER_ENTERING_KEY = '__echartsExtensionHoverEntering';
 
 export interface ElementHoverItem {
@@ -34,6 +35,7 @@ interface HoverAnimatableElement extends HoverGraphicElement {
 
 interface HoverStateElement extends HoverGraphicElement {
   [HOVER_BASE_STYLE_KEY]?: Record<string, unknown>;
+  [HOVER_DIM_OPACITY_KEY]?: number;
   [HOVER_ENTERING_KEY]?: boolean;
 }
 
@@ -141,6 +143,19 @@ export function setElementHoverBaseStyle(
   target[HOVER_BASE_STYLE_KEY] = cloneRecord(style);
 }
 
+export function setElementHoverDimOpacity(
+  element: HoverGraphicElement | null | undefined,
+  opacity: number | null | undefined
+): void {
+  if (!element || typeof element !== 'object') return;
+  const target = element as HoverStateElement;
+  if (typeof opacity !== 'number' || !Number.isFinite(opacity)) {
+    delete target[HOVER_DIM_OPACITY_KEY];
+    return;
+  }
+  target[HOVER_DIM_OPACITY_KEY] = Math.max(0, Math.min(1, opacity));
+}
+
 export function setElementHoverEntering(
   element: HoverGraphicElement | null | undefined,
   entering = true
@@ -160,7 +175,9 @@ function captureBaseStyles(
 ): void {
   items.forEach((item) => {
     item.elements.forEach((element) => {
-      if (!baseStyles.has(element)) baseStyles.set(element, cloneStyle(element));
+      if (!baseStyles.has(element) || hasExplicitHoverBaseStyle(element)) {
+        baseStyles.set(element, cloneStyle(element));
+      }
     });
   });
 }
@@ -182,7 +199,7 @@ function applyHoverItem(
         ? cloneRecord(baseStyle)
         : {
             ...baseStyle,
-            opacity: dimOpacity
+            opacity: resolveHoverDimOpacity(element, dimOpacity)
           };
       transitionStyle(element, nextStyle, ['opacity'], duration, easing);
     });
@@ -306,6 +323,14 @@ function cloneStyle(element: HoverGraphicElement): Record<string, unknown> {
   return cloneRecord(asRecord(target[HOVER_BASE_STYLE_KEY] ?? target.style));
 }
 
+function hasExplicitHoverBaseStyle(element: HoverGraphicElement): boolean {
+  return Object.prototype.hasOwnProperty.call(element, HOVER_BASE_STYLE_KEY);
+}
+
+function resolveHoverDimOpacity(element: HoverGraphicElement, fallback: number): number {
+  return finiteNumber((element as HoverStateElement)[HOVER_DIM_OPACITY_KEY], fallback);
+}
+
 function cloneRecord(record: Record<string, unknown>): Record<string, unknown> {
   return {
     ...record
@@ -330,5 +355,6 @@ export const __test__ = {
   cloneStyle,
   createTransitionTarget,
   removeMissingStyleKeys,
+  resolveHoverDimOpacity,
   resetHoverItems
 };

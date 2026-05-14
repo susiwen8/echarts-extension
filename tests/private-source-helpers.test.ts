@@ -1039,9 +1039,26 @@ test('direct renderer exports cover hierarchical fallback render branches', () =
     enterAnimation: false
   }, [{ name: 'A' }]);
   circlePackingRenderer.drawCirclePacking(host, group, circleSeries.model, {
+    root: {
+      id: 'root',
+      raw: {},
+      name: 'Root',
+      value: 1,
+      percent: 1,
+      depth: 0,
+      x: 50,
+      y: 40,
+      r: 20,
+      dataIndex: -1,
+      color: '',
+      parentId: null,
+      children: []
+    },
+    center: { x: 50, y: 40 },
+    radius: 20,
     nodes: [
-      { raw: {}, name: 'Zero', value: 0, percent: 0, depth: 0, x: 0, y: 0, r: 0, dataIndex: 0, color: '' },
-      { raw: {}, name: 'Loose', value: 1, percent: 1, depth: 1, x: 10, y: 10, r: 8, dataIndex: 99, color: '' }
+      { id: 'zero', raw: {}, name: 'Zero', value: 0, percent: 0, depth: 0, x: 0, y: 0, r: 0, dataIndex: 0, color: '', parentId: null, children: [] },
+      { id: 'loose', raw: {}, name: 'Loose', value: 1, percent: 1, depth: 1, x: 10, y: 10, r: 8, dataIndex: 99, color: '', parentId: null, children: [] }
     ]
   }, rect);
   assert.equal(circlePackingRenderer.drawLabels(host, group, circleSeries.model, circleSeries.data, [], new Map()), undefined);

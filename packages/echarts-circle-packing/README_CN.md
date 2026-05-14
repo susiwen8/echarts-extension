@@ -54,7 +54,7 @@ chart.setOption({
 - `center`, `radius`：圆堆积视口设置。
 - `rootName`, `rootVisible`：根节点行为。
 - `sort`：`value`, `name`, `asc`, `desc`, `none`, `true`, or `false`.
-- `colors`, `itemStyle`, `label`, `emphasis`, `enterAnimation`：展示样式。
+- `colors`, `itemStyle`, `label`, `emphasis`, `enterAnimation`, `focusAnimation`：展示样式与点击聚焦动画。
 
 ## 配置项
 
@@ -187,6 +187,11 @@ chart.setOption({
 | `enterAnimation.delay` | 动画开始前的延迟。 | `数字 \| 函数` |
 | `enterAnimation.stagger` | 图元之间增加的延迟。 | `数字 \| 函数` |
 | `enterAnimation.easing` | 动画缓动名称。 | `字符串` |
+| `focusAnimation` | 为点击聚焦缩放添加过渡动画。 | `布尔值 \| 对象` |
+| `focusAnimation.show` | 为 true 时显示聚焦动画。 | `布尔值` |
+| `focusAnimation.enabled` | 为 true 时启用聚焦动画。 | `布尔值` |
+| `focusAnimation.duration` | 聚焦动画时长。 | `数字` |
+| `focusAnimation.easing` | 聚焦动画缓动名称。 | `字符串` |
 | `itemStyle` | 设置circles样式。 | `对象` |
 | `itemStyle.color` | 主颜色。 | `字符串` |
 | `itemStyle.opacity` | 透明度。 | `数字` |

@@ -43,6 +43,13 @@ interface CirclePackingPadding {
   left?: number;
 }
 
+interface CirclePackingFocusAnimationOption {
+  show?: boolean;
+  enabled?: boolean;
+  duration?: number;
+  easing?: string;
+}
+
 declare module 'echarts/types/dist/echarts' {
   export interface CirclePackingSeriesOption {
     mainType?: 'series';
@@ -93,6 +100,7 @@ declare module 'echarts/types/dist/echarts' {
       stagger?: number;
       easing?: string;
     };
+    focusAnimation?: boolean | CirclePackingFocusAnimationOption;
     itemStyle?: {
       color?: string;
       opacity?: number;

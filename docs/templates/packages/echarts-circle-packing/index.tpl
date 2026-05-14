@@ -24,7 +24,7 @@
     <section class="demo-stage"><div class="chart-frame"><div id="chart"></div></div></section>
   </main>
   <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
-  <script src="../../../packages/echarts-circle-packing/dist/echarts-circle-packing.js"></script>
+  <script src="../../../packages/echarts-circle-packing/dist/echarts-circle-packing.js?v=focus-drilldown-1"></script>
   <script src="../../shared/demo-runner.js?v=circle-packing"></script>
 </body>
 </html>

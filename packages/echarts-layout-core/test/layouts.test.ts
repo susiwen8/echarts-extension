@@ -10,6 +10,7 @@ import {
   installGraphLayout,
   normalizeGraphData,
   setElementHoverBaseStyle,
+  setElementHoverDimOpacity,
   setElementHoverEntering
 } from '../src/index.ts';
 
@@ -151,6 +152,63 @@ test('keeps hover transitions away from elements that are still entering', () =>
   active.trigger('mouseout');
 
   assert.equal(entering.style.opacity, 0.82);
+});
+
+test('refreshes explicit hover base styles after an earlier hover capture', () => {
+  const host = createFakeEChartsHost();
+  const active = new host.graphic.Circle({
+    style: {
+      opacity: 1
+    }
+  });
+  const secondary = new host.graphic.Text({
+    style: {
+      text: 'Old',
+      fontSize: 12,
+      opacity: 1
+    }
+  });
+  const unrelated = new host.graphic.Circle({
+    style: {
+      opacity: 1
+    }
+  });
+
+  installElementHover([
+    {
+      elements: [active, secondary]
+    },
+    {
+      elements: [unrelated]
+    }
+  ], {
+    transitionDuration: 0,
+    zrender: host.zr
+  });
+
+  active.trigger('mouseover');
+  active.trigger('mouseout');
+
+  secondary.setStyle({
+    text: 'New',
+    fontSize: 4,
+    opacity: 1
+  });
+  setElementHoverBaseStyle(secondary, secondary.style);
+  setElementHoverDimOpacity(secondary, 0.42);
+  unrelated.trigger('mouseover');
+
+  assert.equal(secondary.style.text, 'New');
+  assert.equal(secondary.style.fontSize, 4);
+  assert.equal(secondary.style.opacity, 0.42);
+
+  setElementHoverDimOpacity(secondary, 2);
+  assert.equal(secondary.__echartsExtensionHoverDimOpacity, 1);
+  setElementHoverDimOpacity(secondary, -1);
+  assert.equal(secondary.__echartsExtensionHoverDimOpacity, 0);
+  setElementHoverDimOpacity(secondary, null);
+  assert.equal(secondary.__echartsExtensionHoverDimOpacity, undefined);
+  setElementHoverDimOpacity(null, 0.5);
 });
 
 test('can defer element hover while a chart-level gate is disabled', () => {

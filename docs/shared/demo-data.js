@@ -75,43 +75,182 @@
     packBubble: createPackBubbleData(),
     circlePacking: {
       name: 'Product Suite',
-      itemStyle: { color: '#e6eefb' },
+      itemStyle: { color: '#eef3f8' },
       children: [
         {
           name: 'Core Experience',
-          itemStyle: { color: '#7aa5e8' },
+          itemStyle: { color: '#8fcfd4' },
           children: [
-            { name: 'Editor', value: 38, itemStyle: { color: '#5f8fda' } },
-            { name: 'Search', value: 32, itemStyle: { color: '#4a7ed0' } },
-            { name: 'Sync', value: 22, itemStyle: { color: '#8db5ef' } },
-            { name: 'Files', value: 18, itemStyle: { color: '#b6cef5' } }
+            {
+              name: 'Creation',
+              itemStyle: { color: '#57b6bf' },
+              children: [
+                {
+                  name: 'Editor Surface',
+                  itemStyle: { color: '#2f9bab' },
+                  children: [
+                    { name: 'Blocks', value: 18, itemStyle: { color: '#6ec7d2' } },
+                    { name: 'Shortcuts', value: 12, itemStyle: { color: '#9edce2' } }
+                  ]
+                },
+                {
+                  name: 'Media Tools',
+                  itemStyle: { color: '#65beb0' },
+                  children: [
+                    { name: 'Images', value: 10, itemStyle: { color: '#8ed4ca' } },
+                    { name: 'Attachments', value: 8, itemStyle: { color: '#b5e4dc' } }
+                  ]
+                }
+              ]
+            },
+            {
+              name: 'Find & Organize',
+              itemStyle: { color: '#6db6d8' },
+              children: [
+                {
+                  name: 'Search',
+                  itemStyle: { color: '#3f9dcc' },
+                  children: [
+                    { name: 'Indexing', value: 14, itemStyle: { color: '#77c1e0' } },
+                    { name: 'Filters', value: 10, itemStyle: { color: '#a6d8eb' } }
+                  ]
+                },
+                {
+                  name: 'Library',
+                  itemStyle: { color: '#85c6df' },
+                  children: [
+                    { name: 'Folders', value: 9, itemStyle: { color: '#9ed5e7' } },
+                    { name: 'Pins', value: 7, itemStyle: { color: '#c4e7f1' } }
+                  ]
+                }
+              ]
+            }
           ]
         },
         {
           name: 'Growth',
-          itemStyle: { color: '#82c7a2' },
+          itemStyle: { color: '#aecb78' },
           children: [
-            { name: 'Campaigns', value: 30, itemStyle: { color: '#52ad79' } },
-            { name: 'Referrals', value: 20, itemStyle: { color: '#6fc590' } },
-            { name: 'Activation', value: 18, itemStyle: { color: '#a5dcb8' } }
+            {
+              name: 'Acquisition',
+              itemStyle: { color: '#84b65f' },
+              children: [
+                {
+                  name: 'Campaigns',
+                  itemStyle: { color: '#639f4f' },
+                  children: [
+                    { name: 'Lifecycle', value: 13, itemStyle: { color: '#8bc878' } },
+                    { name: 'Launches', value: 11, itemStyle: { color: '#b4d99e' } }
+                  ]
+                },
+                {
+                  name: 'Referrals',
+                  itemStyle: { color: '#94bf72' },
+                  children: [
+                    { name: 'Invites', value: 9, itemStyle: { color: '#abd38c' } },
+                    { name: 'Rewards', value: 7, itemStyle: { color: '#c9e3b2' } }
+                  ]
+                }
+              ]
+            },
+            {
+              name: 'Onboarding',
+              itemStyle: { color: '#c3d27d' },
+              children: [
+                {
+                  name: 'Activation',
+                  itemStyle: { color: '#aeba5f' },
+                  children: [
+                    { name: 'Checklist', value: 10, itemStyle: { color: '#cad77d' } },
+                    { name: 'Templates', value: 8, itemStyle: { color: '#dfe8a8' } }
+                  ]
+                }
+              ]
+            }
           ]
         },
         {
           name: 'Platform',
-          itemStyle: { color: '#dda55f' },
+          itemStyle: { color: '#efb86d' },
           children: [
-            { name: 'API', value: 28, itemStyle: { color: '#c98230' } },
-            { name: 'Billing', value: 18, itemStyle: { color: '#e3b16e' } },
-            { name: 'Auth', value: 16, itemStyle: { color: '#efc88f' } }
+            {
+              name: 'Developer Layer',
+              itemStyle: { color: '#d99148' },
+              children: [
+                {
+                  name: 'API',
+                  itemStyle: { color: '#bf7640' },
+                  children: [
+                    { name: 'REST', value: 12, itemStyle: { color: '#de9a5a' } },
+                    { name: 'Webhooks', value: 9, itemStyle: { color: '#edbb85' } }
+                  ]
+                },
+                {
+                  name: 'Auth',
+                  itemStyle: { color: '#c58b5d' },
+                  children: [
+                    { name: 'SSO', value: 8, itemStyle: { color: '#dfa97b' } },
+                    { name: 'Tokens', value: 7, itemStyle: { color: '#efcaa7' } }
+                  ]
+                }
+              ]
+            },
+            {
+              name: 'Commerce Layer',
+              itemStyle: { color: '#e9a95b' },
+              children: [
+                {
+                  name: 'Billing',
+                  itemStyle: { color: '#d89543' },
+                  children: [
+                    { name: 'Plans', value: 10, itemStyle: { color: '#efbf72' } },
+                    { name: 'Invoices', value: 8, itemStyle: { color: '#f5d8a8' } }
+                  ]
+                }
+              ]
+            }
           ]
         },
         {
           name: 'Insights',
-          itemStyle: { color: '#bc83cf' },
+          itemStyle: { color: '#c98fbd' },
           children: [
-            { name: 'Reports', value: 24, itemStyle: { color: '#a865bf' } },
-            { name: 'Forecasts', value: 15, itemStyle: { color: '#cd9cda' } },
-            { name: 'Exports', value: 12, itemStyle: { color: '#dec0e8' } }
+            {
+              name: 'Analytics',
+              itemStyle: { color: '#b575a9' },
+              children: [
+                {
+                  name: 'Reports',
+                  itemStyle: { color: '#9f5f95' },
+                  children: [
+                    { name: 'Dashboards', value: 12, itemStyle: { color: '#bf84b7' } },
+                    { name: 'Cohorts', value: 8, itemStyle: { color: '#d6afd1' } }
+                  ]
+                },
+                {
+                  name: 'Forecasts',
+                  itemStyle: { color: '#c184b7' },
+                  children: [
+                    { name: 'Trends', value: 7, itemStyle: { color: '#d19ac9' } },
+                    { name: 'Scenarios', value: 6, itemStyle: { color: '#e2bfdc' } }
+                  ]
+                }
+              ]
+            },
+            {
+              name: 'Distribution',
+              itemStyle: { color: '#d7a2c9' },
+              children: [
+                {
+                  name: 'Exports',
+                  itemStyle: { color: '#c88abc' },
+                  children: [
+                    { name: 'CSV', value: 6, itemStyle: { color: '#ddb3d5' } },
+                    { name: 'Warehouse', value: 6, itemStyle: { color: '#ecd4e6' } }
+                  ]
+                }
+              ]
+            }
           ]
         }
       ]

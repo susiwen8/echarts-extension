@@ -9,6 +9,7 @@ export { normalizeGraphData } from './data.js';
 export {
   installElementHover,
   setElementHoverBaseStyle,
+  setElementHoverDimOpacity,
   setElementHoverEntering
 } from './element-hover.js';
 export {

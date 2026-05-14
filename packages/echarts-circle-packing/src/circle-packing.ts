@@ -1,5 +1,11 @@
 import * as echarts from 'echarts/lib/echarts';
-import { clearAliveRender, installElementHover, renderAlive } from '@echarts-extension/layout-core';
+import {
+  clearAliveRender,
+  installElementHover,
+  renderAlive,
+  setElementHoverBaseStyle,
+  setElementHoverDimOpacity
+} from '@echarts-extension/layout-core';
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
 import {
@@ -48,12 +54,32 @@ interface CirclePackingSeriesModel extends EChartsModel {
 
 interface GraphicElement {
   [key: string]: unknown;
+  children?: () => GraphicElement[];
 }
 
 interface AnimatableGraphicElement extends GraphicElement {
   shape?: Record<string, unknown>;
   style?: Record<string, unknown>;
   animate?: (key: AnimationTargetKey, loop?: boolean) => GraphicAnimator | null | undefined;
+}
+
+interface FocusableGraphicElement extends AnimatableGraphicElement {
+  x?: number;
+  y?: number;
+  scaleX?: number;
+  scaleY?: number;
+  ignore?: boolean;
+  cursor?: unknown;
+  silent?: boolean;
+  attr?: (target: Record<string, unknown>) => void;
+  animateTo?: (
+    target: Record<string, unknown>,
+    config?: Record<string, unknown>,
+    animationProps?: Record<string, unknown>
+  ) => void;
+  stopAnimation?: (scope?: string, forwardToLast?: boolean) => void;
+  on?: (eventName: string, handler: (event?: unknown) => void) => void;
+  off?: (eventName: string, handler: (event?: unknown) => void) => void;
 }
 
 interface GraphicAnimator {
@@ -65,6 +91,8 @@ interface GraphicAnimator {
 interface GraphicGroup extends GraphicElement {
   x?: number;
   y?: number;
+  scaleX?: number;
+  scaleY?: number;
   add(element: GraphicElement): void;
   removeAll(): void;
 }
@@ -95,7 +123,9 @@ interface CirclePackingChartView {
   group: GraphicGroup;
   __renderToken?: object | null;
   __hoverController?: ElementHoverController;
+  __focusController?: CirclePackingFocusController;
   __aliveRenderState?: AliveRenderState;
+  __focusedNodeId?: string | null;
 }
 
 interface EnterAnimationConfig {
@@ -117,6 +147,49 @@ interface LabelBox {
   y: number;
   width: number;
   height: number;
+}
+
+interface CirclePackingRenderPayload {
+  chartGroup: GraphicGroup;
+  nodesById: Map<string, CirclePackingNode>;
+  focusElementsByNodeId: Map<string, GraphicElement[]>;
+  labelItems: CirclePackingLabelItem[];
+}
+
+interface CirclePackingFocusController {
+  dispose(): void;
+}
+
+interface CirclePackingFocusTransform extends Record<string, number> {
+  x: number;
+  y: number;
+  scaleX: number;
+  scaleY: number;
+}
+
+interface CirclePackingFocusOptions {
+  chartGroup: GraphicGroup;
+  nodesById: Map<string, CirclePackingNode>;
+  focusElementsByNodeId: Map<string, GraphicElement[]>;
+  labelItems: CirclePackingLabelItem[];
+  root: CirclePackingNode;
+  layout: CirclePackingLayoutResult;
+  rect: ViewRect;
+  seriesModel: CirclePackingSeriesModel;
+  getFocusedNodeId(): string | null;
+  setFocusedNodeId(nodeId: string | null): void;
+}
+
+const FOCUS_TRANSITION_SCOPE = 'circle-packing-focus';
+const LABEL_HOVER_DIM_OPACITY = 0.42;
+
+interface CirclePackingLabelItem {
+  element: GraphicElement;
+  node: CirclePackingNode;
+  text: string;
+  requestedFontSize: number;
+  requestedLineHeight: number;
+  minRadius: number;
 }
 
 const echartsHost = echarts as unknown as EChartsHost;
@@ -170,6 +243,10 @@ echartsHost.extendSeriesModel({
     sort: true,
     colors: DEFAULT_CIRCLE_PACKING_COLORS,
     enterAnimation: true,
+    focusAnimation: {
+      duration: 520,
+      easing: 'cubicOut'
+    },
     itemStyle: {
       opacity: 0.88,
       borderColor: '#ffffff',
@@ -202,6 +279,8 @@ echartsHost.extendChartView({
     this.__renderToken = renderToken;
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
+    this.__focusController?.dispose();
+    this.__focusController = undefined;
 
     try {
       const rect = echartsHost.helper.getLayoutRect(seriesModel.getBoxLayoutParams(), {
@@ -210,12 +289,40 @@ echartsHost.extendChartView({
       });
       const layout = resolveCirclePackingLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
-      const { hoverItems } = renderAlive(this, echartsHost, group, seriesModel, (targetGroup, targetSeriesModel) => (
-        drawCirclePacking(echartsHost, targetGroup, targetSeriesModel, layout, rect)
-      ));
+      const rendered = renderAlive<CirclePackingSeriesModel, CirclePackingRenderPayload>(
+        this,
+        echartsHost,
+        group,
+        seriesModel,
+        (targetGroup, targetSeriesModel) => drawCirclePacking(
+          echartsHost,
+          targetGroup,
+          targetSeriesModel,
+          layout,
+          rect,
+          this.__focusedNodeId ?? null
+        )
+      );
+      const { hoverItems, payload } = rendered;
       this.__hoverController = installElementHover(hoverItems, {
         zrender: api.getZr?.()
       });
+      if (payload) {
+        this.__focusController = installCirclePackingFocus({
+          chartGroup: rendered.mapElement(payload.chartGroup),
+          nodesById: payload.nodesById,
+          focusElementsByNodeId: mapCirclePackingNodeElements(payload.focusElementsByNodeId, rendered.mapElement),
+          labelItems: mapCirclePackingLabelItems(payload.labelItems, rendered.mapElement),
+          root: layout.root,
+          layout,
+          rect,
+          seriesModel,
+          getFocusedNodeId: () => this.__focusedNodeId ?? null,
+          setFocusedNodeId: (nodeId) => {
+            this.__focusedNodeId = nodeId;
+          }
+        });
+      }
     } catch (error) {
       console.error('[circlePacking] render failed', error);
     }
@@ -225,6 +332,9 @@ echartsHost.extendChartView({
     this.__renderToken = null;
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
+    this.__focusController?.dispose();
+    this.__focusController = undefined;
+    this.__focusedNodeId = null;
     clearAliveRender(this);
     this.group.removeAll();
   },
@@ -233,6 +343,9 @@ echartsHost.extendChartView({
     this.__renderToken = null;
     this.__hoverController?.dispose();
     this.__hoverController = undefined;
+    this.__focusController?.dispose();
+    this.__focusController = undefined;
+    this.__focusedNodeId = null;
     clearAliveRender(this);
     this.group.removeAll();
   }
@@ -275,15 +388,17 @@ function drawCirclePacking(
   group: GraphicGroup,
   seriesModel: CirclePackingSeriesModel,
   layout: CirclePackingLayoutResult,
-  rect: ViewRect
-): ElementHoverItem[] {
+  rect: ViewRect,
+  focusedNodeId: string | null = null
+): { hoverItems: ElementHoverItem[]; payload: CirclePackingRenderPayload } {
   const data = seriesModel.getData();
   const chartGroup = new echartsInstance.graphic.Group();
   const hoverItems: ElementHoverItem[] = [];
   const hoverItemsByDataIndex = new Map<number, ElementHoverItem>();
   const hoverItemsByNodeId = new Map<string, ElementHoverItem>();
-  chartGroup.x = rect.x;
-  chartGroup.y = rect.y;
+  const nodesById = createCirclePackingNodeMap(layout.root);
+  const focusElementsByNodeId = new Map<string, GraphicElement[]>();
+  const labelItems: CirclePackingLabelItem[] = [];
 
   layout.nodes.forEach((node, index) => {
     if (node.r <= 0) return;
@@ -306,15 +421,228 @@ function drawCirclePacking(
       hoverItems.push(hoverItem);
       hoverItemsByDataIndex.set(node.dataIndex, hoverItem);
       hoverItemsByNodeId.set(node.id, hoverItem);
+      appendCirclePackingFocusElement(focusElementsByNodeId, node.id, circleEl);
     }
 
     chartGroup.add(circleEl);
   });
 
-  drawLabels(echartsInstance, chartGroup, seriesModel, data, layout.nodes, hoverItemsByDataIndex);
+  drawLabels(
+    echartsInstance,
+    chartGroup,
+    seriesModel,
+    data,
+    layout.nodes,
+    hoverItemsByDataIndex,
+    focusElementsByNodeId,
+    labelItems
+  );
   includeDescendantsInHoverItems(layout.nodes, hoverItemsByNodeId);
+  const focusTransform = createCirclePackingFocusTransform(
+    resolveCurrentFocusTarget(focusedNodeId, nodesById, layout.root),
+    layout,
+    rect
+  );
+  assignCirclePackingFocusTransform(chartGroup, focusTransform);
+  updateCirclePackingFocusLabels(labelItems, focusTransform.scaleX, disabledEnterAnimation());
   group.add(chartGroup);
-  return hoverItems;
+  return {
+    hoverItems,
+    payload: {
+      chartGroup,
+      nodesById,
+      focusElementsByNodeId,
+      labelItems
+    }
+  };
+}
+
+function installCirclePackingFocus(options: CirclePackingFocusOptions): CirclePackingFocusController {
+  const disposers: Array<() => void> = [];
+
+  options.focusElementsByNodeId.forEach((elements, nodeId) => {
+    elements.forEach((element) => {
+      const evented = element as FocusableGraphicElement;
+      const handler = () => handleCirclePackingFocusClick(nodeId, options);
+      evented.cursor = 'pointer';
+      evented.silent = false;
+      evented.on?.('mousedown', handler);
+      disposers.push(() => evented.off?.('mousedown', handler));
+    });
+  });
+
+  return {
+    dispose() {
+      disposers.forEach((dispose) => dispose());
+    }
+  };
+}
+
+function handleCirclePackingFocusClick(nodeId: string, options: CirclePackingFocusOptions): void {
+  const focusedNodeId = options.getFocusedNodeId();
+  const clickedNode = options.nodesById.get(nodeId);
+  const focusTarget = resolveCirclePackingFocusTarget(clickedNode, options.nodesById, options.root);
+  const targetNode = focusedNodeId === focusTarget.id ? options.root : focusTarget;
+  const nextFocusedNodeId = targetNode.id === options.root.id ? null : targetNode.id;
+  const transform = createCirclePackingFocusTransform(targetNode, options.layout, options.rect);
+  const animation = readFocusAnimation(options.seriesModel);
+
+  options.setFocusedNodeId(nextFocusedNodeId);
+  updateCirclePackingFocusLabels(options.labelItems, transform.scaleX, animation);
+  applyCirclePackingFocus(options.chartGroup, transform, animation);
+}
+
+function createCirclePackingNodeMap(root: CirclePackingNode): Map<string, CirclePackingNode> {
+  const nodesById = new Map<string, CirclePackingNode>();
+  function visit(node: CirclePackingNode) {
+    nodesById.set(node.id, node);
+    node.children.forEach(visit);
+  }
+  visit(root);
+  return nodesById;
+}
+
+function mapCirclePackingNodeElements(
+  nodeElementsById: Map<string, GraphicElement | GraphicElement[]>,
+  mapElement: <TElement extends GraphicElement | null | undefined>(element: TElement) => TElement
+): Map<string, GraphicElement[]> {
+  const mapped = new Map<string, GraphicElement[]>();
+  nodeElementsById.forEach((elements, nodeId) => {
+    const mappedElements: GraphicElement[] = [];
+    const sourceElements = Array.isArray(elements) ? elements : [elements];
+    sourceElements.forEach((element) => {
+      const mappedElement = mapElement(element);
+      if (mappedElement && !mappedElements.includes(mappedElement)) mappedElements.push(mappedElement);
+    });
+    if (mappedElements.length) mapped.set(nodeId, mappedElements);
+  });
+  return mapped;
+}
+
+function mapCirclePackingLabelItems(
+  labelItems: CirclePackingLabelItem[],
+  mapElement: <TElement extends GraphicElement | null | undefined>(element: TElement) => TElement
+): CirclePackingLabelItem[] {
+  const mappedItems: CirclePackingLabelItem[] = [];
+  labelItems.forEach((item) => {
+    const mappedElement = mapElement(item.element);
+    if (mappedElement) mappedItems.push({ ...item, element: mappedElement });
+  });
+  return mappedItems;
+}
+
+function appendCirclePackingFocusElement(
+  elementsByNodeId: Map<string, GraphicElement[]>,
+  nodeId: string,
+  element: GraphicElement
+): void {
+  const elements = elementsByNodeId.get(nodeId) || [];
+  collectCirclePackingFocusElements(element).forEach((focusElement) => {
+    if (!elements.includes(focusElement)) elements.push(focusElement);
+  });
+  elementsByNodeId.set(nodeId, elements);
+}
+
+function collectCirclePackingFocusElements(element: GraphicElement): GraphicElement[] {
+  return [
+    element,
+    ...(element.children?.() || []).flatMap((child) => collectCirclePackingFocusElements(child))
+  ];
+}
+
+function resolveCurrentFocusTarget(
+  focusedNodeId: string | null,
+  nodesById: Map<string, CirclePackingNode>,
+  root: CirclePackingNode
+): CirclePackingNode {
+  return focusedNodeId ? nodesById.get(focusedNodeId) || root : root;
+}
+
+function resolveCirclePackingFocusTarget(
+  clickedNode: CirclePackingNode | undefined,
+  nodesById: Map<string, CirclePackingNode>,
+  root: CirclePackingNode
+): CirclePackingNode {
+  if (!clickedNode) return root;
+  if (clickedNode.children.length) return clickedNode;
+  if (!clickedNode.parentId) return root;
+  const parent = nodesById.get(clickedNode.parentId);
+  return parent || root;
+}
+
+function createCirclePackingFocusTransform(
+  targetNode: CirclePackingNode,
+  layout: CirclePackingLayoutResult,
+  rect: ViewRect
+): CirclePackingFocusTransform {
+  const scale = targetNode.r > 0 ? layout.radius / targetNode.r : 1;
+  return {
+    x: rect.x + layout.center.x - targetNode.x * scale,
+    y: rect.y + layout.center.y - targetNode.y * scale,
+    scaleX: scale,
+    scaleY: scale
+  };
+}
+
+function readFocusAnimation(
+  seriesModel: CirclePackingSeriesModel,
+  animationOption = seriesModel.get('focusAnimation')
+): EnterAnimationConfig {
+  if (seriesModel.get('animation') === false || animationOption === false) return disabledEnterAnimation();
+
+  const option = animationOption == null || animationOption === true ? {} : asRecord(animationOption);
+  if (option.show === false || option.enabled === false) return disabledEnterAnimation();
+
+  return {
+    enabled: true,
+    duration: Math.max(0, resolveAnimationNumber(
+      option.duration ?? seriesModel.get('animationDurationUpdate') ?? seriesModel.get('animationDuration'),
+      {},
+      0,
+      520
+    )),
+    delay: 0,
+    easing: resolveAnimationEasing(
+      option.easing ?? seriesModel.get('animationEasingUpdate') ?? seriesModel.get('animationEasing')
+    )
+  };
+}
+
+function applyCirclePackingFocus(
+  group: GraphicGroup,
+  transform: CirclePackingFocusTransform,
+  animation: EnterAnimationConfig
+): void {
+  const target = group as FocusableGraphicElement;
+  if (!animation.enabled || animation.duration <= 0 || typeof target.animateTo !== 'function') {
+    assignCirclePackingFocusTransform(group, transform);
+    return;
+  }
+
+  target.stopAnimation?.(FOCUS_TRANSITION_SCOPE, false);
+  target.animateTo(transform, {
+    duration: animation.duration,
+    easing: animation.easing,
+    scope: FOCUS_TRANSITION_SCOPE,
+    done: () => assignCirclePackingFocusTransform(group, transform)
+  }, {
+    x: true,
+    y: true,
+    scaleX: true,
+    scaleY: true
+  });
+}
+
+function assignCirclePackingFocusTransform(
+  group: GraphicGroup,
+  transform: CirclePackingFocusTransform
+): void {
+  const target = group as FocusableGraphicElement;
+  if (typeof target.attr === 'function') {
+    target.attr(transform);
+    return;
+  }
+  Object.assign(target, transform);
 }
 
 function drawLabels(
@@ -323,7 +651,9 @@ function drawLabels(
   seriesModel: CirclePackingSeriesModel,
   data: SeriesData,
   nodes: CirclePackingNode[],
-  hoverItemsByDataIndex: Map<number, ElementHoverItem>
+  hoverItemsByDataIndex: Map<number, ElementHoverItem>,
+  focusElementsByNodeId: Map<string, GraphicElement[]> = new Map(),
+  labelItems: CirclePackingLabelItem[] = []
 ): void {
   const seriesLabelModel = seriesModel.getModel('label');
   if (!seriesLabelModel.get('show')) return;
@@ -333,21 +663,21 @@ function drawLabels(
     const itemLabelModel = itemModel?.getModel('label');
     const show = itemLabelModel?.get('show') ?? seriesLabelModel.get('show');
     const minRadius = finiteNumber(itemLabelModel?.get('minRadius') ?? seriesLabelModel.get('minRadius'), 18);
-    if (!show || node.r < minRadius) return;
+    if (!show) return;
 
     const requestedFontSize = finiteNumber(itemLabelModel?.get('fontSize') ?? seriesLabelModel.get('fontSize'), 12);
-    const fontSize = Math.min(requestedFontSize, Math.max(8, node.r * 0.32));
-    const lineHeight = finiteNumber(itemLabelModel?.get('lineHeight') ?? seriesLabelModel.get('lineHeight'), fontSize + 2);
-    const text = formatLabel(itemLabelModel?.get('formatter') || seriesLabelModel.get('formatter'), node);
-    const wrappedText = wrapText(String(text), node.r * 1.5, fontSize, node.r);
-    const position = resolveLabelPosition(node, wrappedText, fontSize, lineHeight);
+    const lineHeight = finiteNumber(
+      itemLabelModel?.get('lineHeight') ?? seriesLabelModel.get('lineHeight'),
+      requestedFontSize + 2
+    );
+    const text = String(formatLabel(itemLabelModel?.get('formatter') || seriesLabelModel.get('formatter'), node));
     const textEl = new echartsInstance.graphic.Text({
       style: {
-        x: position.x,
-        y: position.y,
-        text: wrappedText,
+        x: node.x,
+        y: node.y,
+        text,
         fill: itemLabelModel?.get('color') || seriesLabelModel.get('color') || '#101828',
-        fontSize,
+        fontSize: requestedFontSize,
         fontWeight: itemLabelModel?.get('fontWeight') || seriesLabelModel.get('fontWeight') || 650,
         lineHeight,
         align: 'center',
@@ -356,9 +686,123 @@ function drawLabels(
       silent: true
     });
     applyFadeEnterAnimation(textEl, readEnterAnimation(seriesModel, node.dataIndex));
+    setElementHoverDimOpacity(textEl, LABEL_HOVER_DIM_OPACITY);
     addHoverElement(hoverItemsByDataIndex.get(node.dataIndex), textEl);
     group.add(textEl);
+    appendCirclePackingFocusElement(focusElementsByNodeId, node.id, textEl);
+    labelItems.push({
+      element: textEl,
+      node,
+      text,
+      requestedFontSize,
+      requestedLineHeight: lineHeight,
+      minRadius
+    });
   });
+}
+
+function updateCirclePackingFocusLabels(
+  labelItems: CirclePackingLabelItem[],
+  focusScale: number,
+  animation: EnterAnimationConfig
+): void {
+  const scale = Math.max(0.001, finiteNumber(focusScale, 1));
+  labelItems.forEach((item) => {
+    assignCirclePackingLabelState(item.element, createCirclePackingFocusLabelState(item, scale), animation);
+  });
+}
+
+function createCirclePackingFocusLabelState(
+  item: CirclePackingLabelItem,
+  focusScale: number
+): { ignore: boolean; style: Record<string, unknown> } {
+  const visibleRadius = item.node.r * focusScale;
+  const visualFontSize = Math.min(item.requestedFontSize, Math.max(8, visibleRadius * 0.32));
+  const fontSize = visualFontSize / focusScale;
+  const lineHeight = item.requestedLineHeight / focusScale;
+  const wrappedText = wrapText(item.text, item.node.r * 1.5, fontSize, item.node.r);
+  const position = resolveLabelPosition(item.node, wrappedText, fontSize, lineHeight);
+
+  return {
+    ignore: visibleRadius < item.minRadius,
+    style: {
+      x: position.x,
+      y: position.y,
+      text: wrappedText,
+      fontSize,
+      lineHeight
+    }
+  };
+}
+
+function assignCirclePackingLabelState(
+  element: GraphicElement,
+  state: { ignore: boolean; style: Record<string, unknown> },
+  animation: EnterAnimationConfig
+): void {
+  const target = element as FocusableGraphicElement;
+  const nextStyle = createCirclePackingLabelStyle(target.style, state.style);
+  if (!animation.enabled || animation.duration <= 0 || typeof target.animateTo !== 'function') {
+    applyCirclePackingLabelState(target, state.ignore, nextStyle);
+    return;
+  }
+
+  if (state.ignore) {
+    applyCirclePackingLabelState(target, true, nextStyle);
+    return;
+  }
+
+  applyCirclePackingLabelState(target, false, {
+    ...createCirclePackingLabelStyle(target.style, {}),
+    text: state.style.text
+  });
+  target.stopAnimation?.(FOCUS_TRANSITION_SCOPE, false);
+  target.animateTo({
+    style: nextStyle
+  }, {
+    duration: animation.duration,
+    easing: animation.easing,
+    scope: FOCUS_TRANSITION_SCOPE,
+    done: () => applyCirclePackingLabelState(target, false, nextStyle)
+  });
+}
+
+function applyCirclePackingLabelState(
+  target: FocusableGraphicElement,
+  ignore: boolean,
+  style: Record<string, unknown>
+): void {
+  setElementHoverBaseStyle(target, createCirclePackingLabelHoverBaseStyle(style));
+  if (typeof target.attr === 'function') {
+    target.attr({
+      ignore,
+      style
+    });
+    return;
+  }
+
+  target.ignore = ignore;
+  target.style = style;
+}
+
+function createCirclePackingLabelStyle(
+  currentStyle: unknown,
+  nextStyle: Record<string, unknown>
+): Record<string, unknown> {
+  const style = {
+    ...asRecord(currentStyle),
+    ...nextStyle
+  };
+  delete style.opacity;
+  return style;
+}
+
+function createCirclePackingLabelHoverBaseStyle(style: Record<string, unknown>): Record<string, unknown> {
+  const baseStyle = {
+    ...style
+  };
+  delete baseStyle.opacity;
+  return baseStyle;
 }
 
 function readNodeStyle(
@@ -784,10 +1228,31 @@ export const __test__ = {
   readInitialDataOptions,
   readLayoutOption,
   drawCirclePacking,
+  installCirclePackingFocus,
+  handleCirclePackingFocusClick,
+  createCirclePackingNodeMap,
+  mapCirclePackingNodeElements,
+  mapCirclePackingLabelItems,
+  appendCirclePackingFocusElement,
+  collectCirclePackingFocusElements,
+  resolveCurrentFocusTarget,
+  resolveCirclePackingFocusTarget,
+  createCirclePackingFocusTransform,
+  readFocusAnimation,
+  applyCirclePackingFocus,
+  assignCirclePackingFocusTransform,
   drawLabels,
+  updateCirclePackingFocusLabels,
+  createCirclePackingFocusLabelState,
+  assignCirclePackingLabelState,
+  applyCirclePackingLabelState,
+  createCirclePackingLabelStyle,
+  createCirclePackingLabelHoverBaseStyle,
   readNodeStyle,
   formatLabel,
   wrapText,
+  resolveLabelPosition,
+  dedupeLabelCandidates,
   createLegendVisualProvider,
   collectDataNames,
   readRawItemStyle,
