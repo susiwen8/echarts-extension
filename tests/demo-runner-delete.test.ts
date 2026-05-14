@@ -65,6 +65,26 @@ test('fisheye example exposes form controls and scatter data options', () => {
   assert.ok(option.series[0].data[0].symbolSize > 0);
 });
 
+test('arc example exposes a horizontal and vertical layout switch', () => {
+  const namespace = loadDemoNamespace();
+  const entry = namespace.registry.arc;
+  assert.ok(entry);
+
+  const controlIds = entry.controls.map((control) => control.id);
+  assert.ok(controlIds.includes('layoutOrient'));
+
+  const data = namespace.cloneExampleData(namespace.data);
+  const state = namespace.createControlState(entry.controls);
+  assert.equal(state.layoutOrient, 'vertical');
+
+  let option = namespace.createDemoOption('arc', data, state);
+  assert.equal(option.series[0].layout.orient, 'vertical');
+
+  state.layoutOrient = 'horizontal';
+  option = namespace.createDemoOption('arc', data, state);
+  assert.equal(option.series[0].layout.orient, 'horizontal');
+});
+
 test('shared examples can delete an existing data item before add-data', () => {
   const namespace = loadDemoNamespace();
   const missingDelete = [];

@@ -171,6 +171,13 @@ test('layout core covers defensive graph normalization and graph layout branches
     x: 0,
     y: 0
   });
+  assert.deepEqual(computeArcLayout({
+    nodes: [{ id: 'a' }, { id: 'b' }],
+    edges: []
+  }, { width: 120, height: 80, orient: 'horizontal' }).nodes.map((node) => [node.x, node.y]), [
+    [40, 40],
+    [80, 40]
+  ]);
   assert.equal(pathToString(createArcPath([0, 0], [10, 0])), 'M 0 0 A 5 5 0 0 1 10 0');
   assert.equal(pathToString(createArcPath([10, 0], [0, 0])), 'M 10 0 A 5 5 0 0 0 0 0');
   assert.equal(pathToString(createArcPath([0, 0], [0, 10])), 'M 0 0 A 5 5 0 0 1 0 10');

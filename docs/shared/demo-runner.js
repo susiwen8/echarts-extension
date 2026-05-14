@@ -315,6 +315,7 @@
     },
     arc: {
       controls: graphControls('Arc', [
+        selectControl('layoutOrient', 'Orientation', 'series.0.layout.orient', 'vertical', ['vertical', 'horizontal']),
         rangeControl('layoutNodeSep', 'Node separation', 'series.0.layout.nodeSep', 34, 12, 120, 2),
         rangeControl('edgeDuration', 'Edge duration', 'series.0.edgeAnimation.duration', 720, 120, 1800, 20),
         rangeControl('edgeStagger', 'Edge stagger', 'series.0.edgeAnimation.stagger', 80, 0, 220, 5),
@@ -329,6 +330,7 @@
           color: '#374151'
         },
         layout: {
+          orient: 'vertical',
           nodeSep: 34
         },
         fisheye: {
