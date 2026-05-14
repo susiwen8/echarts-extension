@@ -77,6 +77,11 @@ declare module 'echarts/types/dist/echarts' {
       lineHeight?: number;
       formatter?: string | ((params: MosaicLabelParams) => unknown);
     };
+    tooltip?: {
+      trigger?: 'item';
+      formatter?: string | ((params: unknown) => unknown);
+      valueFormatter?: (value: unknown) => string;
+    };
     emphasis?: {
       itemStyle?: {
         shadowBlur?: number;

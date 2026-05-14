@@ -2,10 +2,18 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
+import * as echarts from 'echarts/lib/echarts';
+import { getECData } from 'echarts/lib/util/innerStore.js';
+import { SVGRenderer } from 'echarts/renderers';
+
 import {
   layoutMosaic,
   resolveMosaicLayout
 } from '../src/layout.ts';
+import { __test__ as mosaicRenderer } from '../src/mosaic.ts';
+import '../index.ts';
+
+echarts.use([SVGRenderer]);
 
 const sampleData = [
   { category: 'North', segment: 'A', value: 30 },
@@ -123,3 +131,141 @@ test('drops non-positive values without breaking the viewport', () => {
     assert.ok(Number.isFinite(tile.height));
   });
 });
+
+test('binds mosaic labels to tooltip data and formats tooltip content', () => {
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 500,
+    height: 300
+  });
+
+  chart.setOption({
+    animation: false,
+    series: [{
+      type: 'mosaic',
+      xField: 'category',
+      yField: 'segment',
+      valueField: 'value',
+      data: sampleData,
+      label: {
+        show: true
+      },
+      tooltip: {
+        trigger: 'item'
+      }
+    }]
+  });
+
+  const elements = collectMosaicElements(chart);
+  const northALabel = elements.labels.find((label) => label.style.text === 'North / A');
+  const seriesModel = chart.getModel().getSeriesByIndex(0);
+
+  assert.ok(northALabel, 'North / A label should render');
+  assert.equal(getECData(northALabel).dataIndex, 0);
+
+  const tooltip = seriesModel.formatTooltip(0);
+  assert.equal(tooltip.header, 'North / A');
+  assert.deepEqual(
+    tooltip.blocks.map((block) => [block.name, block.value]),
+    [
+      ['value', 30],
+      ['Overall', '30%'],
+      ['Within North', '75%']
+    ]
+  );
+
+  chart.dispose();
+});
+
+test('formats mosaic tooltip fallback cases without visible cells', () => {
+  const emptyChart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 320,
+    height: 220
+  });
+
+  emptyChart.setOption({
+    animation: false,
+    series: [{
+      type: 'mosaic',
+      data: []
+    }]
+  });
+
+  const emptyTooltip = emptyChart.getModel().getSeriesByIndex(0).formatTooltip(2);
+  assert.equal(emptyTooltip.header, 'Item 3');
+  assert.deepEqual(emptyTooltip.blocks, []);
+  emptyChart.dispose();
+
+  const sparseChart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 320,
+    height: 220
+  });
+
+  sparseChart.setOption({
+    animation: false,
+    series: [{
+      type: 'mosaic',
+      dimensions: ['category', 'segment', 'users'],
+      xField: 'category',
+      yField: 'segment',
+      valueField: 2,
+      data: [
+        ['Skipped', 'Zero', 0],
+        ['Kept', 'One', 1],
+        ['Kept', 'Two', 2]
+      ]
+    }]
+  });
+
+  const fallbackTooltip = sparseChart.getModel().getSeriesByIndex(0).formatTooltip(0);
+  assert.equal(fallbackTooltip.header, 'Kept / One');
+  assert.deepEqual(
+    fallbackTooltip.blocks.map((block) => [block.name, block.value]),
+    [
+      ['value', 1],
+      ['Overall', '33.3%'],
+      ['Within Kept', '33.3%']
+    ]
+  );
+
+  sparseChart.dispose();
+});
+
+test('normalizes tooltip layout options when series option is absent', () => {
+  const option = mosaicRenderer.readTooltipLayoutOption({
+    get(key) {
+      if (key === 'padding') return 8;
+      return null;
+    }
+  });
+
+  assert.deepEqual(option.data, []);
+  assert.deepEqual(option.layoutOptions, {});
+  assert.equal(option.padding, 8);
+});
+
+function collectMosaicElements(chart) {
+  const view = chart._chartsViews.find((chartView) => chartView.type === 'mosaic');
+  const rects = [];
+  const labels = [];
+
+  visitElement(view.group, (element) => {
+    if (element.type === 'rect') rects.push(element);
+    if (element.type === 'text') labels.push(element);
+  });
+
+  return {
+    rects,
+    labels
+  };
+}
+
+function visitElement(element, visitor) {
+  visitor(element);
+  element.childrenRef?.().forEach((child) => visitElement(child, visitor));
+}

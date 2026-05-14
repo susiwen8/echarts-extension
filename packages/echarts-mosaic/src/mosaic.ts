@@ -24,6 +24,7 @@ interface EChartsModel {
 }
 
 interface SeriesData {
+  dataType?: unknown;
   initData(source: unknown[]): void;
   count(): number;
   getName(index: number): string;
@@ -36,6 +37,7 @@ interface SeriesData {
 
 interface MosaicSeriesModel extends EChartsModel {
   option?: MosaicLayoutOption;
+  seriesIndex?: number;
   legendVisualProvider?: unknown;
   getBoxLayoutParams(): unknown;
   getData(): SeriesData;
@@ -76,6 +78,12 @@ interface EChartsHost {
   extendChartView(option: Record<string, unknown>): void;
   helper: {
     createDimensions(source: unknown[], options: Record<string, unknown>): unknown;
+    getECData(element: GraphicElement): {
+      dataIndex?: number;
+      dataType?: unknown;
+      seriesIndex?: number;
+      ssrType?: string;
+    };
     getLayoutRect(params: unknown, container: { width: number; height: number }): ViewRect;
   };
   List: new (dimensions: unknown, host: MosaicSeriesModel) => SeriesData;
@@ -99,6 +107,23 @@ interface EnterAnimationConfig {
   duration: number;
   delay: number;
   easing: string;
+}
+
+interface TooltipMarkupNameValue {
+  type: 'nameValue';
+  markerType: 'subItem';
+  markerColor: string;
+  name: string;
+  value: unknown;
+  dataIndex: number;
+}
+
+interface TooltipMarkupSection {
+  type: 'section';
+  header: string;
+  noHeader: false;
+  sortBlocks: false;
+  blocks: TooltipMarkupNameValue[];
 }
 
 type AnimationTargetKey = 'shape' | 'style';
@@ -134,6 +159,10 @@ echartsHost.extendSeriesModel({
     return list;
   },
 
+  formatTooltip(this: MosaicSeriesModel, dataIndex: number) {
+    return formatMosaicTooltip(this, dataIndex);
+  },
+
   defaultOption: {
     left: 'center',
     top: 'center',
@@ -161,6 +190,9 @@ echartsHost.extendSeriesModel({
       fontWeight: 600,
       lineHeight: null,
       formatter: null
+    },
+    tooltip: {
+      trigger: 'item'
     },
     emphasis: {
       itemStyle: {
@@ -264,6 +296,7 @@ function drawMosaic(
     if (itemModel && tile.dataIndex >= 0 && tile.dataIndex < data.count()) {
       data.setItemLayout(tile.dataIndex, [tile.x, tile.y, tile.width, tile.height]);
       data.setItemGraphicEl(tile.dataIndex, rectEl);
+      bindTooltipData(echartsInstance, seriesModel, data, tile.dataIndex, rectEl);
       const hoverItem = createHoverItem(rectEl);
       hoverItems.push(hoverItem);
       hoverItemsByDataIndex.set(tile.dataIndex, hoverItem);
@@ -316,7 +349,9 @@ function drawLabels(
       },
       silent: true
     });
+    bindTooltipData(echartsInstance, seriesModel, data, tile.dataIndex, labelEl);
     applyFadeEnterAnimation(labelEl, readEnterAnimation(seriesModel, tile.dataIndex));
+    labelEl.silent = false;
     addHoverElement(hoverItemsByDataIndex.get(tile.dataIndex), labelEl);
     group.add(labelEl);
   });
@@ -366,6 +401,96 @@ function formatLabel(formatter: unknown, tile: MosaicTile): unknown {
       .replace(/\{y\}/g, tile.yCategory);
   }
   return tile.name;
+}
+
+function bindTooltipData(
+  echartsInstance: EChartsHost,
+  seriesModel: MosaicSeriesModel,
+  data: SeriesData,
+  dataIndex: number,
+  element: GraphicElement
+): void {
+  const ecData = echartsInstance.helper.getECData(element);
+  ecData.dataIndex = dataIndex;
+  ecData.dataType = data.dataType;
+  ecData.seriesIndex = seriesModel.seriesIndex;
+  ecData.ssrType = 'chart';
+}
+
+function formatMosaicTooltip(seriesModel: MosaicSeriesModel, dataIndex: number): TooltipMarkupSection {
+  const tile = findTooltipTile(seriesModel, dataIndex);
+  const valueName = tooltipValueName(seriesModel);
+  const markerColor = tile?.color || DEFAULT_MOSAIC_COLORS[dataIndex % DEFAULT_MOSAIC_COLORS.length];
+  const header = tile?.name || fallbackTooltipHeader(seriesModel, dataIndex);
+
+  if (!tile) {
+    return {
+      type: 'section',
+      header,
+      noHeader: false,
+      sortBlocks: false,
+      blocks: []
+    };
+  }
+
+  return {
+    type: 'section',
+    header,
+    noHeader: false,
+    sortBlocks: false,
+    blocks: [
+      createTooltipBlock(valueName, tile.value, markerColor, dataIndex),
+      createTooltipBlock('Overall', formatPercent(tile.percent), markerColor, dataIndex),
+      createTooltipBlock(`Within ${tile.xCategory}`, formatPercent(tile.columnPercent), markerColor, dataIndex)
+    ]
+  };
+}
+
+function findTooltipTile(seriesModel: MosaicSeriesModel, dataIndex: number): MosaicTile | undefined {
+  const layout = resolveMosaicLayout(readTooltipLayoutOption(seriesModel));
+  return layout.tiles.find((tile) => tile.dataIndex === dataIndex) || layout.tiles[dataIndex];
+}
+
+function readTooltipLayoutOption(seriesModel: MosaicSeriesModel): MosaicLayoutOption {
+  const option = seriesModel.option || {};
+  const layoutOption: MosaicLayoutOption = {
+    data: Array.isArray(option.data) ? option.data : [],
+    layout: seriesModel.get('layout'),
+    layoutOptions: seriesModel.get('layoutOptions') || {}
+  };
+
+  optionKeys.forEach((key) => {
+    const value = seriesModel.get(key);
+    if (value !== undefined && value !== null) layoutOption[key as string] = value;
+  });
+
+  return layoutOption;
+}
+
+function createTooltipBlock(name: string, value: unknown, markerColor: string, dataIndex: number): TooltipMarkupNameValue {
+  return {
+    type: 'nameValue',
+    markerType: 'subItem',
+    markerColor,
+    name,
+    value,
+    dataIndex
+  };
+}
+
+function tooltipValueName(seriesModel: MosaicSeriesModel): string {
+  const valueField = seriesModel.get('valueField');
+  return typeof valueField === 'string' && valueField ? valueField : 'value';
+}
+
+function fallbackTooltipHeader(seriesModel: MosaicSeriesModel, dataIndex: number): string {
+  return seriesModel.getData().getName(dataIndex) || `Item ${dataIndex + 1}`;
+}
+
+function formatPercent(value: number): string {
+  const percent = value * 100;
+  const rounded = Math.round(percent * 10) / 10;
+  return `${Number.isInteger(rounded) ? Math.round(rounded) : rounded}%`;
 }
 
 function wrapText(value: string, maxChars: number, maxLines: number): string {
@@ -556,6 +681,14 @@ export const __test__ = {
   drawLabels,
   readTileStyle,
   formatLabel,
+  bindTooltipData,
+  formatMosaicTooltip,
+  findTooltipTile,
+  readTooltipLayoutOption,
+  createTooltipBlock,
+  tooltipValueName,
+  fallbackTooltipHeader,
+  formatPercent,
   wrapText,
   trimLines,
   createLegendVisualProvider,
