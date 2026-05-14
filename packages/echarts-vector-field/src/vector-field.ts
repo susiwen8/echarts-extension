@@ -2,7 +2,7 @@ import * as echarts from 'echarts/lib/echarts';
 import { clearAliveRender, installElementHover, renderAlive } from '@echarts-extension/layout-core';
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
-import { resolveVectorFieldLayout } from './layout.js';
+import { normalizeVectorFieldData, resolveVectorFieldLayout } from './layout.js';
 import type { VectorFieldLayoutItem, VectorFieldLayoutOption, VectorFieldLayoutResult } from './layout.js';
 
 interface ViewRect {
@@ -28,6 +28,7 @@ interface SeriesData {
   count(): number;
   getItemModel(index: number): EChartsModel;
   getItemVisual(dataIndex: number, key: string): unknown;
+  getItemLayout?(dataIndex: number): unknown;
   setItemLayout(dataIndex: number, layout: [number, number]): void;
   setItemGraphicEl(dataIndex: number, element: GraphicElement): void;
 }
@@ -98,6 +99,24 @@ interface EnterAnimationConfig {
   easing: string;
 }
 
+interface TooltipMarkupNameValue {
+  type: 'nameValue';
+  markerType: 'subItem';
+  markerColor: string;
+  name: string;
+  value: unknown;
+  noValue: boolean;
+  dataIndex: number;
+}
+
+interface TooltipMarkupSection {
+  type: 'section';
+  header: unknown;
+  noHeader: boolean;
+  sortBlocks: boolean;
+  blocks: TooltipMarkupNameValue[];
+}
+
 const echartsHost = echarts as unknown as EChartsHost;
 const optionKeys = [
   'padding',
@@ -130,6 +149,15 @@ echartsHost.extendSeriesModel({
     const list = new echartsHost.List(dimensions, this);
     list.initData(source);
     return list;
+  },
+
+  getTooltipPosition(this: VectorFieldSeriesModel, dataIndex: number) {
+    const layout = this.getData().getItemLayout?.(dataIndex);
+    return Array.isArray(layout) ? layout : undefined;
+  },
+
+  formatTooltip(this: VectorFieldSeriesModel, dataIndex: number) {
+    return formatVectorFieldTooltip(this, dataIndex);
   },
 
   defaultOption: {
@@ -385,6 +413,106 @@ function enableHover(element: GraphicElement, itemModel: EChartsModel): void {
   );
 }
 
+function formatVectorFieldTooltip(seriesModel: VectorFieldSeriesModel, dataIndex: number): TooltipMarkupSection {
+  const option = seriesModel.option || {};
+  const source = Array.isArray(option.data) ? option.data : [];
+  const raw = source[dataIndex];
+  const point = normalizeVectorFieldData([raw], readTooltipFieldOptions(seriesModel))[0];
+  const markerColor = readTooltipMarkerColor(seriesModel, dataIndex);
+  const header = point ? `${formatTooltipNumber(point.x)}, ${formatTooltipNumber(point.y)}` : fallbackTooltipHeader(seriesModel, dataIndex);
+
+  return {
+    type: 'section',
+    header,
+    noHeader: false,
+    sortBlocks: false,
+    blocks: point
+      ? [
+          createTooltipBlock(readTooltipFieldName(seriesModel, 'xField', 'longitude'), point.x, markerColor, dataIndex),
+          createTooltipBlock(readTooltipFieldName(seriesModel, 'yField', 'latitude'), point.y, markerColor, dataIndex),
+          createTooltipBlock(readTooltipFieldName(seriesModel, 'uField', 'u'), point.u, markerColor, dataIndex),
+          createTooltipBlock(readTooltipFieldName(seriesModel, 'vField', 'v'), point.v, markerColor, dataIndex),
+          createTooltipBlock('speed', roundTooltipNumber(point.magnitude), markerColor, dataIndex)
+        ]
+      : []
+  };
+}
+
+function readTooltipFieldOptions(seriesModel: VectorFieldSeriesModel): VectorFieldLayoutOption {
+  return {
+    xField: readTooltipFieldName(seriesModel, 'xField', 'longitude'),
+    yField: readTooltipFieldName(seriesModel, 'yField', 'latitude'),
+    uField: readTooltipFieldName(seriesModel, 'uField', 'u'),
+    vField: readTooltipFieldName(seriesModel, 'vField', 'v')
+  };
+}
+
+function createTooltipBlock(
+  name: string,
+  value: unknown,
+  markerColor: string,
+  dataIndex: number
+): TooltipMarkupNameValue {
+  return {
+    type: 'nameValue',
+    markerType: 'subItem',
+    markerColor,
+    name,
+    value,
+    noValue: isEmptyTooltipValue(value),
+    dataIndex
+  };
+}
+
+function readTooltipMarkerColor(seriesModel: VectorFieldSeriesModel, dataIndex: number): string {
+  const data = seriesModel.getData();
+  const itemModel = dataIndex >= 0 && dataIndex < data.count() ? data.getItemModel(dataIndex) : null;
+  const normal = asRecord(seriesModel.get('lineStyle'));
+  const itemLineStyle = itemModel ? asRecord(itemModel.get('lineStyle')) : {};
+  const itemStyle = itemModel ? asRecord(itemModel.get('itemStyle')) : {};
+  const visualStyle = dataIndex >= 0 && dataIndex < data.count()
+    ? asRecord(data.getItemVisual(dataIndex, 'style'))
+    : {};
+  const color = itemLineStyle.color
+    || itemStyle.color
+    || normal.color
+    || visualStyle.stroke
+    || visualStyle.fill
+    || DEFAULT_COLORS[Math.max(0, dataIndex) % DEFAULT_COLORS.length];
+
+  return String(color);
+}
+
+function readTooltipFieldName(
+  seriesModel: VectorFieldSeriesModel,
+  optionKey: 'xField' | 'yField' | 'uField' | 'vField',
+  fallback: string
+): string {
+  const value = seriesModel.get(optionKey);
+  return typeof value === 'string' && value ? value : fallback;
+}
+
+function fallbackTooltipHeader(seriesModel: VectorFieldSeriesModel, dataIndex: number): string {
+  const data = seriesModel.getData();
+  const source = seriesModel.option?.data;
+  const raw = Array.isArray(source) ? source[dataIndex] : undefined;
+  if (asRecord(raw).name != null) return String(asRecord(raw).name);
+  return `Vector ${dataIndex + 1 || data.count()}`;
+}
+
+function isEmptyTooltipValue(value: unknown): boolean {
+  return value == null || value === '' || (typeof value === 'number' && !Number.isFinite(value));
+}
+
+function formatTooltipNumber(value: number): string {
+  return String(roundTooltipNumber(value));
+}
+
+function roundTooltipNumber(value: number): number {
+  if (!Number.isFinite(value)) return value;
+  return Number(value.toFixed(4));
+}
+
 function resolveAnimationValue(value: unknown, index: number, fallback: number): number {
   if (typeof value === 'function') {
     return finiteNumber((value as (dataIndex: number) => unknown)(index), fallback);
@@ -432,6 +560,15 @@ export const __test__ = {
   enableHover,
   resolveAnimationValue,
   disabledAnimation,
+  formatVectorFieldTooltip,
+  readTooltipFieldOptions,
+  createTooltipBlock,
+  readTooltipMarkerColor,
+  readTooltipFieldName,
+  fallbackTooltipHeader,
+  isEmptyTooltipValue,
+  formatTooltipNumber,
+  roundTooltipNumber,
   formatPathNumber,
   asRecord,
   finiteNumber
