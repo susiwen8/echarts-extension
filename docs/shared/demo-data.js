@@ -379,6 +379,7 @@
       { country: 'Russia', population: 144, itemStyle: { color: '#2db5ff' } },
       { country: 'Ethiopia', population: 129, itemStyle: { color: '#2db5ff' } }
     ],
+    fisheyeScatter: createFisheyeScatterData(),
     spiral: createSpiralData(),
     smith: [
       { name: 'Matched load', resistance: 50, reactance: 0, itemStyle: { color: '#2563eb' } },
@@ -525,5 +526,27 @@
         value: Math.round(38 + seasonal + pulse + drift)
       };
     });
+  }
+
+  function createFisheyeScatterData() {
+    const groups = [
+      { name: 'Alpha', color: '#2f83ed', offsetX: -3.8, offsetY: 1.4, phase: 0.2 },
+      { name: 'Beta', color: '#20a37a', offsetX: 1.6, offsetY: 2.1, phase: 1.4 },
+      { name: 'Gamma', color: '#f59e0b', offsetX: 3.2, offsetY: -1.8, phase: 2.3 }
+    ];
+
+    return groups.flatMap((group) => Array.from({ length: 42 }, (_, index) => {
+      const angle = index * 0.55 + group.phase;
+      const radius = 0.9 + (index % 7) * 0.28 + Math.floor(index / 9) * 0.2;
+      const x = group.offsetX + Math.cos(angle) * radius + (index % 5 - 2) * 0.16;
+      const y = group.offsetY + Math.sin(angle) * radius * 0.8 + (index % 6 - 2.5) * 0.14;
+      const value = 12 + (index % 8) * 4 + Math.floor(index / 6) * 2;
+      return {
+        group: group.name,
+        name: `${group.name} ${index + 1}`,
+        value: [Number(x.toFixed(2)), Number(y.toFixed(2)), value],
+        itemStyle: { color: group.color }
+      };
+    }));
   }
 })(window);

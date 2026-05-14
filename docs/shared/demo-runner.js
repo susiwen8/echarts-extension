@@ -8,6 +8,11 @@
     d: '#9c4f97'
   };
   const graphPalette = ['#2454a6', '#248f6a', '#c77725', '#9c4f97', '#5f6fb4', '#c4554d', '#4b8f8c'];
+  const fisheyeGroups = [
+    { name: 'Alpha', color: '#2f83ed', offsetX: -3.8, offsetY: 1.4, phase: 0.2 },
+    { name: 'Beta', color: '#20a37a', offsetX: 1.6, offsetY: 2.1, phase: 1.4 },
+    { name: 'Gamma', color: '#f59e0b', offsetX: 3.2, offsetY: -1.8, phase: 2.3 }
+  ];
   const easingOptions = ['cubicOut', 'linear', 'quadraticOut', 'quarticOut', 'elasticOut'];
   const viewportZoomStep = 1.12;
   const minViewportScale = 0.45;
@@ -187,7 +192,17 @@
       'Max radius': '最大半径',
       'Center radius': '中心半径',
       'Radius': '半径',
-      'Zoom': '缩放'
+      'Zoom': '缩放',
+      'Signal Scatter': '信号散点',
+      'Fisheye radius': '鱼眼半径',
+      'Fisheye scale': '鱼眼倍率',
+      'Preview': '预览',
+      'Lens color': '镜片颜色',
+      'Lens width': '镜片线宽',
+      'Lens opacity': '镜片透明度',
+      'Dot scale': '点大小比例',
+      'Dot opacity': '点透明度',
+      'Legend': '图例'
     }
   };
 
@@ -330,6 +345,106 @@
           easing: 'cubicOut'
         }
       }, 'Arc')
+    },
+    fisheye: {
+      controls: [
+        textControl('titleText', 'Title', 'title.text', 'Signal Scatter'),
+        colorControl('backgroundColor', 'Background', 'backgroundColor', '#ffffff'),
+        checkboxControl('animationEnabled', 'Animation', [
+          'animation',
+          'series.0.animation',
+          'series.1.animation',
+          'series.2.animation'
+        ], false),
+        checkboxControl('fisheyeShow', 'Fisheye', 'fisheye.show', true),
+        rangeControl('fisheyeRadius', 'Fisheye radius', 'fisheye.radius', 170, 60, 420, 5),
+        rangeControl('fisheyeScale', 'Fisheye scale', 'fisheye.scale', 2.4, 1, 4, 0.1),
+        checkboxControl('fisheyePreview', 'Preview', 'fisheye.preview', true),
+        colorControl('fisheyeStroke', 'Lens color', 'fisheye.stroke', '#4b5563'),
+        rangeControl('fisheyeStrokeWidth', 'Lens width', 'fisheye.strokeWidth', 3, 1, 8, 0.5),
+        rangeControl('fisheyeOpacity', 'Lens opacity', 'fisheye.opacity', 0.92, 0.15, 1, 0.02),
+        fisheyeDotScaleControl(),
+        rangeControl('pointOpacity', 'Dot opacity', [
+          'series.0.itemStyle.opacity',
+          'series.1.itemStyle.opacity',
+          'series.2.itemStyle.opacity'
+        ], 0.84, 0.2, 1, 0.02),
+        checkboxControl('legendShow', 'Legend', 'legend.show', true)
+      ],
+      option: (data) => {
+        const scatterData = fisheyeScatterData(data);
+        return {
+          animation: false,
+          backgroundColor: '#ffffff',
+          title: title('Signal Scatter'),
+          color: fisheyeGroups.map((group) => group.color),
+          tooltip: {
+            trigger: 'item',
+            confine: true,
+            formatter: '{a}<br>{b}: {c}'
+          },
+          legend: {
+            show: true,
+            top: 48,
+            left: 'center',
+            itemWidth: 12,
+            itemHeight: 12,
+            textStyle: {
+              color: '#4b5563',
+              fontSize: 12,
+              fontWeight: 600
+            }
+          },
+          fisheye: {
+            show: true,
+            radius: 170,
+            scale: 2.4,
+            stroke: '#4b5563',
+            strokeWidth: 3,
+            opacity: 0.92,
+            preview: true
+          },
+          grid: {
+            left: 42,
+            right: 28,
+            top: 84,
+            bottom: 34
+          },
+          xAxis: {
+            show: false,
+            min: -9,
+            max: 8
+          },
+          yAxis: {
+            show: false,
+            min: -6,
+            max: 7
+          },
+          series: fisheyeGroups.map((group) => ({
+            name: group.name,
+            type: 'scatter',
+            animation: false,
+            data: scatterData
+              .filter((item) => item?.group === group.name)
+              .map((item, index) => fisheyeScatterPoint(item, group, index)),
+            itemStyle: {
+              color: group.color,
+              opacity: 0.84,
+              borderColor: '#ffffff',
+              borderWidth: 1
+            },
+            emphasis: {
+              focus: 'series',
+              itemStyle: {
+                opacity: 1,
+                borderWidth: 2.2,
+                shadowBlur: 10,
+                shadowColor: 'rgba(15, 23, 42, 0.24)'
+              }
+            }
+          }))
+        };
+      }
     },
     'radial-area': {
       controls: [
@@ -1459,6 +1574,20 @@
     };
   }
 
+  function fisheyeDotScaleControl() {
+    return {
+      id: 'dotScale',
+      label: 'Dot scale',
+      type: 'range',
+      targets: [],
+      defaultValue: 0.42,
+      min: 0.2,
+      max: 0.8,
+      step: 0.02,
+      applyValue: applyFisheyeDotScale
+    };
+  }
+
   function timeOfDayControl(defaultValue) {
     return {
       id: 'timeOfDay',
@@ -1776,6 +1905,7 @@
     if (exampleName === 'subway') return appendSubwayData(data, index);
     if (exampleName === 'flame') return appendFlameData(data, index);
     if (exampleName === 'sunrise-sunset') return appendSunriseSunsetData(data, index);
+    if (exampleName === 'fisheye') return appendFisheyeScatterData(data, index);
     if (exampleName === 'lollipop') return appendLollipopData(data, index);
     if (exampleName === 'beeswarm') return appendBeeswarmData(data, index);
     if (exampleName === 'spiral') return appendSpiralData(data, index);
@@ -1800,6 +1930,7 @@
     if (exampleName === 'subway') return removeSubwayData(data);
     if (exampleName === 'flame') return removeTreeData(data.flame);
     if (exampleName === 'sunrise-sunset') return removeArrayData(data, 'sunriseSunset', isAddedItem, 'first');
+    if (exampleName === 'fisheye') return removeArrayData(data, 'fisheyeScatter', isAddedItem);
     if (exampleName === 'lollipop') return removeArrayData(data, 'lollipop', isAddedItem);
     if (exampleName === 'beeswarm') return removeArrayData(data, 'beeswarm', isAddedItem);
     if (exampleName === 'spiral') return removeArrayData(data, 'spiral', isAddedItem);
@@ -1981,6 +2112,7 @@
     if (exampleName === 'subway') return (data.subway || []).reduce((total, route) => total + arrayLength(route.stations), 0);
     if (exampleName === 'flame') return countTreeItems(data.flame);
     if (exampleName === 'sunrise-sunset') return arrayLength(data.sunriseSunset);
+    if (exampleName === 'fisheye') return arrayLength(data.fisheyeScatter);
     if (exampleName === 'lollipop') return arrayLength(data.lollipop);
     if (exampleName === 'beeswarm') return arrayLength(data.beeswarm);
     if (exampleName === 'spiral') return arrayLength(data.spiral);
@@ -2237,6 +2369,26 @@
     return true;
   }
 
+  function appendFisheyeScatterData(data, index) {
+    const list = ensureArrayData(data, 'fisheyeScatter');
+    const group = fisheyeGroups[(index - 1) % fisheyeGroups.length];
+    const angle = index * 0.73 + group.phase;
+    const radius = 1.1 + (index % 5) * 0.35;
+    const x = group.offsetX + Math.cos(angle) * radius + ((index % 3) - 1) * 0.22;
+    const y = group.offsetY + Math.sin(angle) * radius * 0.8 + ((index % 4) - 1.5) * 0.18;
+    list.push({
+      group: group.name,
+      name: `Added ${index}`,
+      value: [
+        Number(x.toFixed(2)),
+        Number(y.toFixed(2)),
+        18 + (index * 5) % 42
+      ],
+      itemStyle: { color: group.color }
+    });
+    return true;
+  }
+
   function appendLollipopData(data, index) {
     const list = ensureArrayData(data, 'lollipop');
     const insertIndex = list.length ? (index * 3) % (list.length + 1) : 0;
@@ -2432,6 +2584,71 @@
 
   function arrayLength(value) {
     return Array.isArray(value) ? value.length : 0;
+  }
+
+  function fisheyeScatterData(data) {
+    const list = Array.isArray(data?.fisheyeScatter) ? data.fisheyeScatter : [];
+    return list.length ? list : createFallbackFisheyeScatterData();
+  }
+
+  function createFallbackFisheyeScatterData() {
+    return fisheyeGroups.flatMap((group) => Array.from({ length: 42 }, (_, index) => {
+      const angle = index * 0.55 + group.phase;
+      const radius = 0.9 + (index % 7) * 0.28 + Math.floor(index / 9) * 0.2;
+      const x = group.offsetX + Math.cos(angle) * radius + (index % 5 - 2) * 0.16;
+      const y = group.offsetY + Math.sin(angle) * radius * 0.8 + (index % 6 - 2.5) * 0.14;
+      const value = 12 + (index % 8) * 4 + Math.floor(index / 6) * 2;
+      return {
+        group: group.name,
+        name: `${group.name} ${index + 1}`,
+        value: [Number(x.toFixed(2)), Number(y.toFixed(2)), value],
+        itemStyle: { color: group.color }
+      };
+    }));
+  }
+
+  function fisheyeScatterPoint(item, group, index, dotScale = 0.42) {
+    const record = item && typeof item === 'object' && !Array.isArray(item) ? item : {};
+    const value = Array.isArray(record.value)
+      ? record.value
+      : Array.isArray(item)
+        ? item
+        : [group.offsetX, group.offsetY, 24];
+    return {
+      name: record.name || `${group.name} ${index + 1}`,
+      value,
+      symbolSize: fisheyeSymbolSize(value, dotScale),
+      itemStyle: {
+        color: group.color,
+        ...(record.itemStyle || {})
+      }
+    };
+  }
+
+  function fisheyeSymbolSize(value, dotScale) {
+    const raw = Array.isArray(value) ? Number(value[2]) : Number(value);
+    return Math.max(6, Math.min(34, finiteNumber(raw, 24) * finiteNumber(Number(dotScale), 0.42)));
+  }
+
+  function applyFisheyeDotScale(option, value) {
+    const dotScale = finiteNumber(Number(value), 0.42);
+    const seriesList = Array.isArray(option?.series) ? option.series : [option?.series].filter(Boolean);
+    seriesList.forEach((series) => {
+      if (!series || series.type !== 'scatter' || !Array.isArray(series.data)) return;
+      series.data = series.data.map((item) => {
+        if (Array.isArray(item)) {
+          return {
+            value: item,
+            symbolSize: fisheyeSymbolSize(item, dotScale)
+          };
+        }
+        if (!item || typeof item !== 'object') return item;
+        return {
+          ...item,
+          symbolSize: fisheyeSymbolSize(item.value, dotScale)
+        };
+      });
+    });
   }
 
   function createControlsPanel(controls, state, handlers) {

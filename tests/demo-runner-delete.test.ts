@@ -39,6 +39,32 @@ test('shared examples can delete one data item after add-data', () => {
   assert.deepEqual(nonDecreasing, []);
 });
 
+test('fisheye example exposes form controls and scatter data options', () => {
+  const namespace = loadDemoNamespace();
+  const entry = namespace.registry.fisheye;
+  assert.ok(entry);
+
+  const data = namespace.cloneExampleData(namespace.data);
+  const controlIds = entry.controls.map((control) => control.id);
+  assert.ok(controlIds.includes('fisheyeRadius'));
+  assert.ok(controlIds.includes('fisheyeScale'));
+  assert.ok(controlIds.includes('dotScale'));
+  assert.ok(controlIds.includes('legendShow'));
+
+  const state = namespace.createControlState(entry.controls);
+  state.fisheyeRadius = 260;
+  state.dotScale = 0.5;
+  state.legendShow = false;
+
+  const option = namespace.createDemoOption('fisheye', data, state);
+  assert.equal(option.fisheye.radius, 260);
+  assert.equal(option.legend.show, false);
+  assert.equal(option.series.length, 3);
+  assert.ok(option.series.every((series) => series.type === 'scatter'));
+  assert.ok(option.series.every((series) => series.data.length > 0));
+  assert.ok(option.series[0].data[0].symbolSize > 0);
+});
+
 test('shared examples can delete an existing data item before add-data', () => {
   const namespace = loadDemoNamespace();
   const missingDelete = [];

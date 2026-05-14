@@ -58,6 +58,17 @@ describe('docs SSG pages', () => {
     }
   });
 
+  it('embeds fisheye demo data and control defaults for the form-driven example', () => {
+    const html = readDoc(path.join(generatedDocsDir, 'packages/echarts-fisheye/index.html'));
+    const payload = readEmbeddedJson(html, 'data-demo-payload');
+
+    expect(html).toContain('data-example="fisheye"');
+    expect(payload.exampleName).toBe('fisheye');
+    expect(payload.data.fisheyeScatter.length).toBeGreaterThan(100);
+    expect(payload.controlValues.fisheyeRadius).toBe(170);
+    expect(payload.controlValues.dotScale).toBe(0.42);
+  });
+
   it('embeds initial large demo payloads in large data pages', () => {
     const largePages = generatedHtmlFiles().filter((filePath) => {
       const html = readDoc(filePath);
