@@ -47,6 +47,17 @@ interface RadialAreaAxisOption {
   splitLine?: RadialAreaSplitLineOption;
 }
 
+interface RadialAreaHoverIndicatorOption {
+  show?: boolean;
+  triggerWidth?: number;
+  lineStyle?: {
+    color?: string;
+    width?: number;
+    opacity?: number;
+    type?: 'solid' | 'dashed' | 'dotted' | number[];
+  };
+}
+
 declare module 'echarts/types/dist/echarts' {
   export interface RadialAreaSeriesOption {
     mainType?: 'series';
@@ -117,6 +128,7 @@ declare module 'echarts/types/dist/echarts' {
     };
     showSymbol?: boolean;
     symbolSize?: number;
+    hoverIndicator?: RadialAreaHoverIndicatorOption;
     emphasis?: {
       itemStyle?: {
         borderWidth?: number;

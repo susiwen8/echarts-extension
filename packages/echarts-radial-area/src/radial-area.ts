@@ -3,7 +3,7 @@ import { clearAliveRender, installElementHover, renderAlive } from '@echarts-ext
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
 import { resolveRadialAreaLayout } from './layout.js';
-import type { RadialAreaLayoutOption, RadialAreaLayoutResult, RadialAreaPoint, RadialAreaPolarPoint } from './layout.js';
+import type { RadialAreaField, RadialAreaLayoutOption, RadialAreaLayoutResult, RadialAreaPoint, RadialAreaPolarPoint } from './layout.js';
 
 interface ViewRect {
   x: number;
@@ -27,6 +27,7 @@ interface SeriesData {
   initData(source: unknown[]): void;
   count(): number;
   getItemModel(index: number): EChartsModel;
+  getName?(index: number): string;
   getItemLayout(dataIndex: number): unknown;
   getItemVisual(dataIndex: number, key: string): unknown;
   setItemLayout(dataIndex: number, layout: [number, number]): void;
@@ -41,6 +42,11 @@ interface RadialAreaSeriesModel extends EChartsModel {
 
 interface GraphicElement {
   [key: string]: unknown;
+  shape?: Record<string, unknown>;
+  style?: Record<string, unknown>;
+  on?: (eventName: string, handler: () => void) => void;
+  setStyle?: (style: Record<string, unknown>) => void;
+  attr?: (keyOrObj: unknown, value?: unknown) => void;
 }
 
 interface AnimatableGraphicElement extends GraphicElement {
@@ -105,6 +111,24 @@ interface EnterAnimationConfig {
 
 type AnimationTargetKey = 'shape' | 'style';
 
+type TooltipMarkupNameValueBlock = {
+  type: 'nameValue';
+  markerType?: string;
+  markerColor?: string;
+  name?: string;
+  value?: unknown;
+  noValue?: boolean;
+  dataIndex?: number;
+};
+
+type TooltipMarkupSection = {
+  type: 'section';
+  header?: unknown;
+  noHeader?: boolean;
+  sortBlocks?: boolean;
+  blocks?: TooltipMarkupNameValueBlock[];
+};
+
 const echartsHost = echarts as unknown as EChartsHost;
 const optionKeys = [
   'padding',
@@ -134,10 +158,12 @@ const layerZ = {
   rangeArea: -4,
   valueArea: -3,
   axis: 0,
+  hoverIndicator: 3,
   line: 4,
   hitSymbol: 7,
   symbol: 8
 } as const;
+const defaultTooltipFieldOrder: RadialAreaField[] = ['minmin', 'maxmax', 'min', 'max', 'avg', 'value'];
 
 echartsHost.extendSeriesModel({
   type: 'series.radialArea',
@@ -158,6 +184,10 @@ echartsHost.extendSeriesModel({
   getTooltipPosition(this: RadialAreaSeriesModel, dataIndex: number) {
     const layout = this.getData().getItemLayout(dataIndex);
     return Array.isArray(layout) ? layout : undefined;
+  },
+
+  formatTooltip(this: RadialAreaSeriesModel, dataIndex: number) {
+    return formatRadialAreaTooltip(this, dataIndex);
   },
 
   defaultOption: {
@@ -250,6 +280,16 @@ echartsHost.extendSeriesModel({
     },
     showSymbol: false,
     symbolSize: 5,
+    hoverIndicator: {
+      show: true,
+      triggerWidth: 14,
+      lineStyle: {
+        color: '#3f86bd',
+        width: 1.4,
+        opacity: 0.72,
+        type: 'solid'
+      }
+    },
     tooltip: {
       trigger: 'item'
     },
@@ -542,7 +582,9 @@ function drawSymbols(
   const showSymbol = seriesModel.get('showSymbol') === true;
   const symbolSize = Math.max(0, finiteNumber(seriesModel.get('symbolSize'), 5));
   const silent = seriesModel.get('silent') === true;
+  const hoverIndicatorModel = seriesModel.getModel('hoverIndicator');
   const hoverItems: ElementHoverItem[] = [];
+  let sharedGuideLine: GraphicElement | null = null;
 
   layout.points.forEach((point) => {
     if (point.dataIndex < 0 || point.dataIndex >= data.count()) return;
@@ -567,23 +609,31 @@ function drawSymbols(
       return;
     }
     const itemModel = data.getItemModel(point.dataIndex);
-    const hitCircle = new echartsInstance.graphic.Circle({
+    const triggerEnds = radialTriggerLineEnds(layout, point.angle);
+    const hitLine = new echartsInstance.graphic.Line({
       shape: {
-        cx: point.x,
-        cy: point.y,
-        r: Math.max(symbolSize / 2, 6)
+        x1: triggerEnds.inner.x,
+        y1: triggerEnds.inner.y,
+        x2: triggerEnds.outer.x,
+        y2: triggerEnds.outer.y
       },
       style: {
-        fill: 'rgba(0,0,0,0)',
         stroke: 'rgba(0,0,0,0)',
-        opacity: 0
+        opacity: 0,
+        lineWidth: Math.max(finiteNumber(hoverIndicatorModel.get('triggerWidth'), 14), symbolSize, 10)
       },
       z2: layerZ.hitSymbol
     });
-    data.setItemGraphicEl(point.dataIndex, hitCircle);
-    const hoverItem = createHoverItem(hitCircle);
+    data.setItemGraphicEl(point.dataIndex, hitLine);
+    const hoverItem = createHoverItem(hitLine);
     hoverItems.push(hoverItem);
-    group.add(hitCircle);
+
+    if (!sharedGuideLine) {
+      sharedGuideLine = createHoverIndicatorLine(echartsInstance, hoverIndicatorModel, triggerEnds);
+      if (sharedGuideLine) group.add(sharedGuideLine);
+    }
+    if (sharedGuideLine) attachHoverIndicator(hitLine, sharedGuideLine, sharedGuideLine.__visibleStyle as Record<string, unknown>, triggerEnds);
+    group.add(hitLine);
 
     if (!showSymbol || symbolSize <= 0) return;
 
@@ -602,6 +652,182 @@ function drawSymbols(
   });
 
   return hoverItems;
+}
+
+function formatRadialAreaTooltip(seriesModel: RadialAreaSeriesModel, dataIndex: number): TooltipMarkupSection {
+  const option = seriesModel.option || {};
+  const source = Array.isArray(option.data) ? option.data : [];
+  const raw = source[dataIndex];
+  const dimensions = normalizeTooltipDimensions(option.dimensions);
+  const fields = resolveTooltipFields(option, raw, dimensions);
+  const markerColor = readTooltipMarkerColor(seriesModel, dataIndex);
+
+  return {
+    type: 'section',
+    header: readTooltipHeader(seriesModel, raw, dimensions, dataIndex),
+    noHeader: false,
+    sortBlocks: false,
+    blocks: fields.map((field) => {
+      const value = readRawField(raw, field, dimensions);
+      return {
+        type: 'nameValue',
+        markerType: 'subItem',
+        markerColor,
+        name: String(field),
+        value,
+        noValue: isEmptyTooltipValue(value),
+        dataIndex
+      };
+    })
+  };
+}
+
+function resolveTooltipFields(
+  option: RadialAreaLayoutOption,
+  raw: unknown,
+  dimensions: string[] | undefined
+): RadialAreaField[] {
+  const configuredFields = [option.minField, option.maxField, option.valueField]
+    .filter((field): field is RadialAreaField => typeof field === 'string' || typeof field === 'number');
+  const presentDefaults = defaultTooltipFieldOrder.filter((field) => hasRawField(raw, field, dimensions));
+  const presentConfigured = configuredFields.filter((field) => hasRawField(raw, field, dimensions));
+  const fields = uniqueTooltipFields([...presentDefaults, ...presentConfigured]);
+  if (fields.length) return fields;
+  return configuredFields.length ? uniqueTooltipFields(configuredFields) : ['value'];
+}
+
+function readTooltipHeader(
+  seriesModel: RadialAreaSeriesModel,
+  raw: unknown,
+  dimensions: string[] | undefined,
+  dataIndex: number
+): unknown {
+  const option = seriesModel.option || {};
+  const nameField = typeof option.nameField === 'string' || typeof option.nameField === 'number' ? option.nameField : undefined;
+  const angleField = typeof option.angleField === 'string' || typeof option.angleField === 'number' ? option.angleField : 'angle';
+  const header = nameField == null ? undefined : readRawField(raw, nameField, dimensions);
+  return header ?? readRawField(raw, angleField, dimensions) ?? seriesModel.getData().getName?.(dataIndex) ?? '';
+}
+
+function readTooltipMarkerColor(seriesModel: RadialAreaSeriesModel, dataIndex: number): string {
+  const data = seriesModel.getData();
+  const itemModel = data.getItemModel(dataIndex);
+  const itemStyleModel = itemModel.getModel('itemStyle');
+  const seriesItemStyleModel = seriesModel.getModel('itemStyle');
+  const lineStyleModel = seriesModel.getModel('lineStyle');
+  const visualStyle = asRecord(data.getItemVisual(dataIndex, 'style'));
+  const color = itemStyleModel.get('color')
+    || visualStyle.fill
+    || visualStyle.stroke
+    || seriesItemStyleModel.get('color')
+    || lineStyleModel.get('color')
+    || '#3f86bd';
+  return typeof color === 'string' ? color : '#3f86bd';
+}
+
+function normalizeTooltipDimensions(value: unknown): string[] | undefined {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : undefined;
+}
+
+function hasRawField(raw: unknown, field: RadialAreaField, dimensions: string[] | undefined): boolean {
+  return !isEmptyTooltipValue(readRawField(raw, field, dimensions));
+}
+
+function readRawField(raw: unknown, field: RadialAreaField, dimensions: string[] | undefined): unknown {
+  if (Array.isArray(raw)) {
+    const index = typeof field === 'number' ? field : dimensions?.indexOf(field) ?? -1;
+    return index >= 0 ? raw[index] : undefined;
+  }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  return (raw as Record<string, unknown>)[String(field)];
+}
+
+function isEmptyTooltipValue(value: unknown): boolean {
+  return value == null || value === '' || (typeof value === 'number' && Number.isNaN(value));
+}
+
+function uniqueTooltipFields(fields: RadialAreaField[]): RadialAreaField[] {
+  const seen = new Set<string>();
+  const result: RadialAreaField[] = [];
+  fields.forEach((field) => {
+    const key = String(field);
+    if (seen.has(key)) return;
+    seen.add(key);
+    result.push(field);
+  });
+  return result;
+}
+
+function radialTriggerLineEnds(
+  layout: RadialAreaLayoutResult,
+  angle: number
+): { inner: { x: number; y: number }; outer: { x: number; y: number } } {
+  return {
+    inner: {
+      x: layout.centerX,
+      y: layout.centerY
+    },
+    outer: polarPoint(layout.centerX, layout.centerY, layout.outerRadius, angle)
+  };
+}
+
+function createHoverIndicatorLine(
+  echartsInstance: EChartsHost,
+  model: EChartsModel,
+  ends: { inner: { x: number; y: number }; outer: { x: number; y: number } }
+): GraphicElement | null {
+  if (model.get('show') === false) return null;
+  const visibleStyle: Record<string, unknown> = {
+    ...readLineStyle(model.getModel('lineStyle'), {
+      stroke: '#3f86bd',
+      lineWidth: 1.4,
+      opacity: 0.72
+    }),
+    fill: null
+  };
+  if (finiteNumber(visibleStyle.lineWidth, 1) <= 0 || finiteNumber(visibleStyle.opacity, 1) <= 0) {
+    return null;
+  }
+
+  const guide = new echartsInstance.graphic.Line({
+    shape: {
+      x1: ends.inner.x,
+      y1: ends.inner.y,
+      x2: ends.outer.x,
+      y2: ends.outer.y
+    },
+    style: {
+      ...visibleStyle,
+      opacity: 0
+    },
+    silent: true,
+    z2: layerZ.hoverIndicator
+  });
+  guide.__visibleStyle = visibleStyle;
+  return guide;
+}
+
+function attachHoverIndicator(
+  trigger: GraphicElement,
+  indicator: GraphicElement,
+  visibleStyle: Record<string, unknown>,
+  ends: { inner: { x: number; y: number }; outer: { x: number; y: number } }
+): void {
+  const hiddenStyle = {
+    ...visibleStyle,
+    opacity: 0
+  };
+  const shape = {
+    x1: ends.inner.x,
+    y1: ends.inner.y,
+    x2: ends.outer.x,
+    y2: ends.outer.y
+  };
+  trigger.on?.('mouseover', () => {
+    setGraphicShape(indicator, shape);
+    setGraphicStyle(indicator, visibleStyle);
+  });
+  trigger.on?.('mouseout', () => setGraphicStyle(indicator, hiddenStyle));
 }
 
 function createValueAreaPoints(layout: RadialAreaLayoutResult): Array<[number, number]> {
@@ -797,6 +1023,32 @@ function nestedOptionValue(record: Record<string, unknown>, parentKey: string, c
   return asRecord(record[parentKey])[childKey];
 }
 
+function setGraphicStyle(element: GraphicElement, style: Record<string, unknown>): void {
+  if (typeof element.setStyle === 'function') {
+    element.setStyle(style);
+    return;
+  }
+  if (typeof element.attr === 'function') {
+    element.attr('style', style);
+    return;
+  }
+  element.style = {
+    ...element.style,
+    ...style
+  };
+}
+
+function setGraphicShape(element: GraphicElement, shape: Record<string, unknown>): void {
+  if (typeof element.attr === 'function') {
+    element.attr('shape', shape);
+    return;
+  }
+  element.shape = {
+    ...element.shape,
+    ...shape
+  };
+}
+
 function finiteNumber(value: unknown, fallback: number): number {
   const numberValue = typeof value === 'number'
     ? value
@@ -827,6 +1079,13 @@ export const __test__ = {
   drawAreas,
   drawLine,
   drawSymbols,
+  formatRadialAreaTooltip,
+  resolveTooltipFields,
+  readTooltipHeader,
+  readTooltipMarkerColor,
+  normalizeTooltipDimensions,
+  readRawField,
+  createHoverIndicatorLine,
   createValueAreaPoints,
   pointsToTuples,
   readAreaStyle,
@@ -845,6 +1104,8 @@ export const __test__ = {
   animateGraphicProperty,
   asRecord,
   nestedOptionValue,
+  setGraphicStyle,
+  setGraphicShape,
   finiteNumber,
   createHoverItem,
   addHoverElement
