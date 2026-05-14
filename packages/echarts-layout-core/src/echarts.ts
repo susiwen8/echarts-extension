@@ -255,6 +255,7 @@ type NodeSizeResolver = (node: PublicLayoutNode) => number;
 const layoutOptionKeys = [
   'nodeSep',
   'nodeSize',
+  'orient',
   'nodeSpacing',
   'linkDistance',
   'unitRadius',

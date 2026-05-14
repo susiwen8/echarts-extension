@@ -70,6 +70,7 @@ export interface LayoutOptions {
   height?: number;
   center?: Array<number | string>;
   begin?: Array<number | string>;
+  orient?: 'horizontal' | 'vertical';
   nodeSep?: number;
   nodeSize?: NodeSizeOption;
   nodeSpacing?: NodeSpacingOption;

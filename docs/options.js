@@ -81,25 +81,56 @@
   }
 
   function initializeOptionSearch() {
-    const input = document.getElementById('options-search');
-    const clear = document.getElementById('options-search-clear');
-    if (!(input instanceof HTMLInputElement) || !(clear instanceof HTMLButtonElement)) return;
+    const inputs = Array.from(document.querySelectorAll('[data-options-search-input]'))
+      .filter((input) => input instanceof HTMLInputElement);
+    const clearButtons = Array.from(document.querySelectorAll('[data-options-search-clear]'))
+      .filter((button) => button instanceof HTMLButtonElement);
+    if (!inputs.length) return;
 
-    input.addEventListener('input', () => {
-      applyOptionSearch(input.value);
-    });
-    input.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape' || !input.value) return;
-      input.value = '';
-      applyOptionSearch('');
-    });
-    clear.addEventListener('click', () => {
-      input.value = '';
-      applyOptionSearch('');
-      input.focus();
+    inputs.forEach((input) => {
+      input.addEventListener('input', () => {
+        syncSearchControls(input.value, input);
+        applyOptionSearch(input.value);
+      });
+      input.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || !input.value) return;
+        syncSearchControls('', input);
+        applyOptionSearch('');
+      });
     });
 
-    applyOptionSearch(input.value);
+    clearButtons.forEach((clear) => {
+      clear.addEventListener('click', () => {
+        syncSearchControls('');
+        applyOptionSearch('');
+        getActiveSearchInput()?.focus();
+      });
+    });
+
+    syncSearchControls(inputs[0].value, inputs[0]);
+    applyOptionSearch(inputs[0].value);
+  }
+
+  function syncSearchControls(value, sourceInput) {
+    document.querySelectorAll('[data-options-search-input]').forEach((input) => {
+      if (!(input instanceof HTMLInputElement) || input === sourceInput) return;
+      input.value = value;
+    });
+    if (sourceInput) sourceInput.value = value;
+  }
+
+  function getActiveSearchInput() {
+    const activeCard = activeOptionCaseId ? document.getElementById(activeOptionCaseId) : null;
+    const input = activeCard?.querySelector('[data-options-search-input]');
+    return input instanceof HTMLInputElement ? input : null;
+  }
+
+  function focusActiveSearchInput() {
+    const input = getActiveSearchInput();
+    if (!input) return;
+    input.focus();
+    const cursor = input.value.length;
+    input.setSelectionRange(cursor, cursor);
   }
 
   function initializeOptionSelection() {
@@ -127,12 +158,12 @@
   function applyOptionSearch(rawQuery) {
     const query = normalizeSearchText(rawQuery);
     const searching = Boolean(query);
+    const searchHadFocus = document.activeElement instanceof HTMLInputElement
+      && document.activeElement.matches('[data-options-search-input]');
     const cards = Array.from(document.querySelectorAll('.option-card'));
     let visibleCards = 0;
     let directMatches = 0;
     let packageMatches = 0;
-
-    document.body.classList.toggle('options-page--searching', searching);
 
     const selectableIds = [];
 
@@ -147,10 +178,15 @@
       if (navLink) navLink.hidden = !stats.visible;
     });
 
+    const hasSearchResults = selectableIds.length > 0;
+    document.body.classList.toggle('options-page--searching', searching);
+    document.body.classList.toggle('options-page--empty-search', searching && !hasSearchResults);
+
     if (!selectableIds.includes(activeOptionCaseId)) {
-      activeOptionCaseId = selectableIds[0] || '';
+      activeOptionCaseId = selectableIds[0] || activeOptionCaseId || getFirstSelectableOptionCaseId();
     }
     applyActiveOptionCase();
+    if (searchHadFocus) focusActiveSearchInput();
     updateSearchStatus(searching, directMatches, packageMatches, visibleCards, cards.length);
   }
 
@@ -231,26 +267,27 @@
   }
 
   function updateSearchStatus(searching, matches, packageMatches, visibleCards, totalCards) {
-    const status = document.getElementById('options-search-status');
-    if (!status) return;
+    const statuses = document.querySelectorAll('.options-search__status');
+    if (!statuses.length) return;
 
+    let message = '';
     if (!searching) {
-      status.textContent = IS_ZH ? `${totalCards} ${UI.packages}` : `${totalCards} ${UI.packages}`;
-      return;
-    }
-    if (!matches && !visibleCards) {
-      status.textContent = UI.noMatches;
-      return;
-    }
-    if (!matches && packageMatches) {
-      status.textContent = IS_ZH
+      message = IS_ZH ? `${totalCards} ${UI.packages}` : `${totalCards} ${UI.packages}`;
+    } else if (!matches && !visibleCards) {
+      message = UI.noMatches;
+    } else if (!matches && packageMatches) {
+      message = IS_ZH
         ? `${packageMatches} ${UI.matchingPackages}`
         : `${packageMatches} ${packageMatches === 1 ? UI.matchingPackage : UI.matchingPackages}`;
-      return;
+    } else {
+      message = IS_ZH
+        ? `${visibleCards} 个图表中有 ${matches} 个匹配配置项。`
+        : `${matches} matching options in ${visibleCards} packages.`;
     }
-    status.textContent = IS_ZH
-      ? `${visibleCards} 个图表中有 ${matches} 个匹配配置项。`
-      : `${matches} matching options in ${visibleCards} packages.`;
+
+    statuses.forEach((status) => {
+      status.textContent = message;
+    });
   }
 
   function selectOptionCase(optionCaseId, { updateHash = false } = {}) {
@@ -266,6 +303,7 @@
 
   function applyActiveOptionCase() {
     const cards = Array.from(document.querySelectorAll('.option-card'));
+    const showEmptySearchCard = document.body.classList.contains('options-page--empty-search');
     if (!activeOptionCaseId) {
       cards.forEach((card) => {
         card.hidden = true;
@@ -276,7 +314,7 @@
     }
 
     cards.forEach((card) => {
-      card.hidden = card.id !== activeOptionCaseId || card.dataset.searchVisible === 'false';
+      card.hidden = card.id !== activeOptionCaseId || (!showEmptySearchCard && card.dataset.searchVisible === 'false');
     });
     updateActiveNavLink(activeOptionCaseId);
     updateLanguageSwitchLinks(activeOptionCaseId);

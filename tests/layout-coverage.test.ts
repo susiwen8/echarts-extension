@@ -163,10 +163,22 @@ test('layout core covers defensive graph normalization and graph layout branches
     nodes: [{ id: 'a' }, { id: 'b' }],
     edges: []
   }, {}).nodes[0].y, 0);
+  assert.deepEqual(computeArcLayout({
+    nodes: [{ id: 'a' }, { id: 'b' }],
+    edges: []
+  }, { orient: 'horizontal' }).nodes[0], {
+    id: 'a',
+    x: 0,
+    y: 0
+  });
   assert.equal(pathToString(createArcPath([0, 0], [10, 0])), 'M 0 0 A 5 5 0 0 1 10 0');
   assert.equal(pathToString(createArcPath([10, 0], [0, 0])), 'M 10 0 A 5 5 0 0 0 0 0');
+  assert.equal(pathToString(createArcPath([0, 0], [0, 10])), 'M 0 0 A 5 5 0 0 1 0 10');
+  assert.equal(pathToString(createArcPath([0, 10], [0, 0])), 'M 0 10 A 5 5 0 0 0 0 0');
   assert.equal(createArcShape([10, 0], [0, 0]).clockwise, false);
   assert.equal(createArcShape([0, 0], [10, 0]).clockwise, true);
+  assert.equal(createArcShape([0, 10], [0, 0]).clockwise, false);
+  assert.equal(createArcShape([0, 0], [0, 10]).clockwise, true);
   assert.equal(computeConcentricLayout(graph, { startAngle: 0, clockwise: false, preventOverlap: true }).nodes.length, 4);
   assert.equal(computeGridLayout(graph, {
     width: 120,

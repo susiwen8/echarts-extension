@@ -20,18 +20,23 @@
 
     .demo-header {
       display: flex;
-      align-items: flex-end;
+      flex-direction: row;
+      align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      padding: 28px clamp(18px, 4vw, 48px);
+      gap: 16px;
+      padding: 8px clamp(18px, 3vw, 32px);
       background: #fbfcff;
       border-bottom: 1px solid #d9e0ea;
     }
 
+    .demo-header > div {
+      min-width: 0;
+    }
+
     .demo-header h1 {
-      margin: 4px 0 0;
-      font-size: clamp(30px, 4vw, 52px);
-      line-height: 1;
+      margin: 2px 0 0;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.05;
       font-weight: 760;
       letter-spacing: 0;
     }
@@ -39,29 +44,25 @@
     .eyebrow {
       margin: 0;
       color: #248f6a;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 760;
       text-transform: uppercase;
     }
 
     .demo-header p:last-child {
-      max-width: 720px;
-      margin: 12px 0 0;
-      color: #647085;
-      font-size: 16px;
-      line-height: 1.5;
+      display: none;
     }
 
     .demo-links a {
       display: inline-flex;
       align-items: center;
-      min-height: 40px;
-      padding: 0 14px;
+      min-height: 32px;
+      padding: 0 10px;
       border: 1px solid #d9e0ea;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #fff;
       color: #1f2a3d;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       text-decoration: none;
     }
@@ -196,8 +197,24 @@
 
     @media (max-width: 760px) {
       .demo-header {
-        align-items: flex-start;
-        flex-direction: column;
+        align-items: center;
+        flex-direction: row;
+        gap: 10px;
+        padding: 8px 14px;
+      }
+
+      .demo-header h1 {
+        font-size: 20px;
+      }
+
+      .demo-links {
+        gap: 6px;
+      }
+
+      .demo-links a {
+        min-height: 28px;
+        padding: 0 8px;
+        font-size: 11px;
       }
 
       .layout-grid {

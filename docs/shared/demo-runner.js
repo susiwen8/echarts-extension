@@ -315,7 +315,7 @@
     },
     arc: {
       controls: graphControls('Arc', [
-        rangeControl('layoutNodeSep', 'Node separation', 'series.0.layout.nodeSep', 58, 12, 120, 2),
+        rangeControl('layoutNodeSep', 'Node separation', 'series.0.layout.nodeSep', 34, 12, 120, 2),
         rangeControl('edgeDuration', 'Edge duration', 'series.0.edgeAnimation.duration', 720, 120, 1800, 20),
         rangeControl('edgeStagger', 'Edge stagger', 'series.0.edgeAnimation.stagger', 80, 0, 220, 5),
         selectControl('edgeEasing', 'Edge easing', 'series.0.edgeAnimation.easing', 'cubicOut', easingOptions)
@@ -324,12 +324,12 @@
         animation: true,
         label: {
           show: true,
-          position: 'bottom',
+          position: 'left',
           fontSize: 12,
           color: '#374151'
         },
         layout: {
-          nodeSep: 58
+          nodeSep: 34
         },
         fisheye: {
           preview: true

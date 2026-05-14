@@ -33,9 +33,17 @@ describe('options docs SSG output', () => {
 
     expect(html).toContain('data-option-target="echarts-layout-core"');
     expect(html).toContain('id="echarts-layout-core"');
+    expect(html).toContain('<div class="option-card__summary">');
+    expect(html).toContain('id="options-search-echarts-layout-core" data-options-search-input');
+    expect(html).toContain('height: 100vh;');
+    expect(html).toContain('overflow: hidden;');
+    expect(html).toContain('overflow: auto;');
+    expect(html).toContain('.option-card[hidden]');
+    expect(html).toContain('display: none;');
     expect(html).toContain('data-option-name="input"');
     expect(html).toContain('<code>input.data</code>');
     expect(html).not.toContain('Loading option reference');
+    expect(html).not.toContain('<section class="options-search" aria-label="Search package options">\n      <label');
   });
 
   it('pre-renders Chinese navigation and localized option rows', () => {
@@ -49,6 +57,7 @@ describe('options docs SSG output', () => {
     expect(html).toContain('href="./packages/echarts-venn/bubble.zh.html">气泡示例</a>');
     expect(html).not.toContain('href="./packages/echarts-radial-boxplot/">示例</a>');
     expect(html).not.toContain('href="./packages/echarts-venn/hollow.html">空心示例</a>');
+    expect(html).toContain('id="options-search-echarts-layout-core" data-options-search-input');
     expect(html).toContain('data-option-name="input"');
     expect(html).toContain('汇总图布局输入数据和连线配置');
     expect(html).not.toContain('正在加载配置项文档');
@@ -68,5 +77,14 @@ describe('options docs SSG output', () => {
     expect(script).toContain('encodeURIComponent(optionCaseId)');
     expect(script).toContain('updateLanguageSwitchLinks(activeOptionCaseId)');
     expect(script).toContain('/options(?:\\.zh)?\\.html$/');
+  });
+
+  it('wires search controls inside each option card header', () => {
+    const script = readDoc('options.js');
+
+    expect(script).toContain("document.querySelectorAll('[data-options-search-input]')");
+    expect(script).toContain('function syncSearchControls(value, sourceInput)');
+    expect(script).toContain("document.querySelectorAll('.options-search__status')");
+    expect(script).toContain("document.body.classList.toggle('options-page--empty-search'");
   });
 });

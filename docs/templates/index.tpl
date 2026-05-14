@@ -21,34 +21,119 @@
       </nav>
     </header>
 
-    <section class="case-grid" aria-label="Examples">
-      <a class="case-card" href="./packages/echarts-layout-core/">layout-core</a>
-      <a class="case-card" href="./packages/echarts-radial/">echarts-radial</a>
-      <a class="case-card" href="./packages/echarts-concentric/">echarts-concentric</a>
-      <a class="case-card" href="./packages/echarts-grid/">echarts-grid</a>
-      <a class="case-card" href="./packages/echarts-mds/">echarts-mds</a>
-      <a class="case-card" href="./packages/echarts-arc/">echarts-arc</a>
-      <a class="case-card" href="./packages/echarts-radial-area/">echarts-radial-area</a>
-      <a class="case-card" href="./packages/echarts-radial-boxplot/">echarts-radial-boxplot</a>
-      <a class="case-card" href="./packages/echarts-venn/hollow.html">echarts-venn hollow</a>
-      <a class="case-card" href="./packages/echarts-venn/bubble.html">echarts-venn bubble</a>
-      <a class="case-card" href="./packages/echarts-pack-bubble/">echarts-pack-bubble</a>
-      <a class="case-card" href="./packages/echarts-circle-packing/">echarts-circle-packing</a>
-      <a class="case-card" href="./packages/echarts-nested-circle/">echarts-nested-circle</a>
-      <a class="case-card" href="./packages/echarts-organization-chart/">echarts-organization-chart</a>
-      <a class="case-card" href="./packages/echarts-mosaic/">echarts-mosaic</a>
-      <a class="case-card" href="./packages/echarts-voronoi-treemap/">echarts-voronoi-treemap</a>
-      <a class="case-card" href="./packages/echarts-subway/">echarts-subway</a>
-      <a class="case-card" href="./packages/echarts-sequence-diagram/">echarts-sequence-diagram</a>
-      <a class="case-card" href="./packages/echarts-cause-effect/">echarts-cause-effect</a>
-      <a class="case-card" href="./packages/echarts-flame/">echarts-flame</a>
-      <a class="case-card" href="./packages/echarts-sunrise-sunset/">echarts-sunrise-sunset</a>
-      <a class="case-card" href="./packages/echarts-lollipop/">echarts-lollipop</a>
-      <a class="case-card" href="./packages/echarts-beeswarm/">echarts-beeswarm</a>
-      <a class="case-card" href="./packages/echarts-spiral/">echarts-spiral</a>
-      <a class="case-card" href="./packages/echarts-smith/">echarts-smith</a>
-      <a class="case-card" href="./packages/echarts-vector-field/">echarts-vector-field</a>
-      <a class="case-card" href="./packages/echarts-fractal/">echarts-fractal</a>
+    <section class="chart-gallery" aria-label="Examples">
+      <a class="chart-gallery-card" href="./packages/echarts-layout-core/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-layout-core.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Layout Core</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-fisheye/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-fisheye.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Fisheye</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-radial/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-radial.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Radial</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-concentric/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-concentric.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Concentric</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-grid/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-grid.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Grid</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-mds/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-mds.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">MDS</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-arc/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-arc.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Arc</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-radial-area/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-radial-area.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Radial Area</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-radial-boxplot/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-radial-boxplot.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Radial Boxplot</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-venn/hollow.html">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-venn-hollow.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Hollow Venn</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-venn/bubble.html">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-venn-bubble.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Bubble Venn</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-pack-bubble/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-pack-bubble.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Pack Bubble</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-circle-packing/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-circle-packing.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Circle Packing</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-nested-circle/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-nested-circle.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Nested Circle</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-organization-chart/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-organization-chart.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Organization Chart</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-mosaic/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-mosaic.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Mosaic</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-voronoi-treemap/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-voronoi-treemap.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Voronoi Treemap</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-subway/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-subway.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Subway</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-sequence-diagram/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-sequence-diagram.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Sequence Diagram</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-cause-effect/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-cause-effect.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Cause and Effect Diagram</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-flame/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-flame.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Flame</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-sunrise-sunset/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-sunrise-sunset.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Sunrise Sunset</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-lollipop/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-lollipop.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Lollipop</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-beeswarm/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-beeswarm.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Beeswarm</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-spiral/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-spiral.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Spiral Heatmap</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-smith/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-smith.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Smith Chart</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-vector-field/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-vector-field.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Vector Field</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-fractal/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-fractal.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Fractal Explorer</span>
+      </a>
     </section>
 
   </main>

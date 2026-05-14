@@ -13,6 +13,7 @@ await mkdir(outputDir, { recursive: true });
 
 await copyRequired('favicon.svg');
 await copyRequired('docs');
+await copyRequired('visual-baseline');
 generateDocsHtml();
 await copyRequired('node_modules/echarts/dist/echarts.min.js');
 await writeFile(path.join(outputDir, '.nojekyll'), '');

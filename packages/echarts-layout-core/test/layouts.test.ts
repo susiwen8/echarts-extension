@@ -461,28 +461,28 @@ test('computes arc layout and SVG arc edge paths', async () => {
   assert.deepEqual(
     result.nodes.map((node) => [node.id, node.x, node.y]),
     [
-      ['root', 136, 100],
-      ['a', 168, 100],
+      ['root', 200, 36],
+      ['a', 200, 68],
       ['b', 200, 100],
-      ['c', 232, 100],
-      ['d', 264, 100]
+      ['c', 200, 132],
+      ['d', 200, 164]
     ]
   );
 
-  assert.deepEqual(createArcPath([0, 0], [64, 0]), [
+  assert.deepEqual(createArcPath([0, 0], [0, 64]), [
     ['M', 0, 0],
-    ['A', 32, 32, 0, 0, 1, 64, 0]
+    ['A', 32, 32, 0, 0, 1, 0, 64]
   ]);
 
-  assert.deepEqual(createArcBezierShape([0, 20], [64, 40]), {
+  assert.deepEqual(createArcBezierShape([0, 20], [0, 84]), {
     x1: 0,
     y1: 20,
-    x2: 64,
-    y2: 40,
-    cpx1: 0,
-    cpy1: -12,
-    cpx2: 64,
-    cpy2: 8
+    x2: 0,
+    y2: 84,
+    cpx1: 32,
+    cpy1: 20,
+    cpx2: 32,
+    cpy2: 84
   });
 });
 
@@ -1226,11 +1226,11 @@ test('updates existing arc edge geometry when appended data reflows the layout',
   assert.equal(updatedFirstEdge, firstEdge);
   assert.notDeepEqual(updatedGeometry, initialGeometry);
   assert.deepEqual(updatedGeometry, {
-    cx: 136,
-    cy: 120,
+    cx: 200,
+    cy: 56,
     r: 16,
-    startAngle: Math.PI,
-    endAngle: 0,
+    startAngle: -Math.PI / 2,
+    endAngle: Math.PI / 2,
     clockwise: true
   });
 });

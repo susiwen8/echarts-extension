@@ -7,28 +7,82 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./shared/demo-page.css?v=interactions-4">
   <style>
+    html {
+      height: 100%;
+      overflow: hidden;
+    }
+
     .options-page {
+      height: 100vh;
+      overflow: hidden;
       background: #f5f7fb;
+    }
+
+    .options-page .gallery-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .options-page .demo-header {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px clamp(18px, 3vw, 32px);
+    }
+
+    .options-page .demo-header > div {
+      min-width: 0;
+    }
+
+    .options-page .demo-header h1 {
+      margin-top: 2px;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.05;
+    }
+
+    .options-page .eyebrow {
+      font-size: 11px;
+    }
+
+    .options-page .lede {
+      display: none;
+    }
+
+    .options-page .demo-links a {
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 6px;
+      font-size: 12px;
     }
 
     .options-layout {
       display: grid;
       grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
       gap: 18px;
+      flex: 1;
       width: min(1360px, calc(100% - 36px));
-      margin: 24px auto 64px;
+      min-height: 0;
+      margin: 12px auto;
     }
 
     .options-search {
       display: grid;
-      gap: 8px;
-      width: min(1360px, calc(100% - 36px));
-      margin: 18px auto 0;
-      padding: 14px 16px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #ffffff;
-      box-shadow: 0 8px 28px rgba(23, 32, 51, 0.06);
+      flex: 1 1 360px;
+      gap: 6px;
+      width: 100%;
+      max-width: 620px;
+      margin-left: auto;
+    }
+
+    .options-search__meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     .options-search__label {
@@ -48,11 +102,11 @@
     .options-search__field input {
       width: 100%;
       min-width: 0;
-      height: 40px;
+      height: 34px;
       border: 1px solid #cad4e5;
       border-radius: 6px;
       color: #172033;
-      font: 13px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font: 12.5px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       padding: 0 12px;
     }
 
@@ -62,7 +116,7 @@
     }
 
     .options-search__field button {
-      height: 40px;
+      height: 34px;
       border: 1px solid #cad4e5;
       border-radius: 6px;
       background: #f7f9fd;
@@ -81,19 +135,17 @@
     }
 
     .options-search__status {
-      min-height: 18px;
       margin: 0;
       color: var(--muted);
       font-size: 12px;
       font-weight: 720;
+      text-align: right;
     }
 
     .options-nav {
-      position: sticky;
-      top: 18px;
       display: grid;
-      align-self: start;
-      max-height: calc(100vh - 36px);
+      align-self: stretch;
+      min-height: 0;
       overflow: auto;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -126,13 +178,20 @@
     }
 
     .options-list {
-      display: grid;
-      gap: 18px;
+      display: block;
+      height: 100%;
       min-width: 0;
+      min-height: 0;
+      overflow: auto;
     }
 
     .option-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
       min-width: 0;
+      min-height: 0;
+      max-height: 100%;
       overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -140,14 +199,22 @@
       box-shadow: var(--shadow);
     }
 
+    .option-card[hidden] {
+      display: none;
+    }
+
     .option-card__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(220px, 0.8fr) minmax(300px, 1fr);
+      align-items: start;
       gap: 14px;
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
       background: #fbfcff;
+    }
+
+    .option-card__summary {
+      min-width: 0;
     }
 
     .option-card h2 {
@@ -179,8 +246,10 @@
     }
 
     .option-table-wrap {
+      flex: 1;
       width: 100%;
-      overflow-x: auto;
+      min-height: 0;
+      overflow: auto;
     }
 
     .option-table {
@@ -319,20 +388,54 @@
     @media (max-width: 900px) {
       .options-layout {
         grid-template-columns: 1fr;
+        grid-template-rows: minmax(80px, 24%) minmax(0, 1fr);
+        gap: 12px;
       }
 
-      .options-search__field {
+      .option-card__header {
         grid-template-columns: 1fr;
       }
 
+      .options-search {
+        max-width: none;
+        margin-left: 0;
+      }
+
+      .options-search__field {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
       .options-nav {
-        position: static;
-        max-height: none;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       }
 
       .options-nav a {
         border-right: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .options-page .demo-header {
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+      }
+
+      .options-page .demo-header h1 {
+        font-size: 22px;
+      }
+
+      .options-page .lede {
+        display: none;
+      }
+
+      .options-layout {
+        width: calc(100% - 20px);
+        margin: 10px auto;
+      }
+
+      .options-search__field {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -351,15 +454,6 @@
       </nav>
     </header>
 
-    <section class="options-search" aria-label="搜索图表配置项">
-      <label class="options-search__label" for="options-search">搜索</label>
-      <div class="options-search__field">
-        <input id="options-search" type="search" placeholder="图表、配置项、说明或可选值" autocomplete="off">
-        <button id="options-search-clear" type="button">清空</button>
-      </div>
-      <p id="options-search-status" class="options-search__status" aria-live="polite"></p>
-    </section>
-
     <section class="options-layout" aria-label="图表配置项">
       <nav id="options-nav" class="options-nav" aria-label="图表配置导航">
         <!-- OPTIONS_NAV:START -->
@@ -371,6 +465,6 @@
       </div>
     </section>
   </main>
-  <script defer src="./options.js?v=options-ssg-1"></script>
+  <script defer src="./options.js?v=options-ssg-2"></script>
 </body>
 </html>

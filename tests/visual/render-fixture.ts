@@ -132,12 +132,12 @@ const panels = [
       symbolSize: 18,
       label: {
         show: true,
-        position: 'bottom',
+        position: 'left',
         fontSize: 11,
         color: '#374151'
       },
       layout: {
-        nodeSep: 45,
+        nodeSep: 30,
         nodeSize: 18
       }
     }
