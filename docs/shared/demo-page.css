@@ -1,13 +1,51 @@
 :root {
+  color-scheme: light;
   --bg: #f5f7fb;
   --panel: #ffffff;
+  --panel-soft: #fbfcff;
+  --panel-muted: #f7f9fd;
   --ink: #172033;
+  --ink-soft: #26344d;
+  --control-ink: #1f2a3d;
   --muted: #647085;
   --line: #d9e0ea;
+  --line-strong: #bdc8d8;
   --blue: #3f6fd8;
+  --blue-strong: #163f9f;
+  --blue-soft: #edf3ff;
   --green: #248f6a;
   --orange: #c77725;
   --shadow: 0 18px 44px rgba(23, 32, 51, 0.1);
+  --field-bg: #ffffff;
+  --field-focus: #e7eefc;
+  --danger: #b42318;
+  --github-bg: #172033;
+  --github-bg-hover: #2f3f5b;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --panel: #111827;
+  --panel-soft: #151f32;
+  --panel-muted: #182338;
+  --ink: #e5edf8;
+  --ink-soft: #cbd7e6;
+  --control-ink: #dbe7f6;
+  --muted: #94a3b8;
+  --line: #2a374d;
+  --line-strong: #3b4b63;
+  --blue: #7aa2ff;
+  --blue-strong: #adc6ff;
+  --blue-soft: #17264a;
+  --green: #4bd0a0;
+  --orange: #f0ad55;
+  --shadow: 0 18px 44px rgba(0, 0, 0, 0.36);
+  --field-bg: #0f172a;
+  --field-focus: #21345c;
+  --danger: #fb7185;
+  --github-bg: #263449;
+  --github-bg-hover: #32425b;
 }
 
 * {
@@ -55,7 +93,7 @@ body.demo-page .demo-shell {
   justify-content: space-between;
   gap: 16px;
   padding: 8px clamp(18px, 3vw, 32px);
-  background: #fbfcff;
+  background: var(--panel-soft);
   border-bottom: 1px solid var(--line);
 }
 
@@ -99,8 +137,8 @@ body.demo-page .demo-shell {
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #ffffff;
-  color: #1f2a3d;
+  background: var(--field-bg);
+  color: var(--control-ink);
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
@@ -108,20 +146,58 @@ body.demo-page .demo-shell {
 
 .demo-links a:hover,
 .case-card:hover {
-  border-color: #9eb2d9;
-  color: #163f9f;
+  border-color: var(--blue);
+  color: var(--blue-strong);
 }
 
 .demo-links a.demo-link--github {
-  border-color: #172033;
-  background: #172033;
+  border-color: var(--github-bg);
+  background: var(--github-bg);
   color: #ffffff;
 }
 
 .demo-links a.demo-link--github:hover {
-  border-color: #2f3f5b;
-  background: #2f3f5b;
+  border-color: var(--github-bg-hover);
+  background: var(--github-bg-hover);
   color: #ffffff;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--field-bg);
+  color: var(--control-ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 760;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.theme-toggle::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: inset -4px -3px 0 var(--field-bg);
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--blue);
+  color: var(--blue-strong);
+  outline: none;
+}
+
+.theme-toggle:focus-visible {
+  box-shadow: 0 0 0 3px var(--field-focus);
 }
 
 .demo-stage {
@@ -190,7 +266,7 @@ body.demo-page .chart-frame {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--panel);
   box-shadow: var(--shadow);
 }
 
@@ -210,7 +286,7 @@ body.demo-page .demo-controls {
   gap: 12px;
   padding: 14px 14px 12px;
   border-bottom: 1px solid var(--line);
-  background: #fbfcff;
+  background: var(--panel-soft);
 }
 
 .demo-controls__header h2 {
@@ -232,10 +308,10 @@ body.demo-page .demo-controls {
 .demo-control-button {
   min-height: 32px;
   padding: 0 10px;
-  border: 1px solid #bdc8d8;
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  background: #ffffff;
-  color: #26344d;
+  background: var(--field-bg);
+  color: var(--ink-soft);
   font: inherit;
   font-size: 12px;
   font-weight: 760;
@@ -244,8 +320,8 @@ body.demo-page .demo-controls {
 }
 
 .demo-control-button:hover {
-  border-color: #8198c7;
-  color: #163f9f;
+  border-color: var(--blue);
+  color: var(--blue-strong);
 }
 
 .demo-control-button--primary {
@@ -265,12 +341,12 @@ body.demo-page .demo-controls {
   gap: 10px;
   padding: 14px;
   border-bottom: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--panel);
 }
 
 .demo-interactions__title {
   margin: 0;
-  color: #26344d;
+  color: var(--ink-soft);
   font-size: 12px;
   font-weight: 760;
   letter-spacing: 0;
@@ -289,7 +365,7 @@ body.demo-page .demo-controls {
 }
 
 .demo-interactions__zoom {
-  color: #163f9f;
+  color: var(--blue-strong);
   font-size: 13px;
   font-weight: 780;
   font-variant-numeric: tabular-nums;
@@ -305,7 +381,7 @@ body.demo-page .demo-controls {
 .demo-interactions__value {
   min-width: 0;
   overflow: hidden;
-  color: #172033;
+  color: var(--ink);
   font-size: 12px;
   font-weight: 650;
   line-height: 1.35;
@@ -354,14 +430,14 @@ body.demo-page .demo-controls {
 
 .demo-perf-summary strong,
 .demo-perf-results strong {
-  color: #172033;
+  color: var(--ink);
   font-size: 13px;
   font-weight: 780;
   font-variant-numeric: tabular-nums;
 }
 
 .demo-perf-results[data-over-budget="true"] strong:last-child {
-  color: #b42318;
+  color: var(--danger);
 }
 
 .demo-control {
@@ -380,7 +456,7 @@ body.demo-page .demo-controls {
 
 .demo-control__label {
   min-width: 0;
-  color: #26344d;
+  color: var(--ink-soft);
   font-size: 12px;
   font-weight: 740;
 }
@@ -411,7 +487,7 @@ body.demo-page .demo-controls {
   padding: 2px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--field-bg);
 }
 
 .demo-control input[type="text"],
@@ -419,7 +495,7 @@ body.demo-page .demo-controls {
 .demo-control textarea {
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--field-bg);
   color: var(--ink);
   font: inherit;
   font-size: 13px;
@@ -458,7 +534,7 @@ body.demo-page .demo-controls {
 .demo-option-editor summary {
   min-height: 42px;
   padding-top: 12px;
-  color: #26344d;
+  color: var(--ink-soft);
   font-size: 12px;
   font-weight: 760;
   cursor: pointer;
@@ -471,8 +547,8 @@ body.demo-page .demo-controls {
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 10px;
-  color: #172033;
-  background: #fbfcff;
+  color: var(--ink);
+  background: var(--panel-soft);
   font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -483,7 +559,7 @@ body.demo-page .demo-controls {
 .demo-option-editor__error {
   flex: 1;
   min-width: 0;
-  color: #b42318;
+  color: var(--danger);
   font-size: 12px;
   font-weight: 700;
 }
@@ -503,8 +579,8 @@ body.demo-page .demo-controls {
   flex-direction: column;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #ffffff;
-  color: #1f2a3d;
+  background: var(--panel);
+  color: var(--control-ink);
   text-decoration: none;
   box-shadow: 0 10px 30px rgba(23, 32, 51, 0.07);
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
@@ -512,13 +588,13 @@ body.demo-page .demo-controls {
 
 .chart-gallery-card:hover {
   transform: translateY(-2px);
-  border-color: #9eb2d9;
-  color: #163f9f;
+  border-color: var(--blue);
+  color: var(--blue-strong);
   box-shadow: 0 16px 38px rgba(23, 32, 51, 0.11);
 }
 
 .chart-gallery-card:focus-visible {
-  outline: 3px solid rgba(63, 111, 216, 0.32);
+  outline: 3px solid var(--field-focus);
   outline-offset: 3px;
 }
 
@@ -529,7 +605,7 @@ body.demo-page .demo-controls {
   justify-content: center;
   aspect-ratio: 16 / 10;
   border-bottom: 1px solid var(--line);
-  background: #f8fafc;
+  background: var(--panel-muted);
 }
 
 .chart-gallery-card__media img {
@@ -587,7 +663,7 @@ body.demo-page .demo-controls {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--panel);
   box-shadow: var(--shadow);
 }
 
@@ -595,7 +671,7 @@ body.demo-page .demo-controls {
   margin: 0;
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
-  color: #26344d;
+  color: var(--ink-soft);
   font-size: 15px;
   letter-spacing: 0;
 }
@@ -623,7 +699,8 @@ body.demo-page .demo-controls {
     justify-content: flex-end;
   }
 
-  .demo-links a {
+  .demo-links a,
+  .theme-toggle {
     min-height: 28px;
     padding: 0 8px;
     font-size: 11px;

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@echarts-extension/layout-core example</title>
   <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../../shared/demo-page.css?v=interactions-4">
   <style>
     * {
       box-sizing: border-box;
@@ -13,8 +14,8 @@
     body {
       min-height: 100vh;
       margin: 0;
-      color: #172033;
-      background: #f5f7fb;
+      color: var(--ink);
+      background: var(--bg);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -25,8 +26,8 @@
       justify-content: space-between;
       gap: 16px;
       padding: 8px clamp(18px, 3vw, 32px);
-      background: #fbfcff;
-      border-bottom: 1px solid #d9e0ea;
+      background: var(--panel-soft);
+      border-bottom: 1px solid var(--line);
     }
 
     .demo-header > div {
@@ -58,10 +59,10 @@
       align-items: center;
       min-height: 32px;
       padding: 0 10px;
-      border: 1px solid #d9e0ea;
+      border: 1px solid var(--line);
       border-radius: 6px;
-      background: #fff;
-      color: #1f2a3d;
+      background: var(--field-bg);
+      color: var(--control-ink);
       font-size: 12px;
       font-weight: 700;
       text-decoration: none;
@@ -78,10 +79,10 @@
     .layout-card {
       min-height: 330px;
       overflow: hidden;
-      border: 1px solid #d9e0ea;
+      border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 18px 44px rgba(23, 32, 51, 0.1);
+      background: var(--panel);
+      box-shadow: var(--shadow);
     }
 
     .layout-card__header {
@@ -91,12 +92,12 @@
       gap: 12px;
       margin: 0;
       padding: 14px 16px;
-      border-bottom: 1px solid #d9e0ea;
+      border-bottom: 1px solid var(--line);
     }
 
     .layout-card h2 {
       margin: 0;
-      color: #26344d;
+      color: var(--ink-soft);
       font-size: 15px;
       letter-spacing: 0;
     }
@@ -111,7 +112,7 @@
 
     .layout-card__zoom {
       min-width: 42px;
-      color: #163f9f;
+      color: var(--blue-strong);
       font-size: 12px;
       font-weight: 780;
       text-align: right;
@@ -121,10 +122,10 @@
     .layout-card__button {
       min-height: 30px;
       padding: 0 10px;
-      border: 1px solid #bdc8d8;
+      border: 1px solid var(--line-strong);
       border-radius: 6px;
-      background: #ffffff;
-      color: #26344d;
+      background: var(--field-bg);
+      color: var(--ink-soft);
       font: inherit;
       font-size: 12px;
       font-weight: 760;
@@ -133,8 +134,8 @@
     }
 
     .layout-card__button:hover {
-      border-color: #8198c7;
-      color: #163f9f;
+      border-color: var(--blue);
+      color: var(--blue-strong);
     }
 
     .layout-card__button--primary {
@@ -152,8 +153,8 @@
     .layout-card__event {
       overflow: hidden;
       padding: 8px 16px;
-      border-bottom: 1px solid #d9e0ea;
-      color: #647085;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
       font-size: 12px;
       font-weight: 650;
       line-height: 1.35;
@@ -211,7 +212,8 @@
         gap: 6px;
       }
 
-      .demo-links a {
+      .demo-links a,
+      .theme-toggle {
         min-height: 28px;
         padding: 0 8px;
         font-size: 11px;

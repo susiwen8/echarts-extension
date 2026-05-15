@@ -6,6 +6,7 @@
   <title>ECharts Extension Options</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./shared/demo-page.css?v=interactions-4">
+  <script src="./shared/theme-toggle.js?v=theme-1"></script>
   <style>
     html {
       height: 100%;
@@ -383,6 +384,68 @@
       color: var(--muted);
       font-size: 13px;
       font-weight: 720;
+    }
+
+    html[data-theme="dark"] .options-page {
+      background: var(--bg);
+    }
+
+    html[data-theme="dark"] .options-search__label,
+    html[data-theme="dark"] .option-card h2,
+    html[data-theme="dark"] .option-table th {
+      color: var(--ink);
+    }
+
+    html[data-theme="dark"] .options-search__field input,
+    html[data-theme="dark"] .options-search__field button,
+    html[data-theme="dark"] .options-nav,
+    html[data-theme="dark"] .option-card,
+    html[data-theme="dark"] .option-toggle {
+      background: var(--panel);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    html[data-theme="dark"] .options-search__field input:focus {
+      border-color: var(--blue);
+      outline-color: var(--field-focus);
+    }
+
+    html[data-theme="dark"] .options-search__field button:hover,
+    html[data-theme="dark"] .options-search__field button:focus-visible,
+    html[data-theme="dark"] .option-toggle:hover,
+    html[data-theme="dark"] .option-toggle:focus-visible {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: var(--blue-strong);
+    }
+
+    html[data-theme="dark"] .options-nav a,
+    html[data-theme="dark"] .option-table,
+    html[data-theme="dark"] .option-table__values {
+      color: var(--ink-soft);
+    }
+
+    html[data-theme="dark"] .options-nav a:hover,
+    html[data-theme="dark"] .options-nav a[aria-current="true"] {
+      color: var(--blue-strong);
+      background: var(--blue-soft);
+    }
+
+    html[data-theme="dark"] .option-card__header,
+    html[data-theme="dark"] .option-table th,
+    html[data-theme="dark"] .option-table__row--nested td {
+      background: var(--panel-soft);
+    }
+
+    html[data-theme="dark"] .option-table__row--search-match td {
+      background: #3b2c12;
+    }
+
+    html[data-theme="dark"] .option-card__meta a,
+    html[data-theme="dark"] .option-table code,
+    html[data-theme="dark"] .option-table__row--nested code {
+      color: var(--blue-strong);
     }
 
     @media (max-width: 900px) {

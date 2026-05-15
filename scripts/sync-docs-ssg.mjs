@@ -121,7 +121,8 @@ async function transformDocsHtml(filePath, html, locale = 'en') {
     html = localizeDocsHtml(relativeTemplatePath, html, locale);
   }
 
-  return injectRepositoryLink(html);
+  html = injectRepositoryLink(html);
+  return injectThemeScript(relativeTemplatePath, html);
 }
 
 function injectRepositoryLink(html) {
@@ -132,6 +133,17 @@ function injectRepositoryLink(html) {
     const link = `<a class="demo-link--github" href="${repositoryUrl}" target="_blank" rel="noreferrer">GitHub</a>`;
     return `${open}${links}\n${indent}${link}${close}`;
   });
+}
+
+function injectThemeScript(relativeTemplatePath, html) {
+  if (html.includes('theme-toggle.js')) return html;
+  const scriptPath = relativeTemplatePath.startsWith('packages/')
+    ? '../../shared/theme-toggle.js?v=theme-1'
+    : './shared/theme-toggle.js?v=theme-1';
+  return html.replace(
+    /(\n\s*<\/head>)/,
+    `\n  <script src="${scriptPath}"></script>$1`
+  );
 }
 
 function injectLayoutCoreMarkup(html, locale = 'en') {
