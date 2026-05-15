@@ -4,6 +4,13 @@ Language: English | [Chinese](./README_CN.md)
 
 ECharts Extension is a gallery of distinctive chart forms for browsing, comparing, and choosing visual ideas. This page keeps the project overview simple and visual; click any chart name to open its dedicated page.
 
+## Website
+
+Visit the live site at [susiwen8.github.io/echarts-extension](https://susiwen8.github.io/echarts-extension/).
+
+- Examples gallery: [docs/](https://susiwen8.github.io/echarts-extension/docs/)
+- Option documentation: [docs/options.html](https://susiwen8.github.io/echarts-extension/docs/options.html)
+
 ## Chart Gallery
 
 <table>

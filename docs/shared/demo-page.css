@@ -112,6 +112,18 @@ body.demo-page .demo-shell {
   color: #163f9f;
 }
 
+.demo-links a.demo-link--github {
+  border-color: #172033;
+  background: #172033;
+  color: #ffffff;
+}
+
+.demo-links a.demo-link--github:hover {
+  border-color: #2f3f5b;
+  background: #2f3f5b;
+  color: #ffffff;
+}
+
 .demo-stage {
   padding: clamp(16px, 4vw, 42px);
 }

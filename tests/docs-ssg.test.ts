@@ -111,6 +111,17 @@ describe('docs SSG pages', () => {
     }
   });
 
+  it('adds the project GitHub link to generated page navigation', () => {
+    const githubLink = 'href="https://github.com/susiwen8/echarts-extension"';
+    const galleryHtml = readDoc(path.join(generatedDocsDir, 'index.html'));
+    const packageHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-radial-boxplot/index.html'));
+    const chinesePackageHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-radial-boxplot/index.zh.html'));
+
+    expect(galleryHtml).toContain(githubLink);
+    expect(packageHtml).toContain(`${githubLink} target="_blank" rel="noreferrer">GitHub</a>`);
+    expect(chinesePackageHtml).toContain(`${githubLink} target="_blank" rel="noreferrer">GitHub</a>`);
+  });
+
   it('generates localized Chinese example pages with language switches', () => {
     const englishHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-radial-boxplot/index.html'));
     const chineseHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-radial-boxplot/index.zh.html'));

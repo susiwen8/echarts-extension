@@ -4,6 +4,13 @@
 
 ECharts Extension 收集了一组风格各异的可视化图表，适合用来浏览、比较和挑选图表形态。这里保留项目的整体印象和图表入口；点击图表名可进入对应页面。
 
+## 网站
+
+访问在线站点：[susiwen8.github.io/echarts-extension](https://susiwen8.github.io/echarts-extension/)。
+
+- 示例入口：[docs/](https://susiwen8.github.io/echarts-extension/docs/)
+- 配置文档：[docs/options.zh.html](https://susiwen8.github.io/echarts-extension/docs/options.zh.html)
+
 ## 图表一览
 
 <table>

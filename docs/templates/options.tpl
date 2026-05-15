@@ -451,6 +451,7 @@
       <nav class="demo-links" aria-label="Documentation navigation">
         <a href="./">Examples</a>
         <a href="./options.zh.html">中文</a>
+        <a class="demo-link--github" href="https://github.com/susiwen8/echarts-extension" target="_blank" rel="noreferrer">GitHub</a>
       </nav>
     </header>
 

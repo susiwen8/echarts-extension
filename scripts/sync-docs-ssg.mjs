@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const docsDir = path.join(rootDir, 'docs');
 const templatesDir = path.join(docsDir, 'templates');
+const repositoryUrl = 'https://github.com/susiwen8/echarts-extension';
 
 const rawArgs = process.argv.slice(2);
 const args = new Set(rawArgs);
@@ -116,8 +117,21 @@ async function transformDocsHtml(filePath, html, locale = 'en') {
     html = injectLargeDemoPayload(html, largeExampleName);
   }
 
-  if (!isLocalizedDocsTemplate(relativeTemplatePath)) return html;
-  return localizeDocsHtml(relativeTemplatePath, html, locale);
+  if (isLocalizedDocsTemplate(relativeTemplatePath)) {
+    html = localizeDocsHtml(relativeTemplatePath, html, locale);
+  }
+
+  return injectRepositoryLink(html);
+}
+
+function injectRepositoryLink(html) {
+  if (html.includes(`href="${repositoryUrl}"`)) return html;
+
+  return html.replace(/(<nav class="demo-links"[^>]*>)([\s\S]*?)(\s*<\/nav>)/, (match, open, links, close) => {
+    const indent = links.match(/\n(\s*)<a\b/)?.[1] || '        ';
+    const link = `<a class="demo-link--github" href="${repositoryUrl}" target="_blank" rel="noreferrer">GitHub</a>`;
+    return `${open}${links}\n${indent}${link}${close}`;
+  });
 }
 
 function injectLayoutCoreMarkup(html, locale = 'en') {
