@@ -51,6 +51,4 @@ jobs:
         run: npm run release
 
       - name: Publish allowlisted packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: node scripts/npm-publish-packages.mjs --packages "$REQUESTED_PACKAGES" --provenance
+        run: node scripts/npm-publish-packages.mjs --packages "$REQUESTED_PACKAGES"

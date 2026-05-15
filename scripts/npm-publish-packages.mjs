@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { resolvePublishPlan } from './npm-publish-plan.mjs';
 
-export function createPublishArgs(pkg, { dryRun = false, provenance = true, rootDir = process.cwd() } = {}) {
+export function createPublishArgs(pkg, { dryRun = false, provenance = false, rootDir = process.cwd() } = {}) {
   const args = ['publish', path.resolve(rootDir, pkg.dir)];
   if (provenance) args.push('--provenance');
   if (pkg.name.startsWith('@')) args.push('--access', 'public');
@@ -15,14 +15,10 @@ export function createPublishArgs(pkg, { dryRun = false, provenance = true, root
 
 export function publishPackages({
   dryRun = false,
-  provenance = true,
+  provenance = false,
   requestedPackages = process.env.REQUESTED_PACKAGES ?? 'all',
   rootDir = process.cwd()
 } = {}) {
-  if (!dryRun && !process.env.NODE_AUTH_TOKEN) {
-    throw new Error('NODE_AUTH_TOKEN is required to publish packages to npm.');
-  }
-
   const plan = resolvePublishPlan({ requestedPackages, rootDir });
   for (const pkg of plan.packages) {
     const args = createPublishArgs(pkg, { dryRun, provenance, rootDir });
@@ -43,7 +39,7 @@ export function publishPackages({
 function parseArgs(argv) {
   const args = {
     dryRun: false,
-    provenance: true,
+    provenance: false,
     requestedPackages: process.env.REQUESTED_PACKAGES ?? 'all',
     rootDir: process.cwd()
   };

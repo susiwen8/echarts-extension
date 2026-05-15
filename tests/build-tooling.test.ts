@@ -170,14 +170,15 @@ test('npm publish workflow only publishes allowlisted packages', () => {
   assert.match(workflow, /uses: actions\/checkout@v6/);
   assert.match(workflow, /uses: actions\/setup-node@v6/);
   assert.match(workflow, /registry-url: https:\/\/registry\.npmjs\.org/);
-  assert.match(workflow, /NODE_AUTH_TOKEN: \$\{\{ secrets\.NPM_TOKEN \}\}/);
+  assert.doesNotMatch(workflow, /NODE_AUTH_TOKEN/);
+  assert.doesNotMatch(workflow, /secrets\.NPM_TOKEN/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /run: npm run test:unit/);
   assert.match(workflow, /run: npm run test:coverage/);
   assert.match(workflow, /run: npm run release/);
   assert.match(workflow, /node scripts\/npm-publish-plan\.mjs/);
   assert.match(workflow, /node scripts\/npm-publish-packages\.mjs/);
-  assert.match(workflow, /--provenance/);
+  assert.doesNotMatch(workflow, /--provenance/);
 });
 
 test('release builds keep minified and development bundles together', async () => {

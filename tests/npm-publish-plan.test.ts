@@ -113,7 +113,19 @@ test('npm publish plan writes GitHub output values for downstream steps', () => 
   assert.match(readFileSync(path.join(root, '.github/npm-publish-allowlist.json'), 'utf8'), /@echarts-extension\/radial/);
 });
 
-test('npm publish command receives a filesystem path instead of a package spec', () => {
+test('npm publish command uses trusted publishing without token or explicit provenance', () => {
+  const rootDir = path.join(os.tmpdir(), 'echarts-publish-root');
+
+  assert.deepEqual(
+    createPublishArgs(
+      { dir: 'packages/echarts-radial', name: '@echarts-extension/radial' },
+      { dryRun: true, rootDir }
+    ),
+    ['publish', path.join(rootDir, 'packages/echarts-radial'), '--access', 'public', '--dry-run']
+  );
+});
+
+test('npm publish command can still request provenance explicitly', () => {
   const rootDir = path.join(os.tmpdir(), 'echarts-publish-root');
 
   assert.deepEqual(
