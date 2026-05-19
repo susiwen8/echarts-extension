@@ -331,6 +331,7 @@ function localizeChineseText(html) {
     ['Circle Packing', '圆形打包图'],
     ['Concentric', '同心布局'],
     ['Fisheye', '鱼眼交互'],
+    ['All ECharts Charts', '全部 ECharts 图表'],
     ['Flame', '火焰图'],
     ['Fractal Explorer', '分形浏览器'],
     ['Grid', '网格布局'],
@@ -362,6 +363,9 @@ function localizeChineseText(html) {
     ['Hierarchical values are packed into nested circles without external layout dependencies.', '层级数值被打包到嵌套圆中，不依赖外部布局库。'],
     ['High-degree graph nodes sit closer to the center.', '度数更高的图节点会更靠近中心。'],
     ['Reusable magnifier interaction for standard and custom ECharts charts.', '适用于标准和自定义 ECharts 图表的可复用放大镜交互。'],
+    ['Every built-in ECharts series below uses the same top-level fisheye component.', '下面每个 ECharts 内置系列都使用同一个顶层鱼眼组件。'],
+    ['ECharts chart fisheye matrix', 'ECharts 图表鱼眼矩阵'],
+    ['This page doubles as a quick compatibility smoke test for the reusable magnifier.', '这个页面也用作可复用放大镜的快速兼容性冒烟测试。'],
     ['Hierarchical values are laid out as a profile flame graph.', '层级数值以性能剖析火焰图的形式展开。'],
     ['Wheel to zoom and drag to pan; each view is recomputed from the complex plane.', '滚轮缩放、拖拽平移，每个视图都会从复平面重新计算。'],
     ['Graph nodes are placed into a deterministic grid, with optional cluster/value sorting and overlap-safe cells.', '图节点放入确定性的网格，可按集群或数值排序，并保持单元格不重叠。'],
@@ -414,6 +418,7 @@ function localizeChineseText(html) {
     ['Options', '配置项'],
     ['Large data', '大数据'],
     ['Standard example', '标准示例'],
+    ['All ECharts charts', '全部 ECharts 图表'],
     ['Bubble case', '气泡示例'],
     ['Hollow case', '空心示例']
   ]);
@@ -458,6 +463,7 @@ function localizeChineseLinks(relativeHtmlPath, html) {
     .replace(/href="\.\.\/\.\.\/"/g, 'href="../../index.zh.html"')
     .replace(/href="\.\.\/\.\.\/options\.html#/g, 'href="../../options.zh.html#')
     .replace(/href="\.\/large\.html"/g, 'href="./large.zh.html"')
+    .replace(/href="\.\/all-charts\.html"/g, 'href="./all-charts.zh.html"')
     .replace(/href="\.\/hollow\.html"/g, 'href="./hollow.zh.html"')
     .replace(/href="\.\/bubble\.html"/g, 'href="./bubble.zh.html"')
     .replace(/href="\.\/"/g, 'href="./index.zh.html"');

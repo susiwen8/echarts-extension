@@ -63,10 +63,25 @@ describe('docs SSG pages', () => {
     const payload = readEmbeddedJson(html, 'data-demo-payload');
 
     expect(html).toContain('data-example="fisheye"');
+    expect(html).toContain('href="./all-charts.html">All ECharts charts</a>');
     expect(payload.exampleName).toBe('fisheye');
     expect(payload.data.fisheyeScatter.length).toBeGreaterThan(100);
     expect(payload.controlValues.fisheyeRadius).toBe(170);
     expect(payload.controlValues.dotScale).toBe(0.42);
+  });
+
+  it('generates the fisheye all ECharts charts matrix page', () => {
+    const html = readDoc(path.join(generatedDocsDir, 'packages/echarts-fisheye/all-charts.html'));
+    const chineseHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-fisheye/all-charts.zh.html'));
+
+    expect(html).toContain('data-fisheye-echarts-gallery');
+    expect(html).toContain('fisheye-echarts-gallery.js?v=all-echarts-charts');
+    expect(html).toContain('Every built-in ECharts series below uses the same top-level fisheye component.');
+    expect(html).toContain('href="../../options.html#echarts-fisheye"');
+    expect(chineseHtml).toContain('<html lang="zh-CN">');
+    expect(chineseHtml).toContain('全部 ECharts 图表');
+    expect(chineseHtml).toContain('href="../../options.zh.html#echarts-fisheye"');
+    expect(chineseHtml).toContain('href="./all-charts.html" lang="en">English</a>');
   });
 
   it('embeds initial large demo payloads in large data pages', () => {
