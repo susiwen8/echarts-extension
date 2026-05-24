@@ -9,5 +9,6 @@ docs/*.html
 docs/**/*.html
 .DS_Store
 .omx/
+.superpowers/
 packages/*/dist/
 packages/*/lib/
