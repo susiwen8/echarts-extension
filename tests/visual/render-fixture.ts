@@ -14,6 +14,7 @@ import '@echarts-extension/venn';
 import '@echarts-extension/nested-circle';
 import '@echarts-extension/mosaic';
 import '@echarts-extension/subway';
+import '@echarts-extension/evolution-fluid';
 import '@echarts-extension/flame';
 import '@echarts-extension/sunrise-sunset';
 import '@echarts-extension/lollipop';
@@ -32,6 +33,8 @@ export const mosaicSnapshotPath = path.resolve('tests/visual/__snapshots__/mosai
 export const mosaicActualPath = path.resolve('test-results/visual/mosaic.actual.svg');
 export const subwaySnapshotPath = path.resolve('tests/visual/__snapshots__/subway.svg');
 export const subwayActualPath = path.resolve('test-results/visual/subway.actual.svg');
+export const evolutionFluidSnapshotPath = path.resolve('tests/visual/__snapshots__/evolution-fluid.svg');
+export const evolutionFluidActualPath = path.resolve('test-results/visual/evolution-fluid.actual.svg');
 export const flameSnapshotPath = path.resolve('tests/visual/__snapshots__/flame.svg');
 export const flameActualPath = path.resolve('test-results/visual/flame.actual.svg');
 export const sunriseSunsetSnapshotPath = path.resolve('tests/visual/__snapshots__/sunrise-sunset.svg');
@@ -163,6 +166,28 @@ const bubbleVennData = [
   { name: 'Massive Attack', value: 23, itemStyle: { color: '#6fc7c3' } },
   { name: 'Portishead', value: 18, itemStyle: { color: '#d78bca' } }
 ];
+
+const evolutionFluidData = {
+  entities: [
+    { id: 'aether', name: 'Aether', industry: 'AI', value: 132, itemStyle: { color: '#38bdf8' } },
+    { id: 'nova', name: 'Nova', industry: 'Cloud', value: 88, itemStyle: { color: '#34d399' } },
+    { id: 'pixel', name: 'Pixel', industry: 'Media', value: 54, itemStyle: { color: '#a78bfa' } },
+    { id: 'orbit', name: 'Orbit', industry: 'Cloud', value: 46, itemStyle: { color: '#f59e0b' } },
+    { id: 'studio', name: 'Studio', industry: 'Media', value: 38, itemStyle: { color: '#fb7185' } },
+    { id: 'lumen', name: 'Lumen', industry: 'AI', value: 42, itemStyle: { color: '#22c55e' } },
+    { id: 'prism', name: 'Prism', industry: 'AI', value: 34, itemStyle: { color: '#60a5fa' } },
+    { id: 'relay', name: 'Relay', industry: 'Cloud', value: 30, itemStyle: { color: '#14b8a6' } },
+    { id: 'atlas', name: 'Atlas', industry: 'Cloud', value: 36, itemStyle: { color: '#f97316' } },
+    { id: 'stream', name: 'Stream', industry: 'Media', value: 32, itemStyle: { color: '#ec4899' } }
+  ],
+  events: [
+    { id: 'a-relay', time: 2020, type: 'acquire', sources: ['relay'], targets: ['nova'], value: 30 },
+    { id: 'a-orbit', time: 2022, type: 'acquire', sources: ['orbit'], targets: ['nova'], value: 34 },
+    { id: 'm-media', time: 2023, type: 'merge', sources: ['pixel', 'studio'], targets: ['pixel-studio'], value: 92 },
+    { id: 'a-nova', time: 2024, type: 'acquire', sources: ['nova'], targets: ['aether'], value: 122 },
+    { id: 's-prism', time: 2025, type: 'spinOff', sources: ['aether'], targets: ['prism'], value: 24 }
+  ]
+};
 
 const vennPanels = [
   {
@@ -912,6 +937,26 @@ export function renderFlameFixture() {
       }
     ]
   }, 960, 620));
+}
+
+export function renderEvolutionFluidFixture() {
+  return normalizeSvg(renderOption({
+    animation: false,
+    backgroundColor: '#ffffff',
+    series: [
+      {
+        type: 'evolutionFluid',
+        width: '94%',
+        height: '82%',
+        top: 24,
+        entities: evolutionFluidData.entities,
+        events: evolutionFluidData.events,
+        currentTime: 2021.82,
+        dropletStyle: { bridgeThreshold: 260, bridgeOpacity: 0.92, minRadius: 6, maxRadius: 18 },
+        label: { show: false, fontSize: 10 }
+      }
+    ]
+  }, 520, 360));
 }
 
 export function renderSunriseSunsetFixture() {

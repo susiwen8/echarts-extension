@@ -4,6 +4,8 @@ import { test } from 'vitest';
 import { normalizeSvgForComparison } from './svg-normalize.ts';
 import {
   actualPath,
+  evolutionFluidActualPath,
+  evolutionFluidSnapshotPath,
   flameActualPath,
   flameSnapshotPath,
   lollipopActualPath,
@@ -16,6 +18,7 @@ import {
   radialBoxplotSnapshotPath,
   readSnapshot,
   renderFixture,
+  renderEvolutionFluidFixture,
   renderFlameFixture,
   renderLollipopFixture,
   renderMosaicFixture,
@@ -82,6 +85,12 @@ const cases = [
     snapshotPath: subwaySnapshotPath
   },
   {
+    actualPath: evolutionFluidActualPath,
+    name: 'Evolution fluid',
+    render: renderEvolutionFluidFixture,
+    snapshotPath: evolutionFluidSnapshotPath
+  },
+  {
     actualPath: flameActualPath,
     name: 'Flame',
     render: renderFlameFixture,
@@ -101,16 +110,25 @@ const cases = [
   }
 ];
 
+const caseFilter = process.env.VISUAL_CASE?.toLowerCase();
+const selectedCases = caseFilter
+  ? cases.filter((visualCase) => visualCase.name.toLowerCase().includes(caseFilter))
+  : cases;
+
+if (caseFilter && selectedCases.length === 0) {
+  throw new Error(`No visual cases matched VISUAL_CASE=${process.env.VISUAL_CASE}`);
+}
+
 test('SVG visual baselines match rendered fixtures', async () => {
   if (process.env.UPDATE_VISUAL_SNAPSHOTS === '1') {
-    for (const visualCase of cases) {
+    for (const visualCase of selectedCases) {
       await writeSnapshot(visualCase.render(), visualCase.snapshotPath);
       console.log(`Updated visual baseline: ${visualCase.snapshotPath}`);
     }
     return;
   }
 
-  for (const visualCase of cases) {
+  for (const visualCase of selectedCases) {
     const actual = visualCase.render();
     let expected;
     try {

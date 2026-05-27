@@ -104,6 +104,12 @@ export const browserVisualCases = [
     screenshotSelector: 'main'
   },
   {
+    name: 'echarts-evolution-fluid',
+    path: '/docs/packages/echarts-evolution-fluid/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main'
+  },
+  {
     name: 'echarts-sequence-diagram',
     path: '/docs/packages/echarts-sequence-diagram/',
     readySelector: '#chart canvas, #chart svg',

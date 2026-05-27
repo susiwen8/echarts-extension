@@ -93,6 +93,10 @@ Visit the live site at [susiwen8.github.io/echarts-extension](https://susiwen8.g
       <a href="./packages/echarts-subway/README.md"><strong>Subway</strong></a><br>
       <img src="./visual-baseline/echarts-subway.png" alt="Subway" width="520">
     </td>
+    <td align="center" width="50%">
+      <a href="./packages/echarts-evolution-fluid/README.md"><strong>Evolution Fluid</strong></a><br>
+      <img src="./visual-baseline/echarts-evolution-fluid.png" alt="Evolution Fluid" width="520">
+    </td>
   </tr>
   <tr>
     <td align="center" width="50%">

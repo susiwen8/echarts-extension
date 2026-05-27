@@ -464,6 +464,34 @@
         ]
       }
     ],
+    evolutionFluid: {
+      entities: [
+        { id: 'aether', name: 'Aether AI', industry: 'AI', value: 132, itemStyle: { color: '#38bdf8' } },
+        { id: 'nova', name: 'Nova Cloud', industry: 'Cloud', value: 88, itemStyle: { color: '#34d399' } },
+        { id: 'pixel', name: 'PixelForge', industry: 'Media', value: 54, itemStyle: { color: '#a78bfa' } },
+        { id: 'orbit', name: 'Orbit Data', industry: 'Cloud', value: 46, itemStyle: { color: '#f59e0b' } },
+        { id: 'studio', name: 'Studio Labs', industry: 'Media', value: 38, itemStyle: { color: '#fb7185' } },
+        { id: 'lumen', name: 'Lumen ML', industry: 'AI', value: 42, itemStyle: { color: '#22c55e' } },
+        { id: 'prism', name: 'Prism Vision', industry: 'AI', value: 34, itemStyle: { color: '#60a5fa' } },
+        { id: 'relay', name: 'RelayStack', industry: 'Cloud', value: 30, itemStyle: { color: '#14b8a6' } },
+        { id: 'atlas', name: 'Atlas DB', industry: 'Cloud', value: 36, itemStyle: { color: '#f97316' } },
+        { id: 'quanta', name: 'Quanta Labs', industry: 'AI', value: 28, itemStyle: { color: '#6366f1' } },
+        { id: 'stream', name: 'Streamly', industry: 'Media', value: 32, itemStyle: { color: '#ec4899' } },
+        { id: 'forge', name: 'Forge Ads', industry: 'Media', value: 26, itemStyle: { color: '#84cc16' } },
+        { id: 'aura', name: 'Aura Robotics', industry: 'AI', value: 24, itemStyle: { color: '#06b6d4' } }
+      ],
+      events: [
+        { id: 'f-aether', time: 2018, type: 'found', targets: ['aether'], value: 132 },
+        { id: 'f-nova', time: 2019, type: 'found', targets: ['nova'], value: 88 },
+        { id: 'a-relay', time: 2020, type: 'acquire', sources: ['relay'], targets: ['nova'], value: 30 },
+        { id: 'a-quanta', time: 2021, type: 'acquire', sources: ['quanta'], targets: ['aether'], value: 28 },
+        { id: 'a-orbit', time: 2022, type: 'acquire', sources: ['orbit'], targets: ['nova'], value: 34 },
+        { id: 'm-media', time: 2023, type: 'merge', sources: ['pixel', 'studio'], targets: ['pixel-studio'], value: 92 },
+        { id: 'a-nova', time: 2024, type: 'acquire', sources: ['nova'], targets: ['aether'], value: 122 },
+        { id: 's-aura', time: 2025, type: 'spinOff', sources: ['aether'], targets: ['aura'], value: 24 },
+        { id: 'a-media', time: 2026, type: 'acquire', sources: ['pixel-studio'], targets: ['aether'], value: 92 }
+      ]
+    },
     flame: {
       name: 'root',
       children: [

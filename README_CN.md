@@ -93,6 +93,10 @@ ECharts Extension 收集了一组风格各异的可视化图表，适合用来�
       <a href="./packages/echarts-subway/README_CN.md"><strong>Subway</strong></a><br>
       <img src="./visual-baseline/echarts-subway.png" alt="Subway" width="520">
     </td>
+    <td align="center" width="50%">
+      <a href="./packages/echarts-evolution-fluid/README_CN.md"><strong>Evolution Fluid</strong></a><br>
+      <img src="./visual-baseline/echarts-evolution-fluid.png" alt="Evolution Fluid" width="520">
+    </td>
   </tr>
   <tr>
     <td align="center" width="50%">

@@ -11,6 +11,7 @@ import '@echarts-extension/circle-packing';
 import '@echarts-extension/concentric';
 import '@echarts-extension/fisheye';
 import '@echarts-extension/fractal';
+import '@echarts-extension/evolution-fluid';
 import '@echarts-extension/flame';
 import '@echarts-extension/grid';
 import '@echarts-extension/lollipop';
@@ -347,6 +348,21 @@ test('radial, temporal, network, and vector custom charts render branch-heavy va
     enterAnimation: false
   }, { width: 900, height: 560 });
   renderSeries({
+    type: 'evolutionFluid',
+    entities: [
+      { id: 'alpha', name: 'Alpha', industry: 'AI', value: 100, itemStyle: { color: '#38bdf8' } },
+      { id: 'beta', name: 'Beta', industry: 'Cloud', value: 60, label: { show: false } }
+    ],
+    events: [
+      { time: 2020, type: 'acquire', sources: ['beta'], targets: ['alpha'], value: 40 },
+      { time: 2021, type: 'spinOff', sources: ['alpha'], targets: ['gamma'], value: 20 }
+    ],
+    currentTime: 2021,
+    dropletStyle: { bridgeThreshold: 240, bridgeOpacity: 0.6 },
+    label: { show: true, formatter: '{b}:{c}' },
+    animation: false
+  }, { width: 900, height: 560 });
+  renderSeries({
     type: 'causeEffect',
     effect: 'Late delivery',
     categories: [
@@ -577,6 +593,7 @@ test('custom chart renderers tolerate empty, malformed, and disabled option vari
     { type: 'spiral', data: null, label: { show: true }, itemStyle: null },
     { type: 'subway', data: null, label: { show: true }, routeLabel: { show: true } },
     { type: 'sequenceDiagram', data: null, participants: null, activations: null, label: { show: true }, participantLabel: { show: true } },
+    { type: 'evolutionFluid', entities: null, events: null, label: { show: true }, timeline: { show: false } },
     { type: 'causeEffect', data: null, effect: null, label: { show: true }, effectLabel: { show: true } },
     { type: 'sunriseSunset', data: null, label: { show: true }, sunIcon: null, moonIcon: null },
     { type: 'vectorField', data: null, label: { show: true }, lineStyle: null, arrowStyle: null },

@@ -16,6 +16,7 @@
   "@echarts-extension/mosaic",
   "@echarts-extension/voronoi-treemap",
   "@echarts-extension/subway",
+  "@echarts-extension/evolution-fluid",
   "@echarts-extension/sequence-diagram",
   "@echarts-extension/cause-effect",
   "@echarts-extension/flame",

@@ -298,6 +298,51 @@
         }]);
       }
     },
+    'evolution-fluid': {
+      packageName: 'echarts-evolution-fluid',
+      title: 'Evolution Fluid Large Timeline',
+      defaultCount: 100000,
+      maxCount: ONE_MILLION,
+      renderLimit: 700,
+      trendLimit: 260,
+      createData(count) {
+        const renderCount = clampCount(count, this.renderLimit);
+        const industries = ['AI', 'Cloud', 'Media', 'Fintech', 'Energy'];
+        const entities = Array.from({ length: renderCount }, (_, index) => ({
+          id: `entity-${index}`,
+          name: `Entity ${index}`,
+          industry: industries[index % industries.length],
+          value: 20 + (index * 17) % 140,
+          itemStyle: { color: palette[index % palette.length] }
+        }));
+        const eventCount = Math.max(1, Math.floor(renderCount * 0.8));
+        const events = Array.from({ length: eventCount }, (_, index) => ({
+          id: `event-${index}`,
+          time: 2010 + index,
+          type: index % 5 === 0 ? 'split' : index % 3 === 0 ? 'merge' : 'acquire',
+          sources: [`entity-${index % renderCount}`],
+          targets: [`entity-${(index + 7) % renderCount}`],
+          value: 5 + (index * 11) % 60
+        }));
+        return withMeta({ entities, events }, count, renderCount);
+      },
+      createOption(payload) {
+        const lastEvent = payload.data.events[payload.data.events.length - 1];
+        return perfOption(this, payload, [{
+          type: 'evolutionFluid',
+          top: 42,
+          width: '94%',
+          height: '88%',
+          entities: payload.data.entities,
+          events: payload.data.events,
+          currentTime: lastEvent?.time,
+          label: { show: false },
+          timeline: { show: true },
+          dropletStyle: { maxRadius: 30, bridgeThreshold: 160, bridgeOpacity: 0.38 },
+          animation: false
+        }]);
+      }
+    },
     'sequence-diagram': {
       packageName: 'echarts-sequence-diagram',
       title: 'Sequence Diagram Large Trace',

@@ -53,6 +53,8 @@
       'Add data': '添加数据',
       'Delete data': '删除数据',
       'Replay': '重播',
+      'Play time': '播放时间',
+      'Pause time': '暂停时间',
       'Reset': '重置',
       'Interactions': '交互',
       'Reset view': '重置视图',
@@ -90,6 +92,8 @@
       'Radial Boxplot': '径向箱线图',
       'Radial': '径向布局',
       'Sequence Diagram': '时序图',
+      'Evolution Fluid': '演化水滴图',
+      'Evolution Fluid Large Timeline': '演化水滴大规模时间线',
       'Smith Chart': '史密斯圆图',
       'Spiral Heatmap': '螺旋热力图',
       'Subway': '地铁线路图',
@@ -172,6 +176,7 @@
       'Tick count': '刻度数',
       'Band opacity': '范围带透明度',
       'Line width': '线宽',
+      'Bridge threshold': '融合距离',
       'Show symbols': '显示符号',
       'Box width': '箱体宽度',
       'Cap width': '端帽宽度',
@@ -1036,6 +1041,49 @@
         ]
       })
     },
+    'evolution-fluid': {
+      controls: [
+        {
+          ...playbackRangeControl('currentTime', 'Time', 'series.0.currentTime', 2019.7, 2018, 2026, 0.01),
+          playbackDuration: 60000,
+          playbackAutoplay: true,
+          playbackLoop: true,
+          playbackFinalHold: 1200,
+          playbackTimer: true
+        }
+      ],
+      option: (data) => ({
+        animation: false,
+        backgroundColor: '#ffffff',
+        series: [
+          {
+            type: 'evolutionFluid',
+            left: 'center',
+            top: 'center',
+            width: '92%',
+            height: '82%',
+            entities: data.evolutionFluid.entities,
+            events: data.evolutionFluid.events,
+            currentTime: 2019.7,
+            fluidSimulation: {
+              enabled: true,
+              mode: 'implicit',
+              quality: 'balanced',
+              areaConservation: true
+            },
+            dropletStyle: {
+              opacity: 0.94,
+              bridgeOpacity: 1,
+              bridgeThreshold: 260,
+              maxRadius: 14
+            },
+            timeline: { show: false },
+            label: { show: false },
+            emphasis: { itemStyle: defaultEmphasisItemStyle }
+          }
+        ]
+      })
+    },
     flame: {
       controls: [
         ...commonChartControls('Profile Flame Graph', [0]),
@@ -1516,6 +1564,15 @@
     };
   }
 
+
+  function playbackRangeControl(id, label, targets, defaultValue, min, max, step, mapValue) {
+    return {
+      ...rangeControl(id, label, targets, defaultValue, min, max, step, mapValue),
+      playback: true,
+      realtime: true
+    };
+  }
+
   function isAnimationTimingTarget(targets) {
     return targets.some((target) => (
       target.endsWith('enterAnimation.duration') ||
@@ -1643,6 +1700,7 @@
     const option = entry.option(data);
     applyControlValues(option, entry.controls || [], controlValues || {}, context);
     applyDataMutationAnimation(option, context);
+    applyRealtimeControlContext(option, context);
     return applyDemoInteractionDefaults(option);
   }
 
@@ -1689,6 +1747,10 @@
     return option;
   }
 
+  function seriesList(option) {
+    return Array.isArray(option?.series) ? option.series : [option?.series].filter(Boolean);
+  }
+
   function applySeriesInteractionDefaults(seriesOption) {
     if (!seriesOption || typeof seriesOption !== 'object') return;
     const emphasis = ensureObject(seriesOption, 'emphasis');
@@ -1729,6 +1791,17 @@
     current[pathKey(parts[parts.length - 1])] = value;
   }
 
+  function applyRealtimeControlContext(option, context = {}) {
+    if (!option || context.realtimeControlId == null) return;
+    option.animationDurationUpdate = 0;
+    option.animationEasingUpdate = 'linear';
+    seriesList(option).forEach((series) => {
+      series.animationDurationUpdate = 0;
+      series.animationEasingUpdate = 'linear';
+    });
+  }
+
+
   function pathKey(part) {
     const numeric = Number(part);
     return Number.isInteger(numeric) && String(numeric) === part ? numeric : part;
@@ -1765,7 +1838,10 @@
     const controlsPanel = createControlsPanel(entry.controls || [], state, {
       onChange(control) {
         customOption = null;
-        render({ interactionControlId: control?.id });
+        render({
+          interactionControlId: control?.id,
+          realtimeControlId: control?.realtime === true ? control.id : null
+        });
       },
       onReset() {
         Object.assign(state, createControlState(entry.controls || []));
@@ -1905,6 +1981,7 @@
     if (exampleName === 'mosaic') return appendMosaicData(data, index);
     if (exampleName === 'voronoi-treemap') return appendVoronoiTreemapData(data, index);
     if (exampleName === 'subway') return appendSubwayData(data, index);
+    if (exampleName === 'evolution-fluid') return appendEvolutionFluidData(data, index);
     if (exampleName === 'flame') return appendFlameData(data, index);
     if (exampleName === 'sunrise-sunset') return appendSunriseSunsetData(data, index);
     if (exampleName === 'fisheye') return appendFisheyeScatterData(data, index);
@@ -1930,6 +2007,7 @@
     if (exampleName === 'mosaic') return removeArrayData(data, 'mosaic', isAddedItem);
     if (exampleName === 'voronoi-treemap') return removeTreeData(data.voronoiTreemap);
     if (exampleName === 'subway') return removeSubwayData(data);
+    if (exampleName === 'evolution-fluid') return removeEvolutionFluidData(data);
     if (exampleName === 'flame') return removeTreeData(data.flame);
     if (exampleName === 'sunrise-sunset') return removeArrayData(data, 'sunriseSunset', isAddedItem, 'first');
     if (exampleName === 'fisheye') return removeArrayData(data, 'fisheyeScatter', isAddedItem);
@@ -2042,6 +2120,62 @@
     return true;
   }
 
+  function removeEvolutionFluidData(data) {
+    const evolution = data?.evolutionFluid;
+    const entities = Array.isArray(evolution?.entities) ? evolution.entities : null;
+    const events = Array.isArray(evolution?.events) ? evolution.events : null;
+    if (!entities && !events) return false;
+
+    const addedEventIndex = events
+      ? findRemovableIndex(events, isAddedItem, events.length - 1, 0)
+      : -1;
+    const eventIndex = addedEventIndex >= 0
+      ? addedEventIndex
+      : events && events.length
+        ? events.length - 1
+        : -1;
+    const removedEvent = eventIndex >= 0 ? events.splice(eventIndex, 1)[0] : null;
+    const eventEntityKeys = new Set([
+      ...(Array.isArray(removedEvent?.sources) ? removedEvent.sources : []),
+      ...(Array.isArray(removedEvent?.targets) ? removedEvent.targets : [])
+    ].map(String));
+    const remainingEventEntityKeys = collectEvolutionFluidEventEntityKeys(events);
+
+    const addedEntityIndex = entities
+      ? findRemovableIndex(
+        entities,
+        (entity) => {
+          const key = String(entity?.id ?? entity?.name ?? '');
+          return isAddedItem(entity) || (
+            eventEntityKeys.has(key) &&
+            isGeneratedEvolutionFluidEntity(entity) &&
+            !remainingEventEntityKeys.has(key)
+          );
+        },
+        entities.length - 1,
+        0
+      )
+      : -1;
+    if (addedEntityIndex >= 0) entities.splice(addedEntityIndex, 1);
+
+    return eventIndex >= 0 || addedEntityIndex >= 0;
+  }
+
+  function collectEvolutionFluidEventEntityKeys(events) {
+    const keys = new Set();
+    if (!Array.isArray(events)) return keys;
+    events.forEach((event) => {
+      if (Array.isArray(event?.sources)) event.sources.forEach((id) => keys.add(String(id)));
+      if (Array.isArray(event?.targets)) event.targets.forEach((id) => keys.add(String(id)));
+    });
+    return keys;
+  }
+
+  function isGeneratedEvolutionFluidEntity(entity) {
+    return entity?.generated === true || entity?.raw?.generated === true;
+  }
+
+
   function findSubwayStation(routes, predicate) {
     for (let routeIndex = routes.length - 1; routeIndex >= 0; routeIndex -= 1) {
       const route = routes[routeIndex];
@@ -2112,6 +2246,7 @@
     if (exampleName === 'mosaic') return arrayLength(data.mosaic);
     if (exampleName === 'voronoi-treemap') return countTreeItems(data.voronoiTreemap);
     if (exampleName === 'subway') return (data.subway || []).reduce((total, route) => total + arrayLength(route.stations), 0);
+    if (exampleName === 'evolution-fluid') return countEvolutionFluidItems(data.evolutionFluid);
     if (exampleName === 'flame') return countTreeItems(data.flame);
     if (exampleName === 'sunrise-sunset') return arrayLength(data.sunriseSunset);
     if (exampleName === 'fisheye') return arrayLength(data.fisheyeScatter);
@@ -2121,6 +2256,10 @@
     if (exampleName === 'smith') return arrayLength(data.smith);
     if (exampleName === 'vector-field') return arrayLength(data.wind);
     return 0;
+  }
+
+  function countEvolutionFluidItems(evolution) {
+    return arrayLength(evolution?.entities) + arrayLength(evolution?.events);
   }
 
   function cloneExampleData(data) {
@@ -2338,6 +2477,37 @@
     route.waypoints.push([id, coord[0], coord[1]]);
     return true;
   }
+
+  function appendEvolutionFluidData(data, index) {
+    const evolution = data.evolutionFluid || (data.evolutionFluid = { entities: [], events: [] });
+    if (!Array.isArray(evolution.entities)) evolution.entities = [];
+    if (!Array.isArray(evolution.events)) evolution.events = [];
+
+    const id = `added-evolution-fluid-${index}`;
+    const anchor = evolution.entities.find((entity) => !isAddedItem(entity)) || evolution.entities[0];
+    const anchorId = anchor ? String(anchor.id ?? anchor.name ?? 'root') : null;
+    const eventTypes = ['acquire', 'spinOff', 'partnership'];
+    const eventType = eventTypes[(index - 1) % eventTypes.length];
+    const industry = addDataCategories[(index - 1) % addDataCategories.length];
+
+    evolution.entities.push({
+      id,
+      name: `Added ${index}`,
+      industry,
+      value: 18 + (index * 11) % 58,
+      itemStyle: { color: addDataColor(index) }
+    });
+    evolution.events.push({
+      id: `added-evolution-fluid-event-${index}`,
+      time: 2026,
+      type: anchorId ? eventType : 'found',
+      sources: anchorId && eventType === 'spinOff' ? [anchorId] : [id],
+      targets: anchorId && eventType !== 'spinOff' ? [anchorId] : [id],
+      value: 12 + (index * 7) % 34
+    });
+    return true;
+  }
+
 
   function appendFlameData(data, index) {
     const root = data.flame || (data.flame = { name: 'root', children: [] });
@@ -2751,17 +2921,148 @@
     input.dataset.controlId = control.id;
     value.textContent = formatControlValue(control, state[control.id]);
     input.addEventListener(control.type === 'range' ? 'input' : 'change', () => {
-      state[control.id] = readInputValue(control, input);
-      value.textContent = formatControlValue(control, state[control.id]);
-      onChange(control);
+      commitControlInputValue(control, state, input, value, onChange);
     });
 
     const row = document.createElement('span');
     row.className = 'demo-control__topline';
     row.append(name, value);
-    field.append(row, input);
+    field.append(row, control.playback === true ? createPlaybackRangeInput(control, state, input, value, onChange) : input);
     return field;
   }
+
+  function commitControlInputValue(control, state, input, valueLabel, onChange) {
+    state[control.id] = readInputValue(control, input);
+    valueLabel.textContent = formatControlValue(control, state[control.id]);
+    onChange(control);
+  }
+
+  function createPlaybackRangeInput(control, state, input, valueLabel, onChange) {
+    const wrapper = document.createElement('span');
+    wrapper.className = 'demo-control__playback';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'demo-control-playback-button';
+    let playing = control.playbackAutoplay === true;
+    let frameId = 0;
+    let previousTime = 0;
+    let scheduledWithTimeout = false;
+    let playbackValue = finiteNumber(Number(input.value), finiteNumber(Number(control.defaultValue), 0));
+
+    const setButtonState = () => {
+      button.dataset.playing = playing ? 'true' : 'false';
+      button.setAttribute('aria-label', t(playing ? 'Pause time' : 'Play time'));
+      button.title = t(playing ? 'Pause time' : 'Play time');
+    };
+
+    const scheduleTick = () => {
+      if (!control.playbackTimer && root.requestAnimationFrame) {
+        scheduledWithTimeout = false;
+        frameId = root.requestAnimationFrame(tick);
+        return;
+      }
+      scheduledWithTimeout = true;
+      frameId = root.setTimeout(() => tick(Date.now()), 16);
+    };
+
+    const clearScheduledTick = () => {
+      if (!frameId) return;
+      if (scheduledWithTimeout) root.clearTimeout?.(frameId);
+      else root.cancelAnimationFrame?.(frameId);
+      frameId = 0;
+    };
+
+    const stop = () => {
+      playing = false;
+      previousTime = 0;
+      clearScheduledTick();
+      setButtonState();
+    };
+
+    const setValue = (nextValue) => {
+      playbackValue = finiteNumber(Number(nextValue), playbackValue);
+      input.value = String(snapRangeValue(control, nextValue));
+      commitControlInputValue(control, state, input, valueLabel, onChange);
+    };
+
+    const tick = (timestamp) => {
+      if (!playing) return;
+      if (!previousTime) previousTime = timestamp;
+      const elapsed = Math.max(0, timestamp - previousTime);
+      previousTime = timestamp;
+      const min = finiteNumber(Number(control.min), 0);
+      const max = finiteNumber(Number(control.max), min);
+      const duration = Math.max(600, finiteNumber(Number(control.playbackDuration), 7200));
+      const current = finiteNumber(Number(playbackValue), finiteNumber(Number(input.value), min));
+      const next = current + ((max - min) * elapsed) / duration;
+      if (next >= max) {
+        setValue(max);
+        if (control.playbackLoop === true) {
+          const hold = Math.max(0, finiteNumber(Number(control.playbackFinalHold), 0));
+          previousTime = 0;
+          scheduledWithTimeout = true;
+          frameId = root.setTimeout(() => {
+            frameId = 0;
+            if (!playing) return;
+            setValue(min);
+            previousTime = 0;
+            scheduleTick();
+          }, hold);
+          return;
+        }
+        stop();
+        return;
+      }
+      setValue(next);
+      scheduleTick();
+    };
+
+    button.addEventListener('click', () => {
+      if (playing) {
+        stop();
+        return;
+      }
+      const min = finiteNumber(Number(control.min), 0);
+      const max = finiteNumber(Number(control.max), min);
+      if (finiteNumber(Number(input.value), min) >= max) setValue(min);
+      playbackValue = finiteNumber(Number(input.value), min);
+      playing = true;
+      previousTime = 0;
+      setButtonState();
+      scheduleTick();
+    });
+
+    input.addEventListener('input', () => {
+      playbackValue = finiteNumber(Number(input.value), playbackValue);
+    });
+    input.addEventListener('change', () => {
+      playbackValue = finiteNumber(Number(input.value), playbackValue);
+    });
+
+    setButtonState();
+    if (playing) scheduleTick();
+    wrapper.append(button, input);
+    return wrapper;
+  }
+
+
+  function snapRangeValue(control, value) {
+    const min = finiteNumber(Number(control.min), 0);
+    const max = finiteNumber(Number(control.max), min);
+    const step = Math.max(Number.EPSILON, finiteNumber(Number(control.step), 1));
+    const clamped = clamp(finiteNumber(Number(value), min), min, max);
+    const snapped = min + Math.round((clamped - min) / step) * step;
+    const precision = decimalPlaces(step);
+    return Number(clamp(snapped, min, max).toFixed(precision));
+  }
+
+  function decimalPlaces(value) {
+    const text = String(value);
+    if (!text.includes('.')) return 0;
+    return text.length - text.indexOf('.') - 1;
+  }
+
 
   function createControlInput(control, value) {
     if (control.type === 'json') {

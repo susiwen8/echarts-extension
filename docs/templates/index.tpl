@@ -94,6 +94,10 @@
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-subway.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Subway</span>
       </a>
+      <a class="chart-gallery-card" href="./packages/echarts-evolution-fluid/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-evolution-fluid.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Evolution Fluid</span>
+      </a>
       <a class="chart-gallery-card" href="./packages/echarts-sequence-diagram/">
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-sequence-diagram.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Sequence Diagram</span>

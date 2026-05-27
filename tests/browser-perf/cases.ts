@@ -13,6 +13,7 @@ export const browserPerfCases = [
   ['echarts-mosaic', '/docs/packages/echarts-mosaic/large.html'],
   ['echarts-voronoi-treemap', '/docs/packages/echarts-voronoi-treemap/large.html'],
   ['echarts-subway', '/docs/packages/echarts-subway/large.html'],
+  ['echarts-evolution-fluid', '/docs/packages/echarts-evolution-fluid/large.html'],
   ['echarts-sequence-diagram', '/docs/packages/echarts-sequence-diagram/large.html'],
   ['echarts-flame', '/docs/packages/echarts-flame/large.html'],
   ['echarts-sunrise-sunset', '/docs/packages/echarts-sunrise-sunset/large.html'],

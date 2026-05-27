@@ -20,6 +20,7 @@ import '@echarts-extension/nested-circle';
 import '@echarts-extension/mosaic';
 import '@echarts-extension/voronoi-treemap';
 import '@echarts-extension/subway';
+import '@echarts-extension/evolution-fluid';
 import '@echarts-extension/sequence-diagram';
 import '@echarts-extension/cause-effect';
 import '@echarts-extension/flame';
@@ -280,6 +281,22 @@ const aliveRenderCases = [
           ]
         }
       ]
+    }
+  },
+  {
+    name: 'evolutionFluid',
+    series: {
+      type: 'evolutionFluid',
+      entities: [
+        { id: 'alpha', name: 'Alpha', industry: 'AI', value: 100 },
+        { id: 'beta', name: 'Beta', industry: 'AI', value: 60 }
+      ],
+      events: [
+        { time: 2020, type: 'acquire', sources: ['beta'], targets: ['alpha'], value: 40 }
+      ],
+      currentTime: 2020,
+      dropletStyle: { bridgeThreshold: 240 },
+      label: { show: true }
     }
   },
   {

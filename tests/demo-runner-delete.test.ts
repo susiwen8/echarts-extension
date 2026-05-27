@@ -105,6 +105,57 @@ test('shared examples can delete an existing data item before add-data', () => {
   assert.deepEqual(nonDecreasing, []);
 });
 
+test('evolution-fluid repeated deletes preserve baseline entities while reducing items', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const deleteState = namespace.createDeleteDataState('evolution-fluid');
+  const beforeCount = namespace.countExampleDataItems('evolution-fluid', data);
+
+  for (let index = 0; index < 4; index += 1) {
+    const result = namespace.deleteExampleData('evolution-fluid', data, deleteState);
+    assert.equal(result.deleted, true);
+  }
+
+  const remainingEntityIds = data.evolutionFluid.entities.map((entity) => entity.id);
+
+  assert.ok(namespace.countExampleDataItems('evolution-fluid', data) < beforeCount);
+  assert.ok(remainingEntityIds.includes('aether'));
+  assert.ok(remainingEntityIds.includes('studio'));
+  assert.ok(remainingEntityIds.includes('orbit'));
+});
+
+test('evolution-fluid time control exposes playback metadata', () => {
+  const namespace = loadDemoNamespace();
+  const entry = namespace.registry['evolution-fluid'];
+  assert.ok(entry);
+
+  const timeControl = entry.controls.find((control) => control.id === 'currentTime');
+
+  assert.ok(timeControl);
+  assert.equal(timeControl.type, 'range');
+  assert.equal(timeControl.playback, true);
+  assert.equal(timeControl.min, 2018);
+  assert.equal(timeControl.max, 2026);
+  assert.equal(timeControl.step, 0.01);
+});
+
+test('evolution-fluid playback frames render without queued update animation', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const entry = namespace.registry['evolution-fluid'];
+  const state = namespace.createControlState(entry.controls);
+  state.currentTime = 2022.5;
+
+  const option = namespace.createDemoOption('evolution-fluid', data, state, {
+    realtimeControlId: 'currentTime'
+  });
+
+  assert.equal(option.animationDurationUpdate, 0);
+  assert.equal(option.animationEasingUpdate, 'linear');
+  assert.equal(option.series[0].animationDurationUpdate, 0);
+  assert.equal(option.series[0].animationEasingUpdate, 'linear');
+});
+
 test('delete-data controls are exposed by shared, large-data, and layout-core examples', () => {
   const demoRunner = readFileSync(new URL('../docs/shared/demo-runner.js', import.meta.url), 'utf8');
   const largeData = readFileSync(new URL('../docs/shared/large-data.js', import.meta.url), 'utf8');

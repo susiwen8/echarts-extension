@@ -42,6 +42,7 @@ const PACKAGE_ORDER = [
   'echarts-mosaic',
   'echarts-voronoi-treemap',
   'echarts-subway',
+  'echarts-evolution-fluid',
   'echarts-sequence-diagram',
   'echarts-cause-effect',
   'echarts-flame',

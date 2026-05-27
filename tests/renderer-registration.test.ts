@@ -395,6 +395,23 @@ test('captured renderer registrations cover lifecycle across the remaining custo
       }
     },
     {
+      path: '../packages/echarts-evolution-fluid/src/evolution-fluid.ts?registration',
+      option: {
+        entities: [
+          { id: 'alpha', name: 'Alpha Long Label', industry: 'AI', value: 100, itemStyle: { color: '#38bdf8' } },
+          { id: 'beta', name: 'Beta', industry: 'AI', value: 60, itemStyle: { color: '#34d399' } },
+          { id: 'gamma', name: 'Gamma', industry: 'Cloud', value: 42 }
+        ],
+        events: [
+          { time: 2020, type: 'acquire', sources: ['beta'], targets: ['alpha'], value: 40 },
+          { time: 2021, type: 'spinOff', sources: ['alpha'], targets: ['gamma'], value: 20 }
+        ],
+        currentTime: 2021,
+        dropletStyle: { bridgeThreshold: 260, bridgeOpacity: 0.6 },
+        label: { show: true, formatter: '{b} {c}' }
+      }
+    },
+    {
       path: '../packages/echarts-sequence-diagram/src/sequence-diagram.ts?registration',
       option: {
         participants: [

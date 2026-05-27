@@ -15,6 +15,7 @@ export default defineConfig({
       '@echarts-extension/concentric': path.join(root, 'packages/echarts-concentric/index.ts'),
       '@echarts-extension/fisheye': path.join(root, 'packages/echarts-fisheye/index.ts'),
       '@echarts-extension/fractal': path.join(root, 'packages/echarts-fractal/index.ts'),
+      '@echarts-extension/evolution-fluid': path.join(root, 'packages/echarts-evolution-fluid/index.ts'),
       '@echarts-extension/flame': path.join(root, 'packages/echarts-flame/index.ts'),
       '@echarts-extension/grid': path.join(root, 'packages/echarts-grid/index.ts'),
       '@echarts-extension/lollipop': path.join(root, 'packages/echarts-lollipop/index.ts'),

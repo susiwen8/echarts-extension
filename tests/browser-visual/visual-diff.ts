@@ -254,6 +254,12 @@ function unionClip(boxes) {
 }
 
 async function disableAnimationControls(page) {
+  const playbackButtons = page.locator('.demo-control-playback-button[data-playing="true"]');
+  const playbackCount = await playbackButtons.count();
+  for (let index = 0; index < playbackCount; index += 1) {
+    await playbackButtons.nth(index).click({ force: true });
+  }
+
   const controls = page.locator('[data-control-id="animationEnabled"]');
   const count = await controls.count();
   if (count === 0) return;
