@@ -17,7 +17,8 @@
     "@echarts-extension/layout-core": "0.1.0"
   },
   "peerDependencies": {
-    "echarts": "^5.0.1 || ^6.0.0"
+    "echarts": "^5.0.1 || ^6.0.0",
+    "zrender": "^6.1.0"
   },
   "publishConfig": {
     "access": "public"

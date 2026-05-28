@@ -4,6 +4,7 @@ import { test } from 'vitest';
 
 import * as echarts from 'echarts/lib/echarts';
 import { SVGRenderer } from 'echarts/renderers';
+import ZRenderWaterdropFusion from 'zrender/lib/graphic/shape/WaterdropFusion.js';
 
 import '../index.ts';
 import { resolveEvolutionFluidLayout } from '../src/layout.ts';
@@ -1270,6 +1271,51 @@ test('renders droplets, bridge paths, entity labels, and timeline in SVG without
   assert.match(svg, /<path/);
   assert.match(svg, /<path[^>]+fill="[^"]+"[^>]+fill-opacity=/);
   chart.dispose();
+});
+
+test('delegates rendered fusion surfaces to zrender WaterdropFusion', () => {
+  const originalBuildPath = ZRenderWaterdropFusion.prototype.buildPath;
+  let buildPathCalls = 0;
+  ZRenderWaterdropFusion.prototype.buildPath = function patchedBuildPath(ctx, shape) {
+    buildPathCalls += 1;
+    return originalBuildPath.call(this, ctx, shape);
+  };
+
+  const chart = echarts.init(null, null, {
+    renderer: 'svg',
+    ssr: true,
+    width: 720,
+    height: 420
+  });
+
+  try {
+    chart.setOption({
+      animation: false,
+      series: [{
+        type: 'evolutionFluid',
+        width: 720,
+        height: 420,
+        entities: [
+          { id: 'alpha', name: 'Alpha', industry: 'AI', value: 120, itemStyle: { color: '#38bdf8' } },
+          { id: 'beta', name: 'Beta', industry: 'AI', value: 80, itemStyle: { color: '#34d399' } }
+        ],
+        events: [
+          { time: 2020, type: 'acquire', sources: ['beta'], targets: ['alpha'], value: 42 }
+        ],
+        currentTime: 2019.8,
+        dropletStyle: { bridgeThreshold: 260 },
+        timeline: { show: false },
+        label: { show: false }
+      }]
+    });
+
+    chart.renderToSVGString();
+
+    assert.ok(buildPathCalls > 0);
+  } finally {
+    ZRenderWaterdropFusion.prototype.buildPath = originalBuildPath;
+    chart.dispose();
+  }
 });
 
 test('uses immediate update animation for timeline-driven playback', () => {

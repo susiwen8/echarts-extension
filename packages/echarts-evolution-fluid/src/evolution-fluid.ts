@@ -1,4 +1,5 @@
 import * as echarts from 'echarts/lib/echarts';
+import ZRenderWaterdropFusion from 'zrender/lib/graphic/shape/WaterdropFusion.js';
 import { clearAliveRender, installElementHover, renderAlive, setAliveRenderKey } from '@echarts-extension/layout-core';
 import type { AliveRenderState, ElementHoverController, ElementHoverItem, ElementHoverOptions } from '@echarts-extension/layout-core';
 
@@ -79,6 +80,8 @@ interface WaterdropFusionGraphicShape {
   curve: number;
   bridgeLength: number;
 }
+
+type ZRenderWaterdropFusionShape = Parameters<typeof ZRenderWaterdropFusion.prototype.buildPath>[1];
 
 interface EChartsHost {
   extendSeriesModel(option: Record<string, unknown>): void;
@@ -378,135 +381,10 @@ function getWaterdropFusionGraphic(host: EChartsHost): WaterdropFusionGraphicCon
       bridgeLength: 0
     },
     buildPath(ctx: CanvasRenderingContext2D, shape: WaterdropFusionGraphicShape) {
-      const x = shape.cx;
-      const y = shape.cy;
-      const width = shape.width;
-      const defaultRadius = shape.height / 2;
-      const leftRadius = shape.leftRadius || defaultRadius;
-      const rightRadius = shape.rightRadius || defaultRadius;
-
-      if (width <= 0 || leftRadius <= 0 || rightRadius <= 0) {
-        return;
-      }
-
-      const leftCx = x - width / 2 + leftRadius;
-      const rightCx = x + width / 2 - rightRadius;
-      const leftCy = y - shape.dy / 2;
-      const rightCy = y + shape.dy / 2;
-      const vx = rightCx - leftCx;
-      const vy = rightCy - leftCy;
-      const dist = Math.sqrt(vx * vx + vy * vy) || 1;
-      const minRadius = Math.min(leftRadius, rightRadius);
-      const maxNeck = waterdropClamp(shape.neck / minRadius, 0, 1);
-      const bridgeLength = Math.max(shape.bridgeLength, 0);
-      const gap = dist - leftRadius - rightRadius;
-      const rawBridgeRate = gap <= 0
-        ? 1
-        : bridgeLength > 0
-          ? waterdropSmoothStep(1 - gap / bridgeLength)
-          : 0;
-      const bridgeRate = waterdropSmoothStep((rawBridgeRate - 0.42) / 0.58);
-      const visibleBridge = bridgeRate <= 0
-        ? 0
-        : 0.48 + bridgeRate * 0.52;
-      const neck = maxNeck * visibleBridge;
-
-      ctx.moveTo(leftCx + leftRadius, leftCy);
-      ctx.arc(leftCx, leftCy, leftRadius, 0, Math.PI * 2);
-
-      ctx.moveTo(rightCx + rightRadius, rightCy);
-      ctx.arc(rightCx, rightCy, rightRadius, 0, Math.PI * 2);
-
-      if (
-        neck <= 0
-        || dist <= Math.abs(leftRadius - rightRadius)
-      ) {
-        return;
-      }
-
-      const centerAngle = Math.atan2(vy, vx);
-      let leftOverlap = 0;
-      let rightOverlap = 0;
-
-      if (dist < leftRadius + rightRadius) {
-        leftOverlap = Math.acos(waterdropClamp(
-          (leftRadius * leftRadius + dist * dist - rightRadius * rightRadius)
-            / (2 * leftRadius * dist),
-          -1,
-          1
-        ));
-        rightOverlap = Math.acos(waterdropClamp(
-          (rightRadius * rightRadius + dist * dist - leftRadius * leftRadius)
-            / (2 * rightRadius * dist),
-          -1,
-          1
-        ));
-      }
-
-      const tangentSpread = Math.acos(waterdropClamp((leftRadius - rightRadius) / dist, -1, 1));
-      const spread = 0.2 + neck * 0.46;
-      const leftSpread = leftOverlap + (tangentSpread - leftOverlap) * spread;
-      const rightSpread = rightOverlap
-        + (Math.PI - rightOverlap - tangentSpread) * spread;
-      const leftTopAngle = centerAngle - leftSpread;
-      const leftBottomAngle = centerAngle + leftSpread;
-      const rightTopAngle = centerAngle + Math.PI + rightSpread;
-      const rightBottomAngle = centerAngle + Math.PI - rightSpread;
-      const leftTop = waterdropPointOnCircle(leftCx, leftCy, leftRadius, leftTopAngle);
-      const leftBottom = waterdropPointOnCircle(leftCx, leftCy, leftRadius, leftBottomAngle);
-      const rightTop = waterdropPointOnCircle(rightCx, rightCy, rightRadius, rightTopAngle);
-      const rightBottom = waterdropPointOnCircle(rightCx, rightCy, rightRadius, rightBottomAngle);
-      const span = Math.min(
-        waterdropDistance(leftTop.x, leftTop.y, rightTop.x, rightTop.y),
-        waterdropDistance(leftBottom.x, leftBottom.y, rightBottom.x, rightBottom.y)
-      );
-      const handle = span * (0.3 + waterdropClamp(shape.curve, 0, 1) * 0.35)
-        * waterdropClamp(dist * 2 / (leftRadius + rightRadius), 0, 1);
-
-      ctx.moveTo(leftTop.x, leftTop.y);
-      ctx.bezierCurveTo(
-        leftTop.x - Math.sin(leftTopAngle) * handle,
-        leftTop.y + Math.cos(leftTopAngle) * handle,
-        rightTop.x + Math.sin(rightTopAngle) * handle,
-        rightTop.y - Math.cos(rightTopAngle) * handle,
-        rightTop.x,
-        rightTop.y
-      );
-      ctx.lineTo(rightBottom.x, rightBottom.y);
-      ctx.bezierCurveTo(
-        rightBottom.x - Math.sin(rightBottomAngle) * handle,
-        rightBottom.y + Math.cos(rightBottomAngle) * handle,
-        leftBottom.x + Math.sin(leftBottomAngle) * handle,
-        leftBottom.y - Math.cos(leftBottomAngle) * handle,
-        leftBottom.x,
-        leftBottom.y
-      );
-      ctx.closePath();
+      ZRenderWaterdropFusion.prototype.buildPath.call(this, ctx, shape as unknown as ZRenderWaterdropFusionShape);
     }
   });
   return WaterdropFusionGraphic;
-}
-
-function waterdropClamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(value, max));
-}
-
-function waterdropSmoothStep(percent: number): number {
-  percent = waterdropClamp(percent, 0, 1);
-  return percent * percent * (3 - 2 * percent);
-}
-
-function waterdropDistance(x0: number, y0: number, x1: number, y1: number): number {
-  const dx = x1 - x0;
-  const dy = y1 - y0;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function waterdropPointOnCircle(cx: number, cy: number, radius: number, angle: number): { x: number; y: number } {
-  return {
-    x: cx + Math.cos(angle) * radius,
-    y: cy + Math.sin(angle) * radius
-  };
 }
 
 function blobEntityIds(bridges: EvolutionFluidBridgeLayout[]): Set<string> {
