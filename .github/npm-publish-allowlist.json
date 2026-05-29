@@ -22,6 +22,7 @@
   "@echarts-extension/flame",
   "@echarts-extension/sunrise-sunset",
   "@echarts-extension/lollipop",
+  "@echarts-extension/seasonal-radial",
   "@echarts-extension/beeswarm",
   "@echarts-extension/spiral",
   "@echarts-extension/vector-field",

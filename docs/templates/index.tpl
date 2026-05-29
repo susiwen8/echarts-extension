@@ -118,6 +118,10 @@
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-lollipop.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Lollipop</span>
       </a>
+      <a class="chart-gallery-card" href="./packages/echarts-seasonal-radial/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-seasonal-radial.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Seasonal Radial</span>
+      </a>
       <a class="chart-gallery-card" href="./packages/echarts-beeswarm/">
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-beeswarm.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Beeswarm</span>

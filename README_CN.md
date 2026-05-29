@@ -130,6 +130,13 @@ ECharts Extension 收集了一组风格各异的可视化图表，适合用来�
   </tr>
   <tr>
     <td align="center" width="50%">
+      <a href="./packages/echarts-seasonal-radial/README_CN.md"><strong>Seasonal Radial</strong></a><br>
+      <img src="./visual-baseline/echarts-seasonal-radial.png" alt="Seasonal Radial" width="520">
+    </td>
+    <td align="center" width="50%"></td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
       <a href="./packages/echarts-spiral/README_CN.md"><strong>Spiral</strong></a><br>
       <img src="./visual-baseline/echarts-spiral.png" alt="Spiral" width="520">
     </td>

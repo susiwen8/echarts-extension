@@ -606,6 +606,7 @@
         title: 'Until sunset'
       }
     ],
+    seasonalRadial: createSeasonalRadialData(),
     lollipop: [
       { country: 'India', population: 1441, itemStyle: { color: '#2db5ff' } },
       { country: 'China', population: 1425, itemStyle: { color: '#2db5ff' } },
@@ -764,6 +765,32 @@
         name: `Segment ${index + 1}`,
         value: Math.round(38 + seasonal + pulse + drift)
       };
+    });
+  }
+
+  function createSeasonalRadialData() {
+    const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+    const profiles = {
+      Spain: [1.8, 2.5, 3.7, 5.2, 6.1, 5.6, 4.8, 4.3, 3.3, 2.5, 1.9, 1.7],
+      Germany: [1.7, 3.0, 5.6, 8.0, 8.7, 7.6, 6.8, 5.6, 4.0, 2.6, 1.8, 1.4]
+    };
+    const fullYears = [2020, 2021, 2022, 2023, 2024];
+    const latestYear = 2025;
+
+    return Object.entries(profiles).flatMap(([country, profile], countryIndex) => {
+      const historical = fullYears.flatMap((year, yearIndex) => profile.map((base, monthIndex) => ({
+        country,
+        year,
+        month: months[monthIndex],
+        value: Number((base * (0.86 + yearIndex * 0.045 + countryIndex * 0.02) + Math.sin((monthIndex + yearIndex) * 0.8) * 0.22).toFixed(2))
+      })));
+      const latest = profile.slice(0, 9).map((base, monthIndex) => ({
+        country,
+        year: latestYear,
+        month: months[monthIndex],
+        value: Number((base * (country === 'Germany' ? 1.18 : 1.12) + Math.cos(monthIndex * 0.7) * 0.18).toFixed(2))
+      }));
+      return historical.concat(latest);
     });
   }
 

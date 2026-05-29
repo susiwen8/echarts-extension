@@ -91,6 +91,8 @@
       'Radial Area': '径向区域图',
       'Radial Boxplot': '径向箱线图',
       'Radial': '径向布局',
+      'Seasonal Radial': '季节径向图',
+      'Solar Generation': '太阳能发电量',
       'Sequence Diagram': '时序图',
       'Evolution Fluid': '演化水滴图',
       'Evolution Fluid Large Timeline': '演化水滴大规模时间线',
@@ -1201,6 +1203,81 @@
         };
       }
     },
+    'seasonal-radial': {
+      controls: [
+        textControl('titleText', 'Title', 'title.text', 'Solar Generation'),
+        colorControl('backgroundColor', 'Background', 'backgroundColor', '#000000'),
+        checkboxControl('animationEnabled', 'Animation', [
+          'animation',
+          'series.0.animation'
+        ], true),
+        rangeControl('valueMax', 'Value max', 'series.0.max', 12, 6, 16, 0.5),
+        rangeControl('tickCount', 'Tick count', 'series.0.tickCount', 3, 2, 6, 1),
+        rangeControl('lineWidth', 'Line width', 'series.0.historyLineStyle.width', 1.8, 0.5, 5, 0.1),
+        rangeControl('highlightWidth', 'Highlight width', 'series.0.highlightLineStyle.width', 2.8, 0.5, 7, 0.1),
+        rangeControl('historyOpacity', 'History opacity', 'series.0.historyLineStyle.opacity', 0.62, 0.05, 1, 0.02),
+        rangeControl('symbolSize', 'Dot size', 'series.0.symbolSize', 8, 3, 20, 1),
+        checkboxControl('highlightSymbol', 'Highlight symbols', 'series.0.highlightSymbol', true)
+      ],
+      option: (data) => {
+        const solarData = Array.isArray(data.seasonalRadial) ? data.seasonalRadial : [];
+        return {
+          animation: true,
+          backgroundColor: '#000000',
+          title: {
+            text: 'Solar Generation',
+            subtext: 'Monthly solar generation in terawatt-hours (TWh)',
+            left: 'center',
+            top: 18,
+            textStyle: {
+              color: '#f4f4f4',
+              fontSize: 24,
+              fontWeight: 760
+            },
+            subtextStyle: {
+              color: '#d7d7d7',
+              fontSize: 16,
+              fontWeight: 420
+            }
+          },
+          series: [
+            {
+              type: 'seasonalRadial',
+              top: 86,
+              width: '96%',
+              height: '80%',
+              padding: { top: 48, right: 34, bottom: 36, left: 34 },
+              data: solarData,
+              groupField: 'country',
+              yearField: 'year',
+              monthField: 'month',
+              valueField: 'value',
+              groups: ['Spain', 'Germany'],
+              months: ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'],
+              min: 0,
+              max: 12,
+              tickCount: 3,
+              highlightYear: 2025,
+              radialAxis: {
+                label: { color: '#bababa', fontSize: 14, formatter: solarTickLabel },
+                splitLine: { lineStyle: { color: '#42464d', width: 1, opacity: 0.82 } }
+              },
+              angleAxis: {
+                label: { color: '#dfdfdf', fontSize: 14, formatter: '{value}' },
+                splitLine: { lineStyle: { color: '#5a5f66', width: 1, opacity: 0.66, type: 'dashed' } }
+              },
+              historyLineStyle: { color: '#a77b21', width: 1.8, opacity: 0.62 },
+              highlightLineStyle: { color: '#e4c356', width: 2.8, opacity: 1 },
+              itemStyle: { color: '#e4c356', borderColor: '#000000', borderWidth: 2 },
+              groupLabel: { color: '#f2f2f2', fontSize: 18, fontWeight: 760 },
+              yearLabel: { color: '#f2f2f2', fontSize: 16, fontWeight: 700 },
+              symbolSize: 8,
+              highlightSymbol: true
+            }
+          ]
+        };
+      }
+    },
     lollipop: {
       controls: [
         textControl('titleText', 'Title', 'title.text', '2024'),
@@ -1690,6 +1767,12 @@
     return `${numeric.toLocaleString('en-US')}M`;
   }
 
+  function solarTickLabel(value) {
+    const numeric = finiteNumber(Number(value), 0);
+    if (numeric <= 0) return '';
+    return numeric >= 10 ? `${numeric} TWh` : String(numeric);
+  }
+
   function createControlState(controls) {
     return controls.reduce((state, control) => {
       state[control.id] = control.type === 'json'
@@ -2000,6 +2083,7 @@
     if (exampleName === 'flame') return appendFlameData(data, index);
     if (exampleName === 'sunrise-sunset') return appendSunriseSunsetData(data, index);
     if (exampleName === 'fisheye') return appendFisheyeScatterData(data, index);
+    if (exampleName === 'seasonal-radial') return appendSeasonalRadialData(data, index);
     if (exampleName === 'lollipop') return appendLollipopData(data, index);
     if (exampleName === 'beeswarm') return appendBeeswarmData(data, index);
     if (exampleName === 'spiral') return appendSpiralData(data, index);
@@ -2026,6 +2110,7 @@
     if (exampleName === 'flame') return removeTreeData(data.flame);
     if (exampleName === 'sunrise-sunset') return removeArrayData(data, 'sunriseSunset', isAddedItem, 'first');
     if (exampleName === 'fisheye') return removeArrayData(data, 'fisheyeScatter', isAddedItem);
+    if (exampleName === 'seasonal-radial') return removeArrayData(data, 'seasonalRadial', isAddedItem);
     if (exampleName === 'lollipop') return removeArrayData(data, 'lollipop', isAddedItem);
     if (exampleName === 'beeswarm') return removeArrayData(data, 'beeswarm', isAddedItem);
     if (exampleName === 'spiral') return removeArrayData(data, 'spiral', isAddedItem);
@@ -2265,6 +2350,7 @@
     if (exampleName === 'flame') return countTreeItems(data.flame);
     if (exampleName === 'sunrise-sunset') return arrayLength(data.sunriseSunset);
     if (exampleName === 'fisheye') return arrayLength(data.fisheyeScatter);
+    if (exampleName === 'seasonal-radial') return arrayLength(data.seasonalRadial);
     if (exampleName === 'lollipop') return arrayLength(data.lollipop);
     if (exampleName === 'beeswarm') return arrayLength(data.beeswarm);
     if (exampleName === 'spiral') return arrayLength(data.spiral);
@@ -2572,6 +2658,20 @@
         18 + (index * 5) % 42
       ],
       itemStyle: { color: group.color }
+    });
+    return true;
+  }
+
+  function appendSeasonalRadialData(data, index) {
+    const list = ensureArrayData(data, 'seasonalRadial');
+    const countries = ['Spain', 'Germany'];
+    const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sep.'];
+    list.push({
+      id: `added-seasonal-radial-${index}`,
+      country: countries[(index - 1) % countries.length],
+      year: 2025,
+      month: months[(index - 1) % months.length],
+      value: Number((2 + ((index * 17) % 82) / 10).toFixed(1))
     });
     return true;
   }
