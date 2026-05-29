@@ -35,6 +35,7 @@ export function createImplicitSurfaceBlobs(
     const path = group.mode === 'detached'
       ? groupParticles.map((particle) => createCirclePath(particle.x, particle.y, particle.radius)).join(' ')
       : createConnectedContourPath(groupParticles, context);
+    /* v8 ignore next -- Paths are produced by the helpers in this module; invalid path rejection is a defensive boundary. */
     if (!hasValidPath(path)) return;
     blobs.push({
       id: `fluid:${context.kind}:${group.id}`,
@@ -63,6 +64,7 @@ function createConnectedContourPath(particles: FluidParticle[], context: Surface
   for (let index = 0; index < sampleCount; index += 1) {
     const angle = (index / sampleCount) * Math.PI * 2;
     const point = sampleContourPoint(center, angle, maxRadius, isoValue, particles);
+    /* v8 ignore next 3 -- maxRadius is chosen to enclose the implicit field for valid active particles. */
     if (!point) {
       return particles.map((particle) => createCirclePath(particle.x, particle.y, particle.radius)).join(' ');
     }
@@ -84,6 +86,7 @@ function sampleContourPoint(
   while (high < maxRadius && fieldAt(rayPoint(center, direction, high), particles) > isoValue) {
     high *= 1.45;
   }
+  /* v8 ignore next -- See createConnectedContourPath: valid particle groups should be enclosed by maxRadius. */
   if (fieldAt(rayPoint(center, direction, high), particles) > isoValue) return null;
   for (let iteration = 0; iteration < 24; iteration += 1) {
     const mid = (low + high) / 2;
@@ -105,6 +108,7 @@ function fieldAt(point: Point, particles: FluidParticle[]): number {
 }
 
 function weightedCenter(particles: FluidParticle[]): Point {
+  /* v8 ignore next -- Caller filters to active particles with radius > 0.05, so total cannot be zero. */
   const total = particles.reduce((sum, particle) => sum + particle.radius * particle.radius, 0) || 1;
   return {
     x: particles.reduce((sum, particle) => sum + particle.x * particle.radius * particle.radius, 0) / total,

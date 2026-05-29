@@ -465,31 +465,103 @@
       }
     ],
     evolutionFluid: {
+      historicalSources: [
+        {
+          title: '三国志·魏书·武帝纪',
+          url: 'https://zh.wikisource.org/zh-hans/%E4%B8%89%E5%9C%8B%E5%BF%97/%E5%8D%B701'
+        },
+        {
+          title: '三国志·蜀书·先主传',
+          url: 'https://zh.wikisource.org/zh-hans/%E4%B8%89%E5%9C%8B%E5%BF%97/%E5%8D%B732'
+        },
+        {
+          title: '三国志·蜀书·后主传',
+          url: 'https://zh.wikisource.org/zh-hans/%E4%B8%89%E5%9C%8B%E5%BF%97/%E5%8D%B733'
+        },
+        {
+          title: '三国志·吴书·孙破虏讨逆传',
+          url: 'https://zh.wikisource.org/zh-hans/%E4%B8%89%E5%9C%8B%E5%BF%97/%E5%8D%B746'
+        },
+        {
+          title: '三国志·吴书·吴主传',
+          url: 'https://zh.wikisource.org/zh-hans/%E4%B8%89%E5%9C%8B%E5%BF%97/%E5%8D%B747'
+        },
+        {
+          title: '晋书·武帝纪',
+          url: 'https://zh.wikisource.org/zh-hans/%E6%99%89%E6%9B%B8/%E5%8D%B7003'
+        }
+      ],
       entities: [
-        { id: 'aether', name: 'Aether AI', industry: 'AI', value: 132, itemStyle: { color: '#38bdf8' } },
-        { id: 'nova', name: 'Nova Cloud', industry: 'Cloud', value: 88, itemStyle: { color: '#34d399' } },
-        { id: 'pixel', name: 'PixelForge', industry: 'Media', value: 54, itemStyle: { color: '#a78bfa' } },
-        { id: 'orbit', name: 'Orbit Data', industry: 'Cloud', value: 46, itemStyle: { color: '#f59e0b' } },
-        { id: 'studio', name: 'Studio Labs', industry: 'Media', value: 38, itemStyle: { color: '#fb7185' } },
-        { id: 'lumen', name: 'Lumen ML', industry: 'AI', value: 42, itemStyle: { color: '#22c55e' } },
-        { id: 'prism', name: 'Prism Vision', industry: 'AI', value: 34, itemStyle: { color: '#60a5fa' } },
-        { id: 'relay', name: 'RelayStack', industry: 'Cloud', value: 30, itemStyle: { color: '#14b8a6' } },
-        { id: 'atlas', name: 'Atlas DB', industry: 'Cloud', value: 36, itemStyle: { color: '#f97316' } },
-        { id: 'quanta', name: 'Quanta Labs', industry: 'AI', value: 28, itemStyle: { color: '#6366f1' } },
-        { id: 'stream', name: 'Streamly', industry: 'Media', value: 32, itemStyle: { color: '#ec4899' } },
-        { id: 'forge', name: 'Forge Ads', industry: 'Media', value: 26, itemStyle: { color: '#84cc16' } },
-        { id: 'aura', name: 'Aura Robotics', industry: 'AI', value: 24, itemStyle: { color: '#06b6d4' } }
+        { id: 'han-court', name: '东汉王朝', region: '02-中原', value: 160, coord: ['45%', '43%'], itemStyle: { color: '#64748b' }, label: { show: true } },
+        { id: 'yellow-turbans', name: '黄巾余部', region: '02-中原', value: 44, coord: ['39%', '56%'], itemStyle: { color: '#f59e0b' } },
+        { id: 'dong-zhuo', name: '董卓军', region: '03-关陇', value: 58, coord: ['35%', '28%'], itemStyle: { color: '#dc2626' }, label: { show: true } },
+        { id: 'li-jue', name: '李傕郭汜', region: '03-关陇', value: 32, coord: ['29%', '23%'], itemStyle: { color: '#b91c1c' } },
+        { id: 'cao-wei', name: '曹操/曹魏', region: '02-中原', value: 118, coord: ['48%', '39%'], itemStyle: { color: '#2563eb' }, label: { show: true } },
+        { id: 'cao-shuang', name: '曹爽魏廷', region: '06-司马晋', value: 45, coord: ['57%', '31%'], itemStyle: { color: '#60a5fa' } },
+        { id: 'sima-jin', name: '司马氏/西晋', region: '06-司马晋', value: 122, coord: ['65%', '29%'], itemStyle: { color: '#111827' }, label: { show: true } },
+        { id: 'yuan-shao', name: '袁绍集团', region: '01-河北', value: 82, coord: ['48%', '18%'], itemStyle: { color: '#7c3aed' }, label: { show: true } },
+        { id: 'gongsun-zan', name: '公孙瓒', region: '01-河北', value: 42, coord: ['64%', '15%'], itemStyle: { color: '#a855f7' } },
+        { id: 'gongsun-yuan', name: '辽东公孙氏', region: '01-河北', value: 34, coord: ['78%', '12%'], itemStyle: { color: '#8b5cf6' } },
+        { id: 'yuan-shu', name: '袁术集团', region: '02-中原', value: 52, coord: ['53%', '51%'], itemStyle: { color: '#c2410c' }, label: { show: true } },
+        { id: 'lu-bu', name: '吕布', region: '02-中原', value: 36, coord: ['57%', '37%'], itemStyle: { color: '#db2777' }, label: { show: true } },
+        { id: 'zhang-xiu', name: '张绣', region: '02-中原', value: 28, coord: ['38%', '49%'], itemStyle: { color: '#f43f5e' } },
+        { id: 'ma-han', name: '马腾韩遂', region: '03-关陇', value: 44, coord: ['21%', '34%'], itemStyle: { color: '#d97706' } },
+        { id: 'liu-biao', name: '刘表荆州', region: '04-荆益', value: 62, coord: ['47%', '65%'], itemStyle: { color: '#16a34a' }, label: { show: true } },
+        { id: 'huang-zu', name: '黄祖江夏', region: '04-荆益', value: 30, coord: ['58%', '62%'], itemStyle: { color: '#84cc16' } },
+        { id: 'liu-zhang', name: '刘璋益州', region: '04-荆益', value: 58, coord: ['25%', '72%'], itemStyle: { color: '#65a30d' }, label: { show: true } },
+        { id: 'zhang-lu', name: '张鲁汉中', region: '04-荆益', value: 32, coord: ['31%', '58%'], itemStyle: { color: '#10b981' } },
+        { id: 'liu-bei-shu', name: '刘备/蜀汉', region: '04-荆益', value: 78, coord: ['35%', '77%'], itemStyle: { color: '#059669' }, label: { show: true } },
+        { id: 'nanzhong', name: '南中豪强', region: '04-荆益', value: 24, coord: ['22%', '86%'], itemStyle: { color: '#14b8a6' } },
+        { id: 'sun-wu', name: '孙氏/东吴', region: '05-江东', value: 86, coord: ['67%', '74%'], itemStyle: { color: '#0891b2' }, label: { show: true } },
+        { id: 'liu-yao', name: '刘繇', region: '05-江东', value: 30, coord: ['64%', '58%'], itemStyle: { color: '#06b6d4' } },
+        { id: 'wang-lang', name: '王朗严白虎', region: '05-江东', value: 32, coord: ['77%', '66%'], itemStyle: { color: '#0e7490' } },
+        { id: 'shi-xie', name: '士燮交州', region: '05-江东', value: 26, coord: ['69%', '88%'], itemStyle: { color: '#22d3ee' } }
       ],
       events: [
-        { id: 'f-aether', time: 2018, type: 'found', targets: ['aether'], value: 132 },
-        { id: 'f-nova', time: 2019, type: 'found', targets: ['nova'], value: 88 },
-        { id: 'a-relay', time: 2020, type: 'acquire', sources: ['relay'], targets: ['nova'], value: 30 },
-        { id: 'a-quanta', time: 2021, type: 'acquire', sources: ['quanta'], targets: ['aether'], value: 28 },
-        { id: 'a-orbit', time: 2022, type: 'acquire', sources: ['orbit'], targets: ['nova'], value: 34 },
-        { id: 'm-media', time: 2023, type: 'merge', sources: ['pixel', 'studio'], targets: ['pixel-studio'], value: 92 },
-        { id: 'a-nova', time: 2024, type: 'acquire', sources: ['nova'], targets: ['aether'], value: 122 },
-        { id: 's-aura', time: 2025, type: 'spinOff', sources: ['aether'], targets: ['aura'], value: 24 },
-        { id: 'a-media', time: 2026, type: 'acquire', sources: ['pixel-studio'], targets: ['aether'], value: 92 }
+        { id: 'han-yellow-turbans-184', time: 184, type: 'spinOff', sources: ['han-court'], targets: ['yellow-turbans'], value: 44, label: '黄巾起义，东汉基层秩序开始破裂' },
+        { id: 'han-sun-jian-187', time: 187.6, type: 'spinOff', sources: ['han-court'], targets: ['sun-wu'], value: 38, label: '孙坚讨乱起兵，江东孙氏势力萌芽' },
+        { id: 'han-mahan-188', time: 188.2, type: 'spinOff', sources: ['han-court'], targets: ['ma-han'], value: 44, label: '凉州边镇坐大，马腾韩遂割据西陲' },
+        { id: 'han-cao-cao-188', time: 188.8, type: 'spinOff', sources: ['han-court'], targets: ['cao-wei'], value: 46, label: '曹操募兵入局，中原军阀之一形成' },
+        { id: 'han-dong-zhuo-189', time: 189, type: 'spinOff', sources: ['han-court'], targets: ['dong-zhuo'], value: 58, label: '董卓入洛，朝廷权威被军阀挟持' },
+        { id: 'han-yuan-shao-189', time: 189.18, type: 'spinOff', sources: ['han-court'], targets: ['yuan-shao'], value: 82, label: '袁绍据河北，关东士族集团独立成势' },
+        { id: 'han-yuan-shu-189', time: 189.36, type: 'spinOff', sources: ['han-court'], targets: ['yuan-shu'], value: 52, label: '袁术割据淮南，袁氏分裂为两支势力' },
+        { id: 'han-gongsun-zan-189', time: 189.54, type: 'spinOff', sources: ['han-court'], targets: ['gongsun-zan'], value: 42, label: '公孙瓒据幽州，河北北部军事化' },
+        { id: 'han-liu-biao-189', time: 189.72, type: 'spinOff', sources: ['han-court'], targets: ['liu-biao'], value: 62, label: '刘表镇荆州，州牧成为地方实权者' },
+        { id: 'han-liu-zhang-189', time: 189.9, type: 'spinOff', sources: ['han-court'], targets: ['liu-zhang'], value: 58, label: '益州刘氏自守，西南形成半独立政权' },
+        { id: 'han-liu-yao-190', time: 190.1, type: 'spinOff', sources: ['han-court'], targets: ['liu-yao'], value: 30, label: '刘繇据扬州，江东旧州郡势力自立' },
+        { id: 'han-wang-lang-190', time: 190.25, type: 'spinOff', sources: ['han-court'], targets: ['wang-lang'], value: 32, label: '王朗、严白虎等会稽势力割据' },
+        { id: 'han-shi-xie-190', time: 190.4, type: 'spinOff', sources: ['han-court'], targets: ['shi-xie'], value: 26, label: '士燮坐镇交州，岭南远离中央控制' },
+        { id: 'han-gongsun-yuan-190', time: 190.55, type: 'spinOff', sources: ['han-court'], targets: ['gongsun-yuan'], value: 34, label: '辽东公孙氏据边地自守' },
+        { id: 'dong-lu-bu-191', time: 191.35, type: 'spinOff', sources: ['dong-zhuo'], targets: ['lu-bu'], value: 36, label: '吕布脱离董卓体系，成为流动军阀' },
+        { id: 'dong-li-jue-192', time: 192, type: 'spinOff', sources: ['dong-zhuo'], targets: ['li-jue'], value: 32, label: '董卓死后，李傕郭汜控制关中' },
+        { id: 'dong-zhang-xiu-192', time: 192.25, type: 'spinOff', sources: ['dong-zhuo'], targets: ['zhang-xiu'], value: 28, label: '张绣承接凉州军余势，占据南阳' },
+        { id: 'liu-biao-huangzu-193', time: 193.2, type: 'spinOff', sources: ['liu-biao'], targets: ['huang-zu'], value: 30, label: '黄祖据江夏，荆州东部军事集团形成' },
+        { id: 'han-liu-bei-194', time: 194, type: 'spinOff', sources: ['han-court'], targets: ['liu-bei-shu'], value: 42, label: '刘备辗转徐豫之间，成为独立军政力量' },
+        { id: 'liu-zhang-zhanglu-194', time: 194.4, type: 'spinOff', sources: ['liu-zhang'], targets: ['zhang-lu'], value: 32, label: '张鲁据汉中，益州北门另成割据' },
+        { id: 'liu-zhang-nanzhong-194', time: 194.8, type: 'spinOff', sources: ['liu-zhang'], targets: ['nanzhong'], value: 24, label: '南中豪强自立，益州南部离心' },
+        { id: 'cao-qingzhou-192', time: 192.2, type: 'acquire', sources: ['yellow-turbans'], targets: ['cao-wei'], value: 34, label: '曹操收青州黄巾为青州兵' },
+        { id: 'sun-liuyao-195', time: 195, type: 'acquire', sources: ['liu-yao'], targets: ['sun-wu'], value: 30, label: '孙策破刘繇，打开江东局面' },
+        { id: 'sun-wanglang-196', time: 196, type: 'acquire', sources: ['wang-lang'], targets: ['sun-wu'], value: 32, label: '孙策平王朗、严白虎等会稽势力' },
+        { id: 'cao-emperor-196', time: 196.2, type: 'acquire', sources: ['li-jue'], targets: ['cao-wei'], value: 32, label: '曹操迎献帝都许，接收关中乱局后的朝廷号令' },
+        { id: 'cao-lubu-198', time: 198, type: 'acquire', sources: ['lu-bu'], targets: ['cao-wei'], value: 36, label: '下邳之战，曹操灭吕布' },
+        { id: 'yuan-gongsun-199', time: 199, type: 'acquire', sources: ['gongsun-zan'], targets: ['yuan-shao'], value: 42, label: '易京陷落，袁绍灭公孙瓒' },
+        { id: 'cao-yuanshu-199', time: 199.2, type: 'acquire', sources: ['yuan-shu'], targets: ['cao-wei'], value: 38, label: '袁术败亡，淮南势力瓦解' },
+        { id: 'cao-zhangxiu-199', time: 199.4, type: 'acquire', sources: ['zhang-xiu'], targets: ['cao-wei'], value: 28, label: '张绣降曹，南阳压力解除' },
+        { id: 'cao-yuan-204', time: 204, type: 'acquire', sources: ['yuan-shao'], targets: ['cao-wei'], value: 82, label: '曹操入邺，河北袁氏主力被吞并' },
+        { id: 'sun-huangzu-208', time: 208, type: 'acquire', sources: ['huang-zu'], targets: ['sun-wu'], value: 30, label: '孙权破黄祖，江夏势力归入孙氏' },
+        { id: 'cao-liubiao-208', time: 208.2, type: 'acquire', sources: ['liu-biao'], targets: ['cao-wei'], value: 42, label: '刘琮降曹，荆州北部入曹操版图' },
+        { id: 'cao-mahan-211', time: 211, type: 'acquire', sources: ['ma-han'], targets: ['cao-wei'], value: 44, label: '潼关之战后，关中凉州势力转弱' },
+        { id: 'liu-liuzhang-214', time: 214, type: 'acquire', sources: ['liu-zhang'], targets: ['liu-bei-shu'], value: 58, label: '刘璋降，刘备取得益州' },
+        { id: 'cao-zhanglu-215', time: 215, type: 'acquire', sources: ['zhang-lu'], targets: ['cao-wei'], value: 32, label: '张鲁降曹，汉中先入曹操控制' },
+        { id: 'wei-replaces-han-220', time: 220, type: 'acquire', sources: ['han-court'], targets: ['cao-wei'], value: 50, label: '曹丕受禅，东汉正式终结' },
+        { id: 'shu-nanzhong-225', time: 225, type: 'acquire', sources: ['nanzhong'], targets: ['liu-bei-shu'], value: 24, label: '诸葛亮南征，南中归附蜀汉' },
+        { id: 'wu-shixie-226', time: 226, type: 'acquire', sources: ['shi-xie'], targets: ['sun-wu'], value: 26, label: '士燮死后，交州逐步纳入孙吴' },
+        { id: 'wei-liaodong-238', time: 238, type: 'acquire', sources: ['gongsun-yuan'], targets: ['cao-wei'], value: 34, label: '司马懿平辽东，公孙氏灭亡' },
+        { id: 'wei-court-factions-239', time: 239.6, type: 'spinOff', sources: ['cao-wei'], targets: ['cao-shuang', 'sima-jin'], value: 45, label: '魏明帝死后，曹爽与司马氏分掌朝局' },
+        { id: 'sima-gaopingling-249', time: 249, type: 'acquire', sources: ['cao-shuang'], targets: ['sima-jin'], value: 45, label: '高平陵之变，司马氏掌握魏政' },
+        { id: 'wei-conquers-shu-263', time: 263, type: 'acquire', sources: ['liu-bei-shu'], targets: ['cao-wei'], value: 78, label: '魏灭蜀，刘禅降' },
+        { id: 'jin-replaces-wei-265', time: 265, type: 'acquire', sources: ['cao-wei'], targets: ['sima-jin'], value: 118, label: '司马炎受禅，西晋代魏' },
+        { id: 'jin-conquers-wu-280', time: 280, type: 'acquire', sources: ['sun-wu'], targets: ['sima-jin'], value: 86, label: '晋灭吴，三国归晋' }
       ]
     },
     flame: {

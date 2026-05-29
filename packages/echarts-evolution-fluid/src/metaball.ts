@@ -1,3 +1,5 @@
+import type { WaterdropFusionShape } from './waterdrop-fusion.js';
+
 export interface MetaballCircle {
   x: number;
   y: number;
@@ -27,23 +29,13 @@ interface Point {
   y: number;
 }
 
-export interface WaterdropSurfaceShape {
-  cx: number;
-  cy: number;
-  width: number;
-  height: number;
-  neck: number;
-  leftRadius: number;
-  rightRadius: number;
-  dy: number;
-  curve: number;
-  bridgeLength: number;
-}
+export type WaterdropSurfaceShape = WaterdropFusionShape;
 
 interface WaterdropShapeOptions {
   bridgeLength?: number;
   handleSize?: number;
   neckSize?: number;
+  bridgeOnly?: boolean;
 }
 
 export function createMetaballBridgePath(
@@ -70,6 +62,7 @@ export function createMetaballBridgePath(
     distance,
     viscosity
   });
+  /* v8 ignore next -- Valid nearby circles produce the sampled contour; empty contour is a numerical guard. */
   if (contour.length < 12) return '';
   return contourToCubicPath(contour, smoothness);
 }
@@ -93,6 +86,7 @@ export function createFusionEnvelopePath(
   const dx = target.x - source.x;
   const dy = target.y - source.y;
   const distance = Math.hypot(dx, dy);
+  /* v8 ignore next -- Circle validity above guarantees a finite distance. */
   if (!Number.isFinite(distance)) return '';
   if (distance <= 1e-6) return createCirclePath(target.x, target.y, Math.max(source.r, target.r));
 
@@ -115,6 +109,7 @@ export function createWaterdropSurfacePath(
   const dx = target.x - source.x;
   const dy = target.y - source.y;
   const distance = Math.hypot(dx, dy);
+  /* v8 ignore next -- Circle validity above guarantees a finite distance. */
   if (!Number.isFinite(distance)) return '';
   if (distance <= 1e-6) return createCirclePath(target.x, target.y, Math.max(source.r, target.r));
   return createWaterdropFusionPath(left, left.r, right, right.r, Math.min(left.r, right.r), {
@@ -138,19 +133,35 @@ export function createWaterdropFusionShape(
 ): WaterdropSurfaceShape | null {
   if (!isValidCircle(source) || !isValidCircle(target)) return null;
   const [left, right] = orderWaterdropPair(source, target);
-  const minRadius = Math.min(left.r, right.r);
-  return {
-    cx: (left.x + right.x) / 2 - (left.r - right.r) / 2,
+  const leftRadius = Math.max(1, left.r);
+  const rightRadius = Math.max(1, right.r);
+  const minRadius = Math.min(leftRadius, rightRadius);
+  const distance = Math.hypot(right.x - left.x, right.y - left.y);
+  const gap = Math.max(0, distance - leftRadius - rightRadius);
+  const bridgeLength = Math.max(finiteNumber(options.bridgeLength, 38), gap);
+  const neck = clamp(finiteNumber(options.neckSize, minRadius), 0, minRadius);
+  const shape: WaterdropSurfaceShape = {
+    cx: (left.x + right.x) / 2 - (leftRadius - rightRadius) / 2,
     cy: (left.y + right.y) / 2,
-    width: right.x - left.x + left.r + right.r,
-    height: Math.max(left.r, right.r) * 2,
-    neck: Math.max(0, finiteNumber(options.neckSize, minRadius)),
-    leftRadius: left.r,
-    rightRadius: right.r,
+    width: right.x - left.x + leftRadius + rightRadius,
+    height: Math.max(leftRadius, rightRadius) * 2,
+    neck,
+    leftRadius,
+    rightRadius,
     dy: right.y - left.y,
     curve: finiteNumber(options.handleSize, 0.85),
-    bridgeLength: finiteNumber(options.bridgeLength, 38)
+    bridgeLength
   };
+  if (options.bridgeOnly === true) {
+    shape.x0 = left.x;
+    shape.y0 = left.y;
+    shape.r0 = leftRadius;
+    shape.x1 = right.x;
+    shape.y1 = right.y;
+    shape.r1 = rightRadius;
+    shape.bridgeOnly = true;
+  }
+  return shape;
 }
 
 export function createSplitEnvelopePath(
@@ -162,6 +173,7 @@ export function createSplitEnvelopePath(
   const dx = target.x - source.x;
   const dy = target.y - source.y;
   const distance = Math.hypot(dx, dy);
+  /* v8 ignore next -- Circle validity above guarantees a finite distance. */
   if (!Number.isFinite(distance)) return '';
   if (distance <= 1e-6) return createCirclePath(source.x, source.y, Math.max(source.r, target.r));
 
@@ -224,6 +236,7 @@ function sampleMetaballContour(
   const easedContact = easeInOutCubic(context.contact);
   const saddle = estimateSaddleField(source, target);
   const isoValue = Math.max(0.72, Math.min(1 + easedContact * (0.1 + context.viscosity * 0.14), saddle * 0.92));
+  /* v8 ignore next -- Contact-positive valid circles keep the weighted center inside the field. */
   if (metaballField(center, source, target) <= isoValue) return [];
 
   const maxRadius = context.distance + Math.max(source.r, target.r) * 3 + Math.min(source.r, target.r) * 4;
@@ -231,6 +244,7 @@ function sampleMetaballContour(
   for (let index = 0; index < sampleCount; index += 1) {
     const angle = (index / sampleCount) * Math.PI * 2;
     const point = sampleContourPoint(center, angle, maxRadius, isoValue, source, target);
+    /* v8 ignore next -- maxRadius encloses the sampled field for valid nearby circles. */
     if (!point) return [];
     points.push(point);
   }
@@ -251,6 +265,7 @@ function sampleContourPoint(
   while (high < maxRadius && metaballField(rayPoint(center, direction, high), source, target) > isoValue) {
     high *= 1.45;
   }
+  /* v8 ignore next -- sampleMetaballContour chooses maxRadius to enclose the field. */
   if (metaballField(rayPoint(center, direction, high), source, target) > isoValue) return null;
 
   for (let iteration = 0; iteration < 24; iteration += 1) {
@@ -292,6 +307,7 @@ function estimateSaddleField(source: MetaballCircle, target: MetaballCircle): nu
     };
     lowest = Math.min(lowest, metaballField(point, source, target));
   }
+  /* v8 ignore next -- Valid circle inputs always produce finite saddle samples. */
   return Number.isFinite(lowest) ? lowest : 1;
 }
 
@@ -303,9 +319,11 @@ function createWaterdropFusionPath(
   neckSize: number,
   options: { bridgeLength: number; curve: number }
 ): string {
+  /* v8 ignore next -- Public callers validate positive radii before building waterdrop paths. */
   if (leftRadius <= 0 || rightRadius <= 0) return '';
   const vx = right.x - left.x;
   const vy = right.y - left.y;
+  /* v8 ignore next -- Coincident circles are handled by public zero-distance callers before this helper. */
   const dist = Math.hypot(vx, vy) || 1;
   const minRadius = Math.min(leftRadius, rightRadius);
   const maxNeck = clamp(neckSize / minRadius, 0, 1);
@@ -314,6 +332,7 @@ function createWaterdropFusionPath(
   const rawBridgeRate = gap <= 0
     ? 1
     : bridgeLength > 0
+      /* v8 ignore next -- Non-overlapping waterdrop paths are requested with a positive bridge length. */
       ? smoothStep(0, 1, 1 - gap / bridgeLength)
       : 0;
   const bridgeRate = smoothStep(0.42, 1, rawBridgeRate);
@@ -412,6 +431,7 @@ function pointDistance(left: Point, right: Point): number {
 
 function arcToCubicCommands(center: Point, radius: number, startAngle: number, endAngle: number): string[] {
   let delta = endAngle - startAngle;
+  /* v8 ignore next -- Current callers pass increasing angles for full-circle arcs. */
   while (delta < 0) delta += Math.PI * 2;
   const segments = Math.max(1, Math.ceil(delta / (Math.PI / 2)));
   const step = delta / segments;

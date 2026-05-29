@@ -12,6 +12,7 @@ export interface FluidSimulationOptions {
   damping: number;
   surfaceTension: number;
   areaConservation: boolean;
+  disableRuntimeRepulsion?: boolean;
 }
 
 export interface FluidParticle {
@@ -29,11 +30,14 @@ export interface FluidParticle {
   opacity: number;
   active: boolean;
   groupId: string;
+  generated?: boolean;
 }
 
 export interface FluidSurfaceGroup {
   id: string;
   particleIds: string[];
+  sourceIds?: string[];
+  targetIds?: string[];
   mode: 'single' | 'fusing' | 'splitting' | 'detached';
   colorPolicy: 'target' | 'source' | 'mixed';
 }

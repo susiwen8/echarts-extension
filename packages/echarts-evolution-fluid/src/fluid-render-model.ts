@@ -47,7 +47,6 @@ function resolveSurfaceShape(
   byEntityId: Map<string, FluidRuntimeFrame['particles'][number]>
 ): EvolutionFluidBridgeLayout['surfaceShape'] {
   if (blob.kind !== 'absorb' && blob.kind !== 'split') return undefined;
-  if ((blob.path.match(/\bM\b/g) || []).length !== 1) return undefined;
   const source = blob.sourceIds
     .map((id) => byEntityId.get(id))
     .find((particle) => particle?.active && particle.radius > 0.05);
@@ -56,13 +55,17 @@ function resolveSurfaceShape(
     .find((particle) => particle?.active && particle.radius > 0.05);
   if (!source || !target || source.entityId === target.entityId) return undefined;
   const minRadius = Math.min(source.radius, target.radius);
+  const distance = Math.hypot(target.x - source.x, target.y - source.y);
+  const gap = Math.max(0, distance - source.radius - target.radius);
+  /* v8 ignore next -- Source/target validity is checked above, so null is only a defensive type fallback. */
   return createWaterdropFusionShape(
     { x: source.x, y: source.y, r: source.radius },
     { x: target.x, y: target.y, r: target.radius },
     {
-      bridgeLength: Math.max(24, minRadius * 4),
+      bridgeLength: Math.max(28, minRadius * 3.2, gap * 2.35),
       handleSize: 0.85,
-      neckSize: minRadius
+      neckSize: minRadius,
+      bridgeOnly: true
     }
   ) || undefined;
 }

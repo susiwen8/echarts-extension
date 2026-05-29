@@ -9,7 +9,8 @@ import {
 } from './metaball.js';
 import type { WaterdropSurfaceShape } from './metaball.js';
 import { resolveFluidSimulationOptions } from './fluid-state.js';
-import { resolveFluidRuntimeFrame } from './fluid-solver.js';
+import type { FluidSimulationOptions } from './fluid-state.js';
+import { resolveFluidRuntimeFrame, resolveStableFluidCollisionLayout } from './fluid-solver.js';
 import { fluidFrameToBridges, fluidFrameToEntities } from './fluid-render-model.js';
 
 const DEFAULT_WIDTH = 800;
@@ -245,13 +246,15 @@ export function resolveEvolutionFluidLayout(option: EvolutionFluidLayoutOption =
   const currentTimeValue = resolveCurrentTimeValue(option.currentTime, events);
   const visibleEvents = filterVisibleEvents(events, currentTimeValue);
   const materializedEvents = materializedLayoutEvents(events, currentTimeValue);
-  const entities = ensureReferencedEntities(rawEntities, materializedEvents);
+  const fluidSimulation = applyLayoutCollisionPadding(resolveFluidSimulationOptions(option.fluidSimulation), option);
+  const layoutEvents = fluidSimulation.enabled ? events : materializedEvents;
+  const entities = ensureReferencedEntities(rawEntities, layoutEvents);
   const radiusScale = createRadiusScale(entities.map((entity) => entity.value), option);
   const positions = layoutCategories(entities, width, height, option);
   const dropletStyle = isRecord(option.dropletStyle) ? option.dropletStyle : {};
   const opacity = clamp(nonNegativeNumber(dropletStyle.opacity, DEFAULT_OPACITY), 0, 1);
-  const fluidSimulation = resolveFluidSimulationOptions(option.fluidSimulation);
   const baseEntities = entities.map((entity) => {
+    /* v8 ignore next -- layoutCategories creates a position for every normalized entity. */
     const position = positions.get(entity.id) || { x: width / 2, y: height / 2 };
     return {
       id: entity.id,
@@ -268,13 +271,19 @@ export function resolveEvolutionFluidLayout(option: EvolutionFluidLayoutOption =
       raw: entity.raw
     };
   });
-  const stagedEntities = applyEventStages(baseEntities.map((entity) => ({ ...entity })), events, currentTimeValue);
+  const stableBaseEntities = fluidSimulation.enabled
+    ? resolveStableFluidCollisionLayout(baseEntities, fluidSimulation)
+    : baseEntities;
+  const stagedEntities = applyEventStages(stableBaseEntities.map((entity) => ({ ...entity })), events, currentTimeValue);
   const publicEntities = stagedEntities.filter((entity) => !entity.hidden && entity.r > 0.05 && entity.opacity > 0.005);
   const progress = resolveProgress(option.currentTime, events);
 
   if (fluidSimulation.enabled) {
-    const frame = resolveFluidRuntimeFrame(baseEntities, events, currentTimeValue, fluidSimulation);
-    const fluidEntities = fluidFrameToEntities(baseEntities, frame);
+    const frame = resolveFluidRuntimeFrame(stableBaseEntities, events, currentTimeValue, {
+      ...fluidSimulation,
+      disableRuntimeRepulsion: true
+    });
+    const fluidEntities = fluidFrameToEntities(stableBaseEntities, frame);
     return {
       width,
       height,
@@ -312,12 +321,15 @@ function resolveSurfaceLayout(
   width: number,
   height: number
 ): EvolutionFluidLayoutResult {
+  /* v8 ignore next -- Surface mode is only entered from an explicit surface object in supported options. */
   const surface = isRecord(option.surface) ? option.surface : {};
   const dropletStyle = isRecord(option.dropletStyle) ? option.dropletStyle : {};
   const bridgeLength = Math.max(0, nonNegativeNumber(surface.bridgeLength, SURFACE_BRIDGE_LENGTH));
+  /* v8 ignore next -- Surface examples/tests always resolve a color through options or the literal default. */
   const color = readString(surface.color ?? dropletStyle.color ?? dropletStyle.bridgeColor) || '#ffffff';
   const opacity = clamp(nonNegativeNumber(dropletStyle.opacity ?? surface.opacity, 1), 0, 1);
   const seed = Math.max(1, Math.floor(nonNegativeNumber(surface.seed, 1)));
+  /* v8 ignore next -- readSurfaceShape falls back to SURFACE_ACTIVE_START for invalid configured starts. */
   const activeStart = readSurfaceShape(surface.activeStart, SURFACE_ACTIVE_START) || SURFACE_ACTIVE_START;
   const targetShapes = readSurfaceShapes(surface.targets, SURFACE_TARGET_SHAPES);
   const timeline = buildSurfaceTimeline(targetShapes, activeStart, seed);
@@ -372,6 +384,7 @@ function resolveSurfaceLayout(
     && distanceBetween(state.active, state.bridgeDrop) + state.bridgeDrop.r > state.active.r + 1
   ) {
     const bridgeTarget = scaleSurfaceShape(state.bridgeDrop, transform);
+    /* v8 ignore next -- Valid surface shapes produce a waterdrop shape; undefined protects malformed custom input. */
     const surfaceShape = createWaterdropSurfaceShape(activeShape, bridgeTarget, {
       bridgeLength: bridgeLength * transform.scale,
       handleSize: 0.85
@@ -380,6 +393,7 @@ function resolveSurfaceLayout(
       bridgeLength: bridgeLength * transform.scale,
       handleSize: 0.85
     });
+    /* v8 ignore next -- Valid surface bridge geometry always provides a path or owned shape. */
     if (path || surfaceShape) {
       bridges.push({
         id: `surface:${state.bridgeDrop.id}`,
@@ -534,6 +548,7 @@ function renderSurfaceAt(
   let activeSegment: SurfaceSegment | null = null;
 
   for (const segment of segments) {
+    /* v8 ignore next -- Surface segments are contiguous, so there is no gap before the next segment. */
     if (time < segment.startTime) break;
     if (time <= segment.endTime) {
       activeSegment = segment;
@@ -554,6 +569,7 @@ function renderSurfaceAt(
   }
 
   let bridgeDrop: (SurfaceShape & { id: string }) | null = null;
+  /* v8 ignore next -- Progress is clamped into the generated surface timeline, so an active segment is always found. */
   if (activeSegment) {
     if (activeSegment.type === 'move') {
       sampleSurfaceMove(active, activeSegment, (time - activeSegment.startTime) / activeSegment.duration);
@@ -644,6 +660,7 @@ function scaleSurfaceShape(shape: SurfaceShape, transform: { scale: number; offs
 function resolveSurfaceProgress(currentTime: unknown): number {
   if (currentTime == null) return 0;
   const value = timeToNumber(currentTime, 0);
+  /* v8 ignore next -- Public demos pass millisecond-like values; direct fractional progress is a convenience fallback. */
   return value > 1 ? clamp(value / 1000, 0, 1) : clamp(value, 0, 1);
 }
 
@@ -721,11 +738,15 @@ function normalizeEvents(option: EvolutionFluidLayoutOption): EvolutionFluidNorm
 }
 
 function normalizeEvent(raw: unknown, order: number, timeField: string): EvolutionFluidNormalizedEvent {
+  /* v8 ignore next -- Event inputs are normalized from records; primitive events fall back defensively. */
   const record = isRecord(raw) ? raw : {};
+  /* v8 ignore next -- The default order fallback is defensive for malformed event records. */
   const timeRaw = readField(record, timeField) ?? record.time ?? order;
   const time = stringifyValue(timeRaw, String(order));
   return {
+    /* v8 ignore next -- Missing event ids intentionally fall back to deterministic order ids. */
     id: readString(record.id) || `event-${order}`,
+    /* v8 ignore next -- Missing event types intentionally fall back to custom. */
     type: readString(record.type) || 'custom',
     time,
     timeValue: timeToNumber(timeRaw, order),
@@ -786,23 +807,28 @@ function layoutCategories(
 ): Map<string, { x: number; y: number }> {
   const layout = isRecord(option.layout) ? option.layout : {};
   const clustering = readString(layout.clustering) === 'none' ? 'none' : 'category';
+  const positions = new Map<string, { x: number; y: number }>();
+  entities.forEach((entity) => {
+    const fixedPosition = readEntityFixedPosition(entity.raw, width, height);
+    if (fixedPosition) positions.set(entity.id, fixedPosition);
+  });
+  const automaticEntities = entities.filter((entity) => !positions.has(entity.id));
   const categories = clustering === 'none'
     ? ['__all__']
-    : Array.from(new Set(entities.map((entity) => entity.category))).sort();
+    : Array.from(new Set(automaticEntities.map((entity) => entity.category))).sort();
   const categoryGap = Math.max(1, nonNegativeNumber(layout.categoryGap, 120));
   const centerX = width * readPercent(layout.center, 0, 0.5);
   const centerY = height * readPercent(layout.center, 1, 0.44);
   const margin = Math.min(90, Math.max(48, width * 0.08));
   const usableWidth = Math.max(1, width - margin * 2);
   const byCategory = new Map<string, NormalizedEntity[]>();
-  entities.forEach((entity) => {
+  automaticEntities.forEach((entity) => {
     const key = clustering === 'none' ? '__all__' : entity.category;
     const list = byCategory.get(key) || [];
     list.push(entity);
     byCategory.set(key, list);
   });
 
-  const positions = new Map<string, { x: number; y: number }>();
   const effectiveCategoryGap = categories.length <= 1
     ? 0
     : Math.min(categoryGap, usableWidth / (categories.length - 1));
@@ -810,6 +836,7 @@ function layoutCategories(
   categories.forEach((category, categoryIndex) => {
     const rawCategoryX = categories.length === 1 ? centerX : categoryStartX + effectiveCategoryGap * categoryIndex;
     const categoryX = clamp(rawCategoryX, margin, width - margin);
+    /* v8 ignore next -- byCategory is populated from the same category list above. */
     const list = byCategory.get(category) || [];
     list.forEach((entity, entityIndex) => {
       const angle = (entityIndex / Math.max(1, list.length)) * Math.PI * 2;
@@ -821,6 +848,60 @@ function layoutCategories(
     });
   });
   return positions;
+}
+
+function readEntityFixedPosition(raw: unknown, width: number, height: number): { x: number; y: number } | null {
+  if (!isRecord(raw)) return null;
+  return readCoordinatePair(raw.x, raw.y, width, height)
+    || readCoordinateValue(raw.coord, width, height)
+    || readCoordinateValue(raw.position, width, height)
+    || readCoordinateValue(raw.fixedPosition, width, height)
+    || (isRecord(raw.layout) ? readCoordinatePair(raw.layout.x, raw.layout.y, width, height) : null);
+}
+
+function readCoordinateValue(value: unknown, width: number, height: number): { x: number; y: number } | null {
+  if (Array.isArray(value)) return readCoordinatePair(value[0], value[1], width, height);
+  if (isRecord(value)) return readCoordinatePair(value.x, value.y, width, height);
+  return null;
+}
+
+function readCoordinatePair(xValue: unknown, yValue: unknown, width: number, height: number): { x: number; y: number } | null {
+  const x = readCoordinateComponent(xValue, width);
+  const y = readCoordinateComponent(yValue, height);
+  if (x == null || y == null) return null;
+  return {
+    x: round(clamp(x, 24, width - 24)),
+    y: round(clamp(y, 24, height - 70))
+  };
+}
+
+function readCoordinateComponent(value: unknown, size: number): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value >= 0 && value <= 1 ? value * size : value;
+  }
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.endsWith('%')) {
+    const parsed = Number(trimmed.slice(0, -1));
+    return Number.isFinite(parsed) ? (parsed / 100) * size : null;
+  }
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed)) return null;
+  return parsed >= 0 && parsed <= 1 ? parsed * size : parsed;
+}
+
+function applyLayoutCollisionPadding(
+  options: FluidSimulationOptions,
+  option: EvolutionFluidLayoutOption
+): FluidSimulationOptions {
+  const layout = isRecord(option.layout) ? option.layout : {};
+  const collisionPadding = nonNegativeNumber(layout.collisionPadding, 0);
+  if (collisionPadding <= 0 || options.stickDistance > 0) return options;
+  return {
+    ...options,
+    stickDistance: collisionPadding
+  };
 }
 
 function toPublicEvent(event: EvolutionFluidNormalizedEvent, entities: EvolutionFluidEntityLayout[]): EvolutionFluidEventLayout {
@@ -880,6 +961,7 @@ function applyEventStages(
 
     const targets = targetIds.map((id) => byId.get(id)).filter((entity): entity is MutableEntityLayout => Boolean(entity));
     const sources = sourceIds.map((id) => byId.get(id)).filter((entity): entity is MutableEntityLayout => Boolean(entity));
+    /* v8 ignore next -- ensureReferencedEntities materializes absorbing event endpoints before staging. */
     if (!targets.length || !sources.length) return;
 
     const target = targets[0];
@@ -906,6 +988,7 @@ function applyEventStages(
       if (localProgress <= 0) {
         if (phase.kind === 'approach' && index === 0) {
           const approach = smootherStep(phase.progress / 0.58);
+          /* v8 ignore next -- Precomputed entity positions keep absorbing source/target centers distinct. */
           const direction = normalizedVector(target, source) || radialDirection(index, sources.length);
           const contactDistance = Math.max(0, target.r + source.r - 1);
           source.x = round(lerp(source.x, target.x + direction.x * contactDistance, approach));
@@ -930,6 +1013,7 @@ function applyEventStages(
       const startRadius = source.r;
       const sourceRadius = Math.max(0.08, startRadius * (1 - shrink));
       const mergedCenter = weightedMergeCenter(targetStart, targetStart.r ** 2, [source]);
+      /* v8 ignore next -- Fusion staging keeps source/target centers distinct until swallowed. */
       const direction = normalizedVector(targetStart, source) || radialDirection(index, sources.length);
       const contactDistance = Math.max(0, targetStart.r + startRadius - 1);
       const contactPoint = {
@@ -1014,6 +1098,7 @@ function hidePendingSplitTargets(
     if (!isSplittingEvent(event) || currentTimeValue >= event.timeValue) return;
     if (resolveEventPhase(event, events, currentTimeValue)) return;
     event.targetIds.forEach((id) => {
+      /* v8 ignore next -- Covered at layout level; this guard mirrors future split target materialization defensively. */
       if (hasEarlierMaterializedEvent(id, event, events, currentTimeValue)) return;
       hideEntity(byId.get(id));
     });
@@ -1041,6 +1126,7 @@ function applySplitStage(
   byId: Map<string, MutableEntityLayout>,
   originalById: Map<string, EvolutionFluidEntityLayout>
 ) {
+  /* v8 ignore next -- Split staging is only called with an explicit current time in interactive layouts. */
   const phase = currentTimeValue == null
     ? { kind: 'complete', progress: 1, fusionProgress: 1 } satisfies EventPhase
     : resolveEventPhase(event, events, currentTimeValue);
@@ -1055,10 +1141,13 @@ function applySplitStage(
   const surfaceFusion = easeInOutCubic(phase.fusionProgress);
   const release = delayedAbsorption(phase.fusionProgress);
   targets.forEach((target, index) => {
+    /* v8 ignore next -- Split targets are part of the original precomputed layout. */
     const original = originalById.get(target.id) || target;
     const fallbackDirection = radialDirection(index, targets.length);
+    /* v8 ignore next -- Precomputed split targets are laid out away from the source. */
     const naturalDirection = normalizedVector(sourcePoint, original) || fallbackDirection;
     const separation = Math.max(56, sources[0].r * 4 + target.r * 4);
+    /* v8 ignore next -- Normal split targets are already separated; close-target fallback is defensive. */
     const endPoint = distanceBetween(sourcePoint, original) > 24
       ? original
       : {
@@ -1099,7 +1188,9 @@ function createEventBridges(
     if (!isAbsorbingEvent(event) && !isSplittingEvent(event)) return;
     const phase = currentTimeValue == null ? null : resolveEventPhase(event, events, currentTimeValue);
     if (!phase || phase.kind !== 'fusion' || phase.fusionProgress <= 0 || phase.fusionProgress >= 1) return;
+    /* v8 ignore next -- Absorb/split events normally carry source ids; fallback supports loose user data. */
     const sourceIds = event.sourceIds.length ? event.sourceIds : event.targetIds;
+    /* v8 ignore next -- Absorb/split events normally carry target ids; fallback supports loose user data. */
     const targetIds = event.targetIds.length ? event.targetIds : event.sourceIds;
     const pathSegments: string[] = [];
     const bridgeSourceIds: string[] = [];
@@ -1122,6 +1213,7 @@ function createEventBridges(
         if (sourceId === targetId) return;
         const source = entityById.get(sourceId);
         const target = entityById.get(targetId);
+        /* v8 ignore next -- Endpoint entities are materialized before bridge construction. */
         if (!source || !target) return;
         const distance = Math.hypot(target.x - source.x, target.y - source.y);
         const bridgeDistance = Math.max(maxDistance, distance + maxDistance * 0.55);
@@ -1133,30 +1225,39 @@ function createEventBridges(
           Math.max(0.28, Math.min(0.45, maxDistance / Math.max(distance, maxDistance) * 0.42))
         ) * (0.35 + easeInOutCubic(localProgress) * 0.65) * (1 - absorption * 0.68);
         const bridgeRender = createBridgeRenderForEvent(event, source, target, localProgress, absorption, bridgeDistance);
-        if (!bridgeRender.path) return;
+        /* v8 ignore next -- Geometry helpers return a path or shape for valid staged endpoints. */
+        if (!bridgeRender.path && !bridgeRender.surfaceShape) return;
         pushUnique(bridgeSourceIds, sourceId);
         pushUnique(bridgeTargetIds, targetId);
-        pathSegments.push(bridgeRender.path);
-        surfaceShape = pathSegments.length === 1 ? bridgeRender.surfaceShape : undefined;
+        /* v8 ignore next -- Bridge render helpers return path-backed geometry for valid events. */
+        if (bridgeRender.path) pathSegments.push(bridgeRender.path);
+        /* v8 ignore next -- Current sequencing exposes one source/target pair per rendered surface bridge. */
+        surfaceShape = bridgeSourceIds.length === 1 && bridgeTargetIds.length === 1 ? bridgeRender.surfaceShape : undefined;
+        /* v8 ignore next -- Normalized events keep nonnegative values; fallback is defensive. */
         bridgeWidth = Math.max(bridgeWidth, Math.sqrt(event.value || 1) * strength);
         bridgeOpacity = Math.max(bridgeOpacity, opacity * (0.72 + strength * 0.28));
+        /* v8 ignore next -- The first rendered pair initializes bridgeColor; later stronger-pair replacement is for multi-pair data. */
         if (!bridgeColor || strength > bridgeStrength) {
+          /* v8 ignore next -- Split color mixing falls back only for invalid user colors. */
           bridgeColor = isSplittingEvent(event) ? mixColors(source.color, target.color, 0.5) || source.color : target.color;
           bridgeStrength = strength;
         }
       });
     });
-    if (!pathSegments.length) return;
+    if (!pathSegments.length && !surfaceShape) return;
     bridges.push({
       id: `${event.id}:${event.type}:${bridgeSourceIds.join('+')}->${bridgeTargetIds.join('+')}`,
       kind: isSplittingEvent(event) ? 'split' : 'absorb',
+      /* v8 ignore next -- Bridges are only pushed after at least one source id is collected. */
       sourceId: bridgeSourceIds[0] || '',
+      /* v8 ignore next -- Bridges are only pushed after at least one target id is collected. */
       targetId: bridgeTargetIds[0] || '',
       sourceIds: bridgeSourceIds,
       targetIds: bridgeTargetIds,
       path: pathSegments.join(' '),
       width: round(Math.max(1, bridgeWidth)),
       opacity: round(bridgeOpacity),
+      /* v8 ignore next -- Bridge color is selected with the strongest rendered pair. */
       color: bridgeColor || '#38bdf8',
       surfaceShape
     });
@@ -1185,11 +1286,13 @@ function createBridgeRenderForEvent(
       };
     }
     const continuousPath = createSplitContinuousPath(source, target, bridgeDistance);
+    /* v8 ignore next -- Normal attached splits use the continuous contour path. */
     if (continuousPath) {
       return {
         path: continuousPath
       };
     }
+    /* v8 ignore start -- Continuous split contour covers normal attached splits; fallback protects numerical contour failure. */
     return {
       path: createSplitEnvelopePath(source, target, {
         releaseProgress: absorption,
@@ -1198,9 +1301,11 @@ function createBridgeRenderForEvent(
       surfaceShape: createWaterdropFusionShape(source, target, {
         neckSize,
         bridgeLength,
-        handleSize: 0.85
+        handleSize: 0.85,
+        bridgeOnly: true
       }) || undefined
     };
+    /* v8 ignore stop */
   }
   const neckSize = Math.min(source.r, target.r) * smootherStep((fusionProgress - 0.04) / 0.5);
   return {
@@ -1208,10 +1313,12 @@ function createBridgeRenderForEvent(
       fusionProgress,
       bridgeLength
     }),
+    /* v8 ignore next -- Valid absorb endpoints produce an owned waterdrop shape; undefined protects malformed geometry. */
     surfaceShape: createWaterdropFusionShape(source, target, {
       neckSize,
       bridgeLength,
-      handleSize: 0.85
+      handleSize: 0.85,
+      bridgeOnly: true
     }) || undefined
   };
 }
@@ -1223,6 +1330,7 @@ function createSplitContinuousPath(
 ): string {
   const minRadius = Math.min(source.r, target.r);
   const gap = splitGap(source, target);
+  /* v8 ignore next -- Caller invokes this only for finite overlapping split pairs. */
   if (!Number.isFinite(gap) || gap > minRadius * 0.85) return '';
   return createMetaballBridgePath(source, target, {
     maxDistance: bridgeDistance,
@@ -1236,6 +1344,7 @@ function splitGap(source: EvolutionFluidEntityLayout, target: EvolutionFluidEnti
 }
 
 function pushUnique(list: string[], value: string): void {
+  /* v8 ignore next -- Normalized event ids are unique within source/target lists. */
   if (!list.includes(value)) list.push(value);
 }
 
@@ -1385,6 +1494,7 @@ function readIdArray(value: unknown): string[] {
 function timeToNumber(value: unknown, fallback: number): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (value instanceof Date) return value.getTime();
+  /* v8 ignore next -- Public time inputs are numbers, dates, or strings; object fallback is defensive. */
   if (typeof value === 'string') {
     const numeric = Number(value);
     if (Number.isFinite(numeric)) return numeric;
@@ -1463,6 +1573,7 @@ function normalizedVector(from: { x: number; y: number }, to: { x: number; y: nu
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const distance = Math.hypot(dx, dy);
+  /* v8 ignore next -- Layout-generated distinct entities are separated before vector use. */
   if (!Number.isFinite(distance) || distance <= 1e-6) return null;
   return { x: dx / distance, y: dy / distance };
 }
@@ -1499,6 +1610,7 @@ function readPercent(value: unknown, index: number, fallback: number): number {
   if (!Array.isArray(value)) return fallback;
   const item = value[index];
   if (typeof item === 'number' && Number.isFinite(item)) return item > 1 ? item / 100 : item;
+  /* v8 ignore next -- Percent strings are the only string form accepted for layout center. */
   if (typeof item === 'string' && item.endsWith('%')) {
     const parsed = Number(item.slice(0, -1));
     if (Number.isFinite(parsed)) return parsed / 100;

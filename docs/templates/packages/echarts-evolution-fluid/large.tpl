@@ -24,8 +24,8 @@
     <section class="demo-stage"><div class="chart-frame"><div id="chart"></div></div></section>
   </main>
   <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
-  <script src="../../../packages/echarts-evolution-fluid/dist/echarts-evolution-fluid.js?v=waterdrop-behavior-3"></script>
-  <script src="../../shared/demo-runner.js?v=waterdrop-behavior-3"></script>
+  <script src="../../../packages/echarts-evolution-fluid/dist/echarts-evolution-fluid.js?v=waterdrop-behavior-5"></script>
+  <script src="../../shared/demo-runner.js?v=waterdrop-behavior-5"></script>
   <script src="../../shared/large-data.js?v=large-data-1"></script>
 </body>
 </html>

@@ -119,9 +119,9 @@ test('evolution-fluid repeated deletes preserve baseline entities while reducing
   const remainingEntityIds = data.evolutionFluid.entities.map((entity) => entity.id);
 
   assert.ok(namespace.countExampleDataItems('evolution-fluid', data) < beforeCount);
-  assert.ok(remainingEntityIds.includes('aether'));
-  assert.ok(remainingEntityIds.includes('studio'));
-  assert.ok(remainingEntityIds.includes('orbit'));
+  assert.ok(remainingEntityIds.includes('cao-wei'));
+  assert.ok(remainingEntityIds.includes('sun-wu'));
+  assert.ok(remainingEntityIds.includes('sima-jin'));
 });
 
 test('evolution-fluid time control exposes playback metadata', () => {
@@ -134,9 +134,49 @@ test('evolution-fluid time control exposes playback metadata', () => {
   assert.ok(timeControl);
   assert.equal(timeControl.type, 'range');
   assert.equal(timeControl.playback, true);
-  assert.equal(timeControl.min, 2018);
-  assert.equal(timeControl.max, 2026);
+  assert.equal(timeControl.defaultValue, 180);
+  assert.equal(timeControl.min, 180);
+  assert.equal(timeControl.max, 280);
   assert.equal(timeControl.step, 0.01);
+  assert.equal(timeControl.playbackAutoplay, false);
+});
+
+test('evolution-fluid uses timeline nodes to play one event window', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const entry = namespace.registry['evolution-fluid'];
+  const state = namespace.createControlState(entry.controls);
+  const option = namespace.createDemoOption('evolution-fluid', data, state);
+  const range = namespace.resolveEvolutionFluidEventPlaybackRange(data.evolutionFluid.events, 214, {
+    min: 184,
+    max: 280
+  });
+
+  assert.equal(option.series[0].timeline.show, true);
+  assert.equal(option.series[0].categoryField, 'region');
+  assert.equal(range.start, 211.54);
+  assert.equal(range.end, 214);
+});
+
+test('evolution-fluid demo data uses late-Han-to-Jin historical events', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const eventIds = data.evolutionFluid.events.map((event) => event.id);
+  const earlySplits = data.evolutionFluid.events.filter((event) => (
+    event.type === 'spinOff' &&
+    Number(event.time) < 190 &&
+    event.sources?.includes('han-court')
+  ));
+
+  assert.ok(data.evolutionFluid.historicalSources.length >= 4);
+  assert.ok(data.evolutionFluid.entities.some((entity) => entity.name === '东汉王朝'));
+  assert.ok(data.evolutionFluid.entities.some((entity) => entity.name === '曹操/曹魏'));
+  assert.ok(data.evolutionFluid.entities.some((entity) => entity.name === '司马氏/西晋'));
+  assert.ok(earlySplits.length >= 8);
+  assert.ok(eventIds.includes('han-yellow-turbans-184'));
+  assert.ok(eventIds.includes('han-dong-zhuo-189'));
+  assert.ok(eventIds.includes('liu-liuzhang-214'));
+  assert.ok(eventIds.includes('jin-conquers-wu-280'));
 });
 
 test('evolution-fluid playback frames render without queued update animation', () => {

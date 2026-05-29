@@ -1044,12 +1044,13 @@
     'evolution-fluid': {
       controls: [
         {
-          ...playbackRangeControl('currentTime', 'Time', 'series.0.currentTime', 2019.7, 2018, 2026, 0.01),
-          playbackDuration: 60000,
-          playbackAutoplay: true,
+          ...playbackRangeControl('currentTime', 'Time', 'series.0.currentTime', 180, 180, 280, 0.01),
+          playbackDuration: 96000,
+          playbackAutoplay: false,
           playbackLoop: true,
           playbackFinalHold: 1200,
-          playbackTimer: true
+          playbackTimer: true,
+          eventPlaybackDuration: 1600
         }
       ],
       option: (data) => ({
@@ -1064,21 +1065,35 @@
             height: '82%',
             entities: data.evolutionFluid.entities,
             events: data.evolutionFluid.events,
-            currentTime: 2019.7,
+            currentTime: 180,
+            categoryField: 'region',
             fluidSimulation: {
               enabled: true,
               mode: 'implicit',
               quality: 'balanced',
+              substeps: 14,
               areaConservation: true
             },
             dropletStyle: {
               opacity: 0.94,
               bridgeOpacity: 1,
               bridgeThreshold: 260,
-              maxRadius: 14
+              minRadius: 3.5,
+              maxRadius: 18
             },
-            timeline: { show: false },
-            label: { show: false },
+            layout: {
+              center: ['50%', '43%'],
+              categoryGap: 156,
+              collisionPadding: 22
+            },
+            timeline: { show: true },
+            label: {
+              show: false,
+              color: '#1f2937',
+              fontSize: 10,
+              fontWeight: 700,
+              formatter: '{b}'
+            },
             emphasis: { itemStyle: defaultEmphasisItemStyle }
           }
         ]
