@@ -6,6 +6,8 @@ import {
   actualPath,
   evolutionFluidActualPath,
   evolutionFluidSnapshotPath,
+  errorChartActualPath,
+  errorChartSnapshotPath,
   flameActualPath,
   flameSnapshotPath,
   lollipopActualPath,
@@ -19,6 +21,7 @@ import {
   readSnapshot,
   renderFixture,
   renderEvolutionFluidFixture,
+  renderErrorChartFixture,
   renderFlameFixture,
   renderLollipopFixture,
   renderMosaicFixture,
@@ -101,6 +104,12 @@ const cases = [
     name: 'Sunrise sunset',
     render: renderSunriseSunsetFixture,
     snapshotPath: sunriseSunsetSnapshotPath
+  },
+  {
+    actualPath: errorChartActualPath,
+    name: 'Error chart',
+    render: renderErrorChartFixture,
+    snapshotPath: errorChartSnapshotPath
   },
   {
     actualPath: lollipopActualPath,

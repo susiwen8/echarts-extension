@@ -114,6 +114,10 @@
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-sunrise-sunset.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Sunrise Sunset</span>
       </a>
+      <a class="chart-gallery-card" href="./packages/echarts-error-chart/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-error-chart.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Error Chart</span>
+      </a>
       <a class="chart-gallery-card" href="./packages/echarts-lollipop/">
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-lollipop.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Lollipop</span>

@@ -70,6 +70,23 @@ describe('docs SSG pages', () => {
     expect(payload.controlValues.dotScale).toBe(0.42);
   });
 
+  it('keeps the original error chart example and adds a dot error chart page', () => {
+    const originalHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-error-chart/index.html'));
+    const dotHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-error-chart/dot.html'));
+    const originalPayload = readEmbeddedJson(originalHtml, 'data-demo-payload');
+    const dotPayload = readEmbeddedJson(dotHtml, 'data-demo-payload');
+
+    expect(originalHtml).toContain('data-example="error-chart"');
+    expect(originalHtml).toContain('Project Lead Time');
+    expect(originalHtml).toContain('href="./dot.html">Dot error chart</a>');
+    expect(originalPayload.data.errorChart[0]).toHaveProperty('month');
+
+    expect(dotHtml).toContain('data-example="error-chart-dot"');
+    expect(dotHtml).toContain('Prime Costs and Prices');
+    expect(dotPayload.data.errorChartDot[0]).toHaveProperty('cost');
+    expect(dotPayload.controlValues.variant).toBe('dot');
+  });
+
   it('generates the fisheye all ECharts charts matrix page', () => {
     const html = readDoc(path.join(generatedDocsDir, 'packages/echarts-fisheye/all-charts.html'));
     const chineseHtml = readDoc(path.join(generatedDocsDir, 'packages/echarts-fisheye/all-charts.zh.html'));

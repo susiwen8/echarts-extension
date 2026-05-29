@@ -576,6 +576,26 @@ test('captured renderer registrations cover lifecycle across the remaining custo
       }
     },
     {
+      path: '../packages/echarts-error-chart/src/error-chart.ts?registration',
+      option: {
+        data: [
+          { month: 'Jan', x: 1, duration: 28, low: 18, high: 40, xLow: 0.8, xHigh: 1.2 },
+          { month: 'Feb', x: 2, duration: 54, lowerError: 10, upperError: 8, xMinus: 0.2, xPlus: 0.25 }
+        ],
+        variant: 'line',
+        categoryField: 'month',
+        valueField: 'duration',
+        lowField: 'low',
+        highField: 'high',
+        xField: 'x',
+        yField: 'duration',
+        xLowField: 'xLow',
+        xHighField: 'xHigh',
+        label: { show: true, formatter: '{b} {c}' },
+        enterAnimation: { duration: 10, delay: 1, stagger: 1 }
+      }
+    },
+    {
       path: '../packages/echarts-beeswarm/src/beeswarm.ts?registration',
       option: {
         data: [

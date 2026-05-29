@@ -134,6 +134,12 @@ export const browserVisualCases = [
     screenshotSelector: 'main'
   },
   {
+    name: 'echarts-error-chart',
+    path: '/docs/packages/echarts-error-chart/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main'
+  },
+  {
     name: 'echarts-lollipop',
     path: '/docs/packages/echarts-lollipop/',
     readySelector: '#chart canvas, #chart svg',

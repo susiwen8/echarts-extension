@@ -96,6 +96,7 @@
       'Sequence Diagram': '时序图',
       'Evolution Fluid': '演化水滴图',
       'Evolution Fluid Large Timeline': '演化水滴大规模时间线',
+      'Error Chart': '误差图',
       'Smith Chart': '史密斯圆图',
       'Spiral Heatmap': '螺旋热力图',
       'Subway': '地铁线路图',
@@ -182,6 +183,8 @@
       'Show symbols': '显示符号',
       'Box width': '箱体宽度',
       'Cap width': '端帽宽度',
+      'Variant': '形态',
+      'Error width': '误差线宽',
       'Box opacity': '箱体透明度',
       'Angle labels': '角度标签',
       'Value labels': '数值标签',
@@ -1278,6 +1281,186 @@
         };
       }
     },
+    'error-chart': {
+      controls: [
+        textControl('titleText', 'Title', 'title.text', 'Project Lead Time'),
+        colorControl('backgroundColor', 'Background', 'backgroundColor', '#ffffff'),
+        checkboxControl('animationEnabled', 'Animation', [
+          'animation',
+          'series.0.animation'
+        ], true),
+        selectControl('variant', 'Variant', 'series.0.variant', 'line', ['line', 'column', 'bar']),
+        rangeControl('valueMax', 'Value max', 'series.0.max', 320, 120, 420, 10),
+        rangeControl('tickCount', 'Tick count', 'series.0.tickCount', 5, 2, 9, 1),
+        rangeControl('capWidth', 'Cap width', 'series.0.capWidth', 14, 4, 36, 1),
+        rangeControl('errorWidth', 'Error width', 'series.0.errorBarStyle.width', 1.4, 0.5, 5, 0.1),
+        rangeControl('symbolSize', 'Dot size', 'series.0.symbolSize', 8, 0, 20, 1),
+        rangeControl('categoryRotate', 'Category rotate', 'series.0.categoryAxis.label.rotate', 0, 0, 75, 1),
+        checkboxControl('labelShow', 'Value labels', 'series.0.label.show', false)
+      ],
+      option: (data) => {
+        const errorData = Array.isArray(data.errorChart) ? data.errorChart : [];
+        return {
+          animation: true,
+          backgroundColor: '#ffffff',
+          title: {
+            text: 'Project Lead Time',
+            left: 'center',
+            top: 10,
+            textStyle: {
+              color: '#1f2937',
+              fontSize: 21,
+              fontWeight: 700
+            }
+          },
+          series: [
+            {
+              type: 'errorChart',
+              top: 56,
+              width: '92%',
+              height: '80%',
+              padding: { top: 18, right: 36, bottom: 72, left: 74 },
+              variant: 'line',
+              categoryField: 'month',
+              valueField: 'duration',
+              lowField: 'low',
+              highField: 'high',
+              xField: 'x',
+              yField: 'duration',
+              xLowField: 'xLow',
+              xHighField: 'xHigh',
+              yLowField: 'low',
+              yHighField: 'high',
+              categories: errorData.map((item) => item.month),
+              data: errorData,
+              min: 0,
+              max: 320,
+              xMin: 0,
+              xMax: 13,
+              baseline: 0,
+              tickCount: 5,
+              capWidth: 14,
+              symbolSize: 8,
+              enterAnimation: { duration: 620, stagger: 36, easing: 'cubicOut' },
+              valueAxis: {
+                name: 'Man-hours',
+                label: { color: '#64748b', fontSize: 12, formatter: (value) => `${value}` },
+                splitLine: {
+                  lineStyle: { color: '#d8e0ea', width: 1, opacity: 0.8, type: 'dashed' }
+                },
+                axisLine: {
+                  lineStyle: { color: '#94a3b8', width: 1.1, opacity: 1 }
+                },
+                nameTextStyle: { color: '#475569', fontSize: 13, fontWeight: 650 }
+              },
+              categoryAxis: {
+                label: { color: '#1f2937', fontSize: 12, fontWeight: 650, rotate: 0, formatter: '{value}' }
+              },
+              lineStyle: { color: '#2563eb', width: 2.4, opacity: 0.94 },
+              errorBarStyle: { color: '#1d4ed8', width: 1.4, opacity: 0.86 },
+              itemStyle: { color: '#60a5fa', borderColor: '#1d4ed8', borderWidth: 1.2, opacity: 0.9 },
+              label: { show: false, color: '#334155', fontSize: 12, formatter: '{b}: {c}d' }
+            }
+          ]
+        };
+      }
+    },
+    'error-chart-dot': {
+      controls: [
+        textControl('titleText', 'Title', 'title.text', 'Prime Costs and Prices for ACME Fashion\nCollection "Spring-Summer, 2016"'),
+        colorControl('backgroundColor', 'Background', 'backgroundColor', '#ffffff'),
+        checkboxControl('animationEnabled', 'Animation', [
+          'animation',
+          'series.0.animation'
+        ], true),
+        selectControl('variant', 'Variant', 'series.0.variant', 'dot', ['dot', 'scatter', 'point', 'column', 'bar', 'line']),
+        rangeControl('xMax', 'Cost max', 'series.0.xMax', 800, 200, 1000, 10),
+        rangeControl('valueMax', 'Price max', 'series.0.max', 900, 300, 1200, 10),
+        rangeControl('tickCount', 'Tick count', 'series.0.tickCount', 5, 2, 8, 1),
+        rangeControl('capWidth', 'Cap width', 'series.0.capWidth', 14, 4, 36, 1),
+        rangeControl('errorWidth', 'Error width', 'series.0.errorBarStyle.width', 1.4, 0.5, 5, 0.1),
+        rangeControl('symbolSize', 'Dot size', 'series.0.symbolSize', 10, 0, 20, 1),
+        checkboxControl('labelShow', 'Value labels', 'series.0.label.show', false)
+      ],
+      option: (data) => {
+        const errorData = Array.isArray(data.errorChartDot) ? data.errorChartDot : [];
+        return {
+          animation: true,
+          backgroundColor: '#ffffff',
+          title: {
+            text: 'Prime Costs and Prices for ACME Fashion\nCollection "Spring-Summer, 2016"',
+            left: 'center',
+            top: 8,
+            textStyle: {
+              color: '#7b8790',
+              fontSize: 18,
+              fontWeight: 600,
+              lineHeight: 24
+            }
+          },
+          series: [
+            {
+              type: 'errorChart',
+              top: 58,
+              width: '92%',
+              height: '78%',
+              padding: { top: 24, right: 38, bottom: 64, left: 76 },
+              variant: 'dot',
+              categoryField: 'name',
+              valueField: 'price',
+              lowField: 'priceLow',
+              highField: 'priceHigh',
+              xField: 'cost',
+              yField: 'price',
+              xLowField: 'costLow',
+              xHighField: 'costHigh',
+              yLowField: 'priceLow',
+              yHighField: 'priceHigh',
+              categories: errorData.map((item) => item.name),
+              data: errorData,
+              min: 0,
+              max: 900,
+              xMin: 0,
+              xMax: 800,
+              baseline: 0,
+              tickCount: 5,
+              capWidth: 14,
+              symbolSize: 10,
+              enterAnimation: { duration: 620, stagger: 36, easing: 'cubicOut' },
+              valueAxis: {
+                name: 'Price per item, $',
+                label: { color: '#7b8790', fontSize: 13, formatter: (value) => `${value}` },
+                splitLine: {
+                  lineStyle: { color: '#eef2f6', width: 1, opacity: 0 }
+                },
+                axisLine: {
+                  lineStyle: { color: '#c9ced3', width: 1.1, opacity: 1 }
+                },
+                nameTextStyle: { color: '#4b5563', fontSize: 15, fontWeight: 650 }
+              },
+              xAxis: {
+                name: 'Prime costs per item, $',
+                label: { color: '#7b8790', fontSize: 13, formatter: (value) => `${value}` },
+                splitLine: {
+                  lineStyle: { color: '#eef2f6', width: 1, opacity: 0 }
+                },
+                axisLine: {
+                  lineStyle: { color: '#c9ced3', width: 1.1, opacity: 1 }
+                },
+                nameTextStyle: { color: '#4b5563', fontSize: 15, fontWeight: 650 }
+              },
+              categoryAxis: {
+                label: { color: '#7b8790', fontSize: 12, rotate: 0, formatter: '{value}' }
+              },
+              lineStyle: { color: '#2563eb', width: 2.2, opacity: 0.95 },
+              errorBarStyle: { color: '#4f8bc3', width: 1.4, opacity: 0.95 },
+              itemStyle: { color: '#48a9e6', borderColor: '#2f7fbc', borderWidth: 1.4, opacity: 0.72 },
+              label: { show: false, color: '#334155', fontSize: 12, formatter: '{b}' }
+            }
+          ]
+        };
+      }
+    },
     lollipop: {
       controls: [
         textControl('titleText', 'Title', 'title.text', '2024'),
@@ -2084,6 +2267,8 @@
     if (exampleName === 'sunrise-sunset') return appendSunriseSunsetData(data, index);
     if (exampleName === 'fisheye') return appendFisheyeScatterData(data, index);
     if (exampleName === 'seasonal-radial') return appendSeasonalRadialData(data, index);
+    if (exampleName === 'error-chart') return appendErrorChartData(data, index);
+    if (exampleName === 'error-chart-dot') return appendErrorChartDotData(data, index);
     if (exampleName === 'lollipop') return appendLollipopData(data, index);
     if (exampleName === 'beeswarm') return appendBeeswarmData(data, index);
     if (exampleName === 'spiral') return appendSpiralData(data, index);
@@ -2111,6 +2296,8 @@
     if (exampleName === 'sunrise-sunset') return removeArrayData(data, 'sunriseSunset', isAddedItem, 'first');
     if (exampleName === 'fisheye') return removeArrayData(data, 'fisheyeScatter', isAddedItem);
     if (exampleName === 'seasonal-radial') return removeArrayData(data, 'seasonalRadial', isAddedItem);
+    if (exampleName === 'error-chart') return removeArrayData(data, 'errorChart', isAddedItem);
+    if (exampleName === 'error-chart-dot') return removeArrayData(data, 'errorChartDot', isAddedItem);
     if (exampleName === 'lollipop') return removeArrayData(data, 'lollipop', isAddedItem);
     if (exampleName === 'beeswarm') return removeArrayData(data, 'beeswarm', isAddedItem);
     if (exampleName === 'spiral') return removeArrayData(data, 'spiral', isAddedItem);
@@ -2351,6 +2538,8 @@
     if (exampleName === 'sunrise-sunset') return arrayLength(data.sunriseSunset);
     if (exampleName === 'fisheye') return arrayLength(data.fisheyeScatter);
     if (exampleName === 'seasonal-radial') return arrayLength(data.seasonalRadial);
+    if (exampleName === 'error-chart') return arrayLength(data.errorChart);
+    if (exampleName === 'error-chart-dot') return arrayLength(data.errorChartDot);
     if (exampleName === 'lollipop') return arrayLength(data.lollipop);
     if (exampleName === 'beeswarm') return arrayLength(data.beeswarm);
     if (exampleName === 'spiral') return arrayLength(data.spiral);
@@ -2658,6 +2847,47 @@
         18 + (index * 5) % 42
       ],
       itemStyle: { color: group.color }
+    });
+    return true;
+  }
+
+  function appendErrorChartData(data, index) {
+    const list = ensureArrayData(data, 'errorChart');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const x = list.length + 1;
+    const duration = 24 + x * 21 + ((index * 13) % 18);
+    const lowerError = 10 + index % 8;
+    const upperError = 14 + index % 12;
+    list.push({
+      id: `added-error-chart-${index}`,
+      month: monthNames[(x - 1) % monthNames.length],
+      x,
+      duration,
+      low: Math.max(0, duration - lowerError),
+      high: duration + upperError,
+      xLow: Number((x - 0.3).toFixed(2)),
+      xHigh: Number((x + 0.3).toFixed(2)),
+      itemStyle: { color: addDataColor(index) }
+    });
+    return true;
+  }
+
+  function appendErrorChartDotData(data, index) {
+    const list = ensureArrayData(data, 'errorChartDot');
+    const cost = 80 + ((list.length * 43 + index * 17) % 620);
+    const price = Math.min(860, 90 + cost * 0.95 + ((index * 53) % 190));
+    const costError = 12 + index % 18;
+    const priceError = 18 + index % 32;
+    list.push({
+      id: `added-error-chart-dot-${index}`,
+      name: `Added ${index}`,
+      cost,
+      price,
+      costLow: Math.max(0, cost - costError),
+      costHigh: cost + costError,
+      priceLow: Math.max(0, price - priceError),
+      priceHigh: price + priceError,
+      itemStyle: { color: addDataColor(index) }
     });
     return true;
   }

@@ -12,6 +12,7 @@ import '@echarts-extension/concentric';
 import '@echarts-extension/fisheye';
 import '@echarts-extension/fractal';
 import '@echarts-extension/evolution-fluid';
+import '@echarts-extension/error-chart';
 import '@echarts-extension/flame';
 import '@echarts-extension/grid';
 import '@echarts-extension/lollipop';
@@ -92,6 +93,67 @@ test('cartesian custom charts render axis, label, style, silent, and animation v
       { country: 'A', population: 1 },
       { country: 'B', population: 2 }
     ],
+    animation: false
+  });
+
+  renderSeries({
+    type: 'errorChart',
+    variant: 'line',
+    categoryField: 'month',
+    valueField: 'duration',
+    lowField: 'low',
+    highField: 'high',
+    xField: 'x',
+    yField: 'duration',
+    xLowField: 'xLow',
+    xHighField: 'xHigh',
+    yLowField: 'low',
+    yHighField: 'high',
+    data: [
+      { month: 'Jan', x: 1, duration: 28, low: 18, high: 40, xLow: 0.8, xHigh: 1.2, itemStyle: { color: '#2563eb' } },
+      { month: 'Feb', x: 2, duration: 54, lowerError: 10, upperError: 8, xMinus: 0.2, xPlus: 0.25 },
+      { month: 'Mar', x: 3, duration: 88, low: 76, high: 100 }
+    ],
+    min: 0,
+    max: 120,
+    xMin: 0,
+    xMax: 4,
+    label: { show: true, formatter: '{b}:{c}:{lower}:{upper}', fontSize: '12' },
+    valueAxis: {
+      name: 'Duration',
+      nameTextStyle: { color: '#123', fontSize: '12' },
+      label: { formatter: (value) => `${value}h`, fontSize: '11' },
+      splitLine: { lineStyle: { type: 'dotted', width: '2', opacity: '0.5' } }
+    },
+    xAxis: {
+      label: { formatter: 'M {value}' }
+    },
+    categoryAxis: {
+      label: { formatter: 'Month {value}', rotate: 18 }
+    },
+    lineStyle: { type: 'dashed', width: '2' },
+    errorBarStyle: { type: [2, 2], width: '1.5', opacity: '0.8' },
+    itemStyle: { borderColor: '#fff', borderWidth: '2' },
+    enterAnimation: {
+      duration: () => 30,
+      delay: () => 1,
+      stagger: () => 1,
+      easing: 'linear'
+    }
+  });
+  renderSeries({
+    type: 'errorChart',
+    variant: 'dot',
+    silent: true,
+    grid: { show: false },
+    valueAxis: { label: { show: false }, axisLine: { show: false }, splitLine: { show: false } },
+    xAxis: { label: { show: false }, axisLine: { show: false }, splitLine: { show: false } },
+    categoryAxis: { show: false },
+    data: [
+      { name: 'A', x: 10, y: 20, xLow: 8, xHigh: 12, yLow: 15, yHigh: 25 },
+      { name: 'B', x: 20, y: 40, xMinus: 3, xPlus: 4, yMinus: 6, yPlus: 8 }
+    ],
+    label: { show: true, formatter: '{b}:{c}' },
     animation: false
   });
 

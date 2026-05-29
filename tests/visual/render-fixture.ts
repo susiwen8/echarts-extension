@@ -17,6 +17,7 @@ import '@echarts-extension/subway';
 import '@echarts-extension/evolution-fluid';
 import '@echarts-extension/flame';
 import '@echarts-extension/sunrise-sunset';
+import '@echarts-extension/error-chart';
 import '@echarts-extension/lollipop';
 
 export const snapshotPath = path.resolve('tests/visual/__snapshots__/graph-layouts.svg');
@@ -39,6 +40,8 @@ export const flameSnapshotPath = path.resolve('tests/visual/__snapshots__/flame.
 export const flameActualPath = path.resolve('test-results/visual/flame.actual.svg');
 export const sunriseSunsetSnapshotPath = path.resolve('tests/visual/__snapshots__/sunrise-sunset.svg');
 export const sunriseSunsetActualPath = path.resolve('test-results/visual/sunrise-sunset.actual.svg');
+export const errorChartSnapshotPath = path.resolve('tests/visual/__snapshots__/error-chart.svg');
+export const errorChartActualPath = path.resolve('test-results/visual/error-chart.actual.svg');
 export const lollipopSnapshotPath = path.resolve('tests/visual/__snapshots__/lollipop.svg');
 export const lollipopActualPath = path.resolve('test-results/visual/lollipop.actual.svg');
 
@@ -333,6 +336,21 @@ const lollipopData = [
   { country: 'Bangladesh', population: 174, itemStyle: { color: '#2db5ff' } },
   { country: 'Russia', population: 144, itemStyle: { color: '#2db5ff' } },
   { country: 'Ethiopia', population: 129, itemStyle: { color: '#2db5ff' } }
+];
+
+const errorChartData = [
+  { month: 'Jan', x: 1, duration: 28, low: 18, high: 40, xLow: 0.75, xHigh: 1.25, itemStyle: { color: '#60a5fa' } },
+  { month: 'Feb', x: 2, duration: 54, low: 44, high: 62, xLow: 1.72, xHigh: 2.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Mar', x: 3, duration: 88, low: 76, high: 100, xLow: 2.72, xHigh: 3.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Apr', x: 4, duration: 100, low: 92, high: 112, xLow: 3.72, xHigh: 4.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'May', x: 5, duration: 90, low: 82, high: 98, xLow: 4.72, xHigh: 5.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Jun', x: 6, duration: 105, low: 96, high: 116, xLow: 5.72, xHigh: 6.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Jul', x: 7, duration: 124, low: 112, high: 136, xLow: 6.72, xHigh: 7.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Aug', x: 8, duration: 205, low: 190, high: 220, xLow: 7.72, xHigh: 8.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Sep', x: 9, duration: 204, low: 192, high: 214, xLow: 8.72, xHigh: 9.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Oct', x: 10, duration: 260, low: 248, high: 274, xLow: 9.72, xHigh: 10.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Nov', x: 11, duration: 187, low: 174, high: 198, xLow: 10.72, xHigh: 11.28, itemStyle: { color: '#60a5fa' } },
+  { month: 'Dec', x: 12, duration: 292, low: 280, high: 312, xLow: 11.7, xHigh: 12.3, itemStyle: { color: '#60a5fa' } }
 ];
 
 const flameData = JSON.parse(
@@ -843,6 +861,66 @@ export function renderLollipopFixture() {
       }
     ]
   }, 980, 540));
+}
+
+export function renderErrorChartFixture() {
+  return normalizeSvg(renderOption({
+    animation: false,
+    backgroundColor: '#ffffff',
+    title: {
+      text: 'Project Lead Time',
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: '#1f2937',
+        fontSize: 21,
+        fontWeight: 700
+      }
+    },
+    series: [
+      {
+        type: 'errorChart',
+        top: 56,
+        width: '92%',
+        height: '80%',
+        padding: { top: 18, right: 36, bottom: 72, left: 74 },
+        variant: 'line',
+        categoryField: 'month',
+        valueField: 'duration',
+        lowField: 'low',
+        highField: 'high',
+        xField: 'x',
+        yField: 'duration',
+        xLowField: 'xLow',
+        xHighField: 'xHigh',
+        yLowField: 'low',
+        yHighField: 'high',
+        categories: errorChartData.map((item) => item.month),
+        data: errorChartData,
+        min: 0,
+        max: 320,
+        xMin: 0,
+        xMax: 13,
+        baseline: 0,
+        tickCount: 5,
+        capWidth: 14,
+        symbolSize: 8,
+        valueAxis: {
+          name: 'Man-hours',
+          label: { color: '#64748b', fontSize: 12 },
+          splitLine: { lineStyle: { color: '#d8e0ea', width: 1, opacity: 0.8, type: 'dashed' } },
+          axisLine: { lineStyle: { color: '#94a3b8', width: 1.1, opacity: 1 } },
+          nameTextStyle: { color: '#475569', fontSize: 13, fontWeight: 650 }
+        },
+        categoryAxis: {
+          label: { color: '#1f2937', fontSize: 12, fontWeight: 650, rotate: 0 }
+        },
+        lineStyle: { color: '#2563eb', width: 2.4, opacity: 0.94 },
+        errorBarStyle: { color: '#1d4ed8', width: 1.4, opacity: 0.86 },
+        itemStyle: { color: '#60a5fa', borderColor: '#1d4ed8', borderWidth: 1.2, opacity: 0.9 }
+      }
+    ]
+  }, 720, 460));
 }
 
 export function renderSubwayFixture() {
