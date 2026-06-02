@@ -627,6 +627,117 @@ test('staggers seasonal radial track enter animation by visible track order', ()
   assert.deepEqual(lineDelays, [10, 15, 20]);
 });
 
+test('reads seasonal radial animation defaults from plain objects', () => {
+  assert.deepEqual(
+    rendererInternals.trackEnterAnimationIndex({
+      points: [{ dataIndex: 9 }]
+    } as never),
+    9
+  );
+  assert.equal(
+    rendererInternals.trackEnterAnimationIndex({
+      points: []
+    } as never),
+    0
+  );
+  assert.deepEqual(rendererInternals.asRecord({ value: 3 }), { value: 3 });
+  assert.deepEqual(rendererInternals.asRecord(null), {});
+});
+
+test('applies seasonal animation target values directly without an animator', () => {
+  const element = {
+    shape: { x: 1 },
+    style: { opacity: 0.2 }
+  };
+  const animation = {
+    enabled: true,
+    duration: 180,
+    delay: 12,
+    easing: 'linear'
+  } as const;
+
+  rendererInternals.animateGraphicProperty(
+    element as never,
+    'shape',
+    animation,
+    { x: 4, y: 5 }
+  );
+
+  assert.deepEqual(element.shape, { x: 4, y: 5 });
+  assert.deepEqual(element.style, { opacity: 0.2 });
+});
+
+test('covers seasonal radial animation option and branch fallbacks', () => {
+  const data = createSeasonalSeriesData(1);
+  const model = createSeasonalSeriesModel(data, {
+    animation: true,
+    enterAnimation: {
+      duration: 240,
+      delay: 12,
+      easing: 'linear'
+    }
+  });
+
+  assert.deepEqual(
+    rendererInternals.readEnterAnimation(model as never, 1, { show: false }),
+    { enabled: false, duration: 0, delay: 0, easing: 'cubicOut' }
+  );
+  assert.deepEqual(
+    rendererInternals.readEnterAnimation(model as never, 1, { enabled: false }),
+    { enabled: false, duration: 0, delay: 0, easing: 'cubicOut' }
+  );
+  assert.equal(rendererInternals.resolveAnimationNumber((value, index) => `${String(index)}`, { value: 10 }, 3, 9), 3);
+});
+
+test('covers seasonal radial animation helper branches without animator or enabled paths', () => {
+  const noAnimatorStyle = {
+    shape: { points: [[0, 0]] },
+    style: { strokePercent: 1 }
+  };
+  const disabled = { enabled: false, duration: 200, delay: 10, easing: 'linear' } as const;
+  const enabled = { enabled: true, duration: 200, delay: 10, easing: 'linear' } as const;
+
+  rendererInternals.applyPathEnterAnimation(noAnimatorStyle as never, enabled);
+  assert.deepEqual(noAnimatorStyle.style, { strokePercent: 1 });
+  rendererInternals.applyPathEnterAnimation(noAnimatorStyle as never, disabled);
+  assert.equal(noAnimatorStyle.style?.strokePercent, 1);
+
+  const pathWithDefaultStyle = new SeasonalGraphicElement();
+  rendererInternals.applyPathEnterAnimation(pathWithDefaultStyle as never, enabled);
+  assert.equal(pathWithDefaultStyle.style?.strokePercent, 1);
+
+  const circleNoAnimator = { shape: { r: 3 }, style: { opacity: 0.5 } };
+  rendererInternals.applyCircleEnterAnimation(circleNoAnimator as never, 16, enabled);
+  assert.equal(circleNoAnimator.shape?.r, 3);
+  assert.equal(circleNoAnimator.style?.opacity, 0.5);
+  rendererInternals.applyCircleEnterAnimation(circleNoAnimator as never, 16, disabled);
+  assert.equal(circleNoAnimator.shape?.r, 3);
+
+  const circleWithDefaults = new SeasonalGraphicElement();
+  rendererInternals.applyCircleEnterAnimation(circleWithDefaults as never, 17, enabled);
+  assert.equal(circleWithDefaults.shape?.r, 17);
+  assert.equal(circleWithDefaults.style?.opacity, 1);
+
+  const fadeNoAnimator = { style: { opacity: 0.4 } };
+  rendererInternals.applyFadeEnterAnimation(fadeNoAnimator as never, enabled);
+  assert.equal(fadeNoAnimator.style?.opacity, 0.4);
+  rendererInternals.applyFadeEnterAnimation(fadeNoAnimator as never, disabled);
+  assert.equal(fadeNoAnimator.style?.opacity, 0.4);
+
+  const fadeWithDefaultStyle = new SeasonalGraphicElement();
+  rendererInternals.applyFadeEnterAnimation(fadeWithDefaultStyle as never, enabled);
+  assert.equal(fadeWithDefaultStyle.style?.opacity, 1);
+
+  const missingShape: Record<string, Record<string, unknown>> = {};
+  rendererInternals.animateGraphicProperty(
+    missingShape as never,
+    'shape',
+    enabled,
+    { x: 3, y: 4 }
+  );
+  assert.equal('shape' in missingShape, false);
+});
+
 interface SeasonalAnimationRecord {
   key: string;
   duration: number;
