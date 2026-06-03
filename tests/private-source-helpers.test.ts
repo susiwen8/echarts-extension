@@ -9,6 +9,7 @@ import * as beeswarmLayout from '../packages/echarts-beeswarm/src/layout.ts';
 import { __test__ as beeswarmRenderer } from '../packages/echarts-beeswarm/src/beeswarm.ts';
 import { __test__ as causeEffectLayout, resolveCauseEffectLayout } from '../packages/echarts-cause-effect/src/layout.ts';
 import * as circlePackingLayout from '../packages/echarts-circle-packing/src/layout.ts';
+import * as circlePackingWaterdropFusion from '../packages/echarts-circle-packing/src/waterdrop-fusion.ts';
 import { __test__ as circlePackingRenderer } from '../packages/echarts-circle-packing/src/circle-packing.ts';
 import * as flameLayout from '../packages/echarts-flame/src/layout.ts';
 import { __test__ as flameRenderer } from '../packages/echarts-flame/src/flame.ts';
@@ -2031,7 +2032,8 @@ function loadRendererPrivate(relativeFile, names, layoutModule) {
         if (element) element.__aliveRenderKey = key;
       }
     },
-    './layout.js': layoutModule
+    './layout.js': layoutModule,
+    './waterdrop-fusion.js': circlePackingWaterdropFusion
   });
 }
 

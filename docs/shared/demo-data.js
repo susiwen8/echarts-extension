@@ -255,6 +255,239 @@
         }
       ]
     },
+    circlePackingCompanyStory: {
+      id: 'company-incubation-story',
+      name: '公司 A 生态演化',
+      itemStyle: { color: '#edf2f7' },
+      children: [
+        {
+          id: 'company-a',
+          name: 'A 大公司',
+          value: 36,
+          itemStyle: { color: '#88b7a2' },
+          children: [
+            { id: 'b-team-a', name: 'B 团队', value: 12, itemStyle: { color: '#2563eb' } },
+            { id: 'c-team-a', name: 'C 团队', value: 9, itemStyle: { color: '#14b8a6' } },
+            { id: 'd-team-a', name: 'D 团队', value: 8, itemStyle: { color: '#f59e0b' } },
+            {
+              id: 'b-unit-a',
+              name: 'B 事业部',
+              value: 16,
+              itemStyle: { color: '#2563eb' },
+              children: [
+                { id: 'd-unit-b-inside-a', name: 'D 独立团队', value: 8, itemStyle: { color: '#f59e0b' } },
+                {
+                  id: 'e-unit-a',
+                  name: 'E 项目',
+                  value: 8,
+                  itemStyle: { color: '#a98df2' },
+                  children: [
+                    { id: 'f-unit', name: 'F 小组', value: 4, itemStyle: { color: '#c4b5fd' } },
+                    { id: 'g-unit', name: 'G 小组', value: 4, itemStyle: { color: '#ddd6fe' } }
+                  ]
+                }
+              ]
+            },
+            {
+              id: 'd-unit-a',
+              name: 'D 事业部',
+              value: 9,
+              itemStyle: { color: '#f59e0b' },
+              children: [
+                { id: 'h-unit', name: 'H 小组', value: 4, itemStyle: { color: '#facc15' } },
+                { id: 'i-unit', name: 'I 小组', value: 4, itemStyle: { color: '#fde68a' } }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'b-company',
+          name: 'B 公司',
+          value: 16,
+          itemStyle: { color: '#2563eb' },
+          children: [
+            { id: 'd-unit-b', name: 'D 独立团队', value: 8, itemStyle: { color: '#f59e0b' } },
+            { id: 'e-project-b', name: 'E 项目', value: 7, itemStyle: { color: '#8b5cf6' } }
+          ]
+        },
+        {
+          id: 'c-company',
+          name: 'C 公司',
+          value: 10,
+          itemStyle: { color: '#14b8a6' }
+        }
+      ]
+    },
+    circlePackingCompanyStoryEvents: [
+      {
+        id: 'b-team-incubates',
+        time: 0.35,
+        type: 'spinOff',
+        sources: ['company-a'],
+        targets: ['b-team-a'],
+        value: 12,
+        label: '孵化 B',
+        note: 'B 团队在 A 内部开始成长。'
+      },
+      {
+        id: 'c-team-incubates',
+        time: 0.7,
+        type: 'spinOff',
+        sources: ['company-a'],
+        targets: ['c-team-a'],
+        value: 9,
+        label: '孵化 C',
+        note: 'C 团队也在 A 内部成长。'
+      },
+      {
+        id: 'd-team-incubates',
+        time: 1,
+        type: 'spinOff',
+        sources: ['company-a'],
+        targets: ['d-team-a'],
+        value: 8,
+        label: '孵化 D',
+        note: 'D 团队作为 A 的直接内部团队成长。'
+      },
+      {
+        id: 'b-spin-off',
+        time: 1.7,
+        type: 'move',
+        sources: ['b-team-a'],
+        targets: ['b-company'],
+        value: 16,
+        label: 'B 独立',
+        note: 'B 团队整体离开 A，成为独立公司。'
+      },
+      {
+        id: 'b-team-exits-a',
+        time: 1.85,
+        type: 'checkpoint',
+        sources: [],
+        targets: ['b-company'],
+        value: 0,
+        bridge: false,
+        label: 'B 离开 A',
+        note: 'B 完成独立，A 内部不再保留 B 团队。'
+      },
+      {
+        id: 'c-spin-off',
+        time: 2.4,
+        type: 'move',
+        sources: ['c-team-a'],
+        targets: ['c-company'],
+        value: 10,
+        label: 'C 独立',
+        note: 'C 团队整体离开 A，成为独立公司。'
+      },
+      {
+        id: 'c-team-exits-a',
+        time: 2.55,
+        type: 'checkpoint',
+        sources: [],
+        targets: ['c-company'],
+        value: 0,
+        bridge: false,
+        label: 'C 离开 A',
+        note: 'C 完成独立，A 内部不再保留 C 团队。'
+      },
+      {
+        id: 'b-acquires-c',
+        time: 3.4,
+        type: 'acquire',
+        sources: ['c-company'],
+        targets: ['b-company'],
+        duration: 0.45,
+        value: 10,
+        label: 'B 吞并 C',
+        note: 'B 收购 C，C 不再作为独立节点存在。'
+      },
+      {
+        id: 'd-moves-from-a-to-b',
+        time: 4,
+        type: 'move',
+        sources: ['d-team-a'],
+        targets: ['d-unit-b'],
+        duration: 0.6,
+        value: 8,
+        label: 'D 从 A 转入 B',
+        note: 'A 内部的 D 团队整体离开 A，并迁入 B 体系。'
+      },
+      {
+        id: 'd-joins-b',
+        time: 4.15,
+        type: 'checkpoint',
+        sources: [],
+        targets: ['d-unit-b'],
+        value: 0,
+        bridge: false,
+        label: 'D 进入 B',
+        note: 'B 把 D 挖过来，D 在 B 内部独立运营。'
+      },
+      {
+        id: 'b-incubates-e',
+        time: 5,
+        type: 'spinOff',
+        sources: ['b-company'],
+        targets: ['e-project-b'],
+        value: 7,
+        label: 'B 孵化 E',
+        note: 'B 内部孵化出 E 项目。'
+      },
+      {
+        id: 'a-reacquires-b',
+        time: 6.2,
+        type: 'acquire',
+        sources: ['b-company'],
+        targets: ['company-a'],
+        value: 24,
+        label: 'A 回购 B',
+        note: 'A 收购 B，B 公司回到 A 的生态中。'
+      },
+      {
+        id: 'b-operates-inside-a',
+        time: 6.45,
+        type: 'spinOff',
+        sources: ['company-a'],
+        targets: ['b-unit-a'],
+        value: 16,
+        label: 'B 事业部',
+        note: '收购完成后，B 在 A 内部独立运营。'
+      },
+      {
+        id: 'd-peer-with-b',
+        time: 6.7,
+        type: 'move',
+        sources: ['d-unit-b-inside-a'],
+        targets: ['d-unit-a'],
+        duration: 0.25,
+        value: 9,
+        label: 'D 与 B 平级',
+        note: 'D 从 B 的体系中出来，成为 A 内部与 B 平级的事业部。'
+      },
+      {
+        id: 'e-splits-f-g',
+        time: 7.1,
+        type: 'split',
+        sources: ['e-unit-a'],
+        targets: ['f-unit', 'g-unit'],
+        duration: 0.4,
+        value: 8,
+        label: 'E 分裂 F/G',
+        note: 'E 拆分出 F 和 G，但仍属于 B 事业部。'
+      },
+      {
+        id: 'd-incubates-h-i',
+        time: 7.7,
+        type: 'split',
+        sources: ['d-unit-a'],
+        targets: ['h-unit', 'i-unit'],
+        duration: 0.6,
+        value: 8,
+        label: 'D 孵化 H/I',
+        note: 'D 继续在 A 生态中孵化出 H 和 I。'
+      }
+    ],
     organizationChart: {
       id: 'ceo',
       name: 'CEO',

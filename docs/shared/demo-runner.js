@@ -72,6 +72,7 @@
       'Title': '标题',
       'Background': '背景',
       'Time': '时间',
+      'Step': '阶段',
       'Arc': '弧线图',
       'Beeswarm': '蜂群图',
       'Cause and Effect Diagram': '因果图',
@@ -107,6 +108,7 @@
       'Voronoi Treemap': 'Voronoi 树图',
       'Population Pack Bubble': '人口打包气泡图',
       'Product Circle Packing': '产品圆形打包图',
+      'Company Incubation Timeline': '公司孵化与并购时间线',
       'Until sunset': '距离日落',
       'Until sunrise': '距离日出',
       'Updated': '更新于',
@@ -715,59 +717,91 @@
     },
     'circle-packing': {
       controls: [
-        textControl('titleText', 'Title', 'title.text', 'Product Circle Packing'),
+        textControl('titleText', 'Title', 'title.text', 'Company Incubation Timeline'),
+        {
+          ...playbackRangeControl('currentTime', 'Step', 'series.0.fluid.currentTime', 0.5, 0, 8, 0.01),
+          playbackDuration: 24000,
+          playbackAutoplay: false,
+          playbackLoop: true,
+          playbackFinalHold: 1200,
+          playbackTimer: true
+        },
         colorControl('backgroundColor', 'Background', 'backgroundColor', '#f8fafc'),
         checkboxControl('animationEnabled', 'Animation', ['animation', 'series.0.animation'], true),
         rangeControl('enterDuration', 'Enter duration', 'series.0.enterAnimation.duration', 720, 120, 1800, 20),
         rangeControl('enterStagger', 'Enter stagger', 'series.0.enterAnimation.stagger', 28, 0, 160, 2),
-        rangeControl('padding', 'Padding', 'series.0.padding', 12, 0, 80, 2),
-        rangeControl('nodePadding', 'Node padding', 'series.0.nodePadding', 4, 0, 14, 0.5),
-        rangeControl('siblingGap', 'Sibling gap', 'series.0.siblingGap', 2, 0, 12, 0.5),
-        rangeControl('itemOpacity', 'Circle opacity', 'series.0.itemStyle.opacity', 0.88, 0.1, 1, 0.02),
+        rangeControl('padding', 'Padding', 'series.0.padding', 14, 0, 80, 2),
+        rangeControl('nodePadding', 'Node padding', 'series.0.nodePadding', 3.6, 0, 14, 0.2),
+        rangeControl('siblingGap', 'Sibling gap', 'series.0.siblingGap', 2.2, 0, 12, 0.2),
         checkboxControl('labelShow', 'Labels', 'series.0.label.show', true),
         rangeControl('labelFontSize', 'Label size', 'series.0.label.fontSize', 12, 8, 24, 1),
-        rangeControl('labelMinRadius', 'Label min radius', 'series.0.label.minRadius', 20, 8, 70, 1)
+        rangeControl('labelMinRadius', 'Label min radius', 'series.0.label.minRadius', 18, 8, 70, 1)
       ],
-      option: (data) => ({
-        animation: true,
-        backgroundColor: '#f8fafc',
-        title: title('Product Circle Packing'),
-        series: [
-          {
-            type: 'circlePacking',
-            top: 68,
-            width: '94%',
-            height: '84%',
-            padding: 12,
-            nodePadding: 4,
-            siblingGap: 2,
-            data: data.circlePacking,
-            enterAnimation: { duration: 720, stagger: 28, easing: 'cubicOut' },
-            itemStyle: {
-              opacity: 0.88,
-              borderColor: '#ffffff',
-              borderWidth: 1.4
-            },
-            label: {
-              show: true,
-              color: '#111827',
+      option: (data) => {
+        const storyData = data.circlePackingCompanyStory || data.circlePackingModernHistory || data.circlePacking;
+        const storyEvents = Array.isArray(data.circlePackingCompanyStoryEvents)
+          ? data.circlePackingCompanyStoryEvents
+          : Array.isArray(data.circlePackingModernHistoryEvents)
+            ? data.circlePackingModernHistoryEvents
+            : [];
+
+        return {
+          animation: true,
+          animationDurationUpdate: 0,
+          backgroundColor: '#f8fafc',
+          title: {
+            ...title('Company Incubation Timeline'),
+            subtext: 'A 孵化 B/C/D，团队独立、吞并、回购后重组',
+            subtextStyle: {
+              color: '#64748b',
               fontSize: 12,
-              fontWeight: 680,
-              lineHeight: 14,
-              minRadius: 20
-            },
-            emphasis: {
+              fontWeight: 520
+            }
+          },
+          series: [
+            {
+              type: 'circlePacking',
+              top: 84,
+              width: '95%',
+              height: '78%',
+              padding: 14,
+              nodePadding: 3.6,
+              siblingGap: 2.2,
+              rootVisible: false,
+              sort: 'none',
+              data: storyData,
+              fluid: {
+                enabled: true,
+                renderMode: 'evolutionFluid',
+                currentTime: 0.5,
+                events: storyEvents,
+                bridgeThreshold: 320
+              },
+              enterAnimation: { duration: 720, stagger: 28, easing: 'cubicOut' },
               itemStyle: {
-                opacity: 1,
-                borderColor: '#0f172a',
-                borderWidth: 2,
-                shadowBlur: 12,
-                shadowColor: 'rgba(15, 23, 42, 0.2)'
+                borderColor: 'rgba(255, 255, 255, 0)',
+                borderWidth: 0
+              },
+              label: {
+                show: true,
+                color: '#111827',
+                fontSize: 12,
+                fontWeight: 700,
+                lineHeight: 14,
+                minRadius: 18
+              },
+              emphasis: {
+                itemStyle: {
+                  borderColor: '#0f172a',
+                  borderWidth: 2,
+                  shadowBlur: 12,
+                  shadowColor: 'rgba(15, 23, 42, 0.2)'
+                }
               }
             }
-          }
-        ]
-      })
+          ]
+        };
+      }
     },
     'organization-chart': {
       controls: [
@@ -2284,7 +2318,7 @@
     if (exampleName === 'venn-hollow') return removeHollowVennData(data);
     if (exampleName === 'venn-bubble') return removeArrayData(data, 'bubbleVenn', isAddedItem);
     if (exampleName === 'pack-bubble') return removeArrayData(data, 'packBubble', isAddedItem);
-    if (exampleName === 'circle-packing') return removeTreeData(data.circlePacking);
+    if (exampleName === 'circle-packing') return removeTreeData(currentCirclePackingData(data));
     if (exampleName === 'organization-chart') return removeTreeData(data.organizationChart);
     if (exampleName === 'cause-effect') return removeCauseEffectData(data);
     if (exampleName === 'nested-circle') return removeArrayData(data, 'nestedCircle', isAddedItem);
@@ -2526,7 +2560,7 @@
     if (exampleName === 'venn-hollow') return arrayLength(data.hollowVenn);
     if (exampleName === 'venn-bubble') return arrayLength(data.bubbleVenn);
     if (exampleName === 'pack-bubble') return arrayLength(data.packBubble);
-    if (exampleName === 'circle-packing') return countTreeItems(data.circlePacking);
+    if (exampleName === 'circle-packing') return countTreeItems(currentCirclePackingData(data));
     if (exampleName === 'organization-chart') return countTreeItems(data.organizationChart);
     if (exampleName === 'cause-effect') return countCauseEffectItems(data.causeEffect);
     if (exampleName === 'nested-circle') return (data.nestedCircle || []).reduce((total, ring) => total + 1 + arrayLength(ring.children), 0);
@@ -2668,7 +2702,7 @@
   }
 
   function appendCirclePackingData(data, index) {
-    const root = data.circlePacking || (data.circlePacking = { name: 'Product Suite', children: [] });
+    const root = currentCirclePackingData(data) || (data.circlePacking = { name: 'Product Suite', children: [] });
     const group = ensureTreeGroup(root, index);
     group.children.push({
       name: `Added ${index}`,
@@ -2676,6 +2710,10 @@
       itemStyle: { color: addDataColor(index) }
     });
     return true;
+  }
+
+  function currentCirclePackingData(data) {
+    return data?.circlePackingCompanyStory || data?.circlePackingModernHistory || data?.circlePacking;
   }
 
   function appendOrganizationChartData(data, index) {

@@ -462,7 +462,12 @@ body.demo-page .demo-controls {
 }
 
 .demo-control__value {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;

@@ -3,6 +3,7 @@ import {
   clearAliveRender,
   installElementHover,
   renderAlive,
+  setAliveRenderKey,
   setElementHoverBaseStyle,
   setElementHoverDimOpacity
 } from '@echarts-extension/layout-core';
@@ -13,7 +14,14 @@ import {
   flattenCirclePackingData,
   resolveCirclePackingLayout
 } from './layout.js';
-import type { CirclePackingLayoutOption, CirclePackingLayoutResult, CirclePackingNode } from './layout.js';
+import { DEFAULT_WATERDROP_FUSION_SHAPE, buildWaterdropFusionPath } from './waterdrop-fusion.js';
+import type {
+  CirclePackingFluidBridge,
+  CirclePackingLayoutOption,
+  CirclePackingLayoutResult,
+  CirclePackingNode
+} from './layout.js';
+import type { WaterdropFusionPathContext, WaterdropFusionShape } from './waterdrop-fusion.js';
 
 interface ViewRect {
   x: number;
@@ -98,10 +106,19 @@ interface GraphicGroup extends GraphicElement {
 }
 
 interface GraphicElementOptions {
-  shape?: Record<string, unknown>;
+  shape?: Record<string, unknown> | Partial<WaterdropFusionGraphicShape>;
   style?: Record<string, unknown>;
   silent?: boolean;
+  z2?: number;
 }
+
+interface WaterdropFusionGraphicOptions extends GraphicElementOptions {}
+
+interface WaterdropFusionGraphicConstructor {
+  new (options: WaterdropFusionGraphicOptions): GraphicElement;
+}
+
+type WaterdropFusionGraphicShape = WaterdropFusionShape;
 
 interface EChartsHost {
   extendSeriesModel(option: Record<string, unknown>): void;
@@ -115,6 +132,16 @@ interface EChartsHost {
     Group: new () => GraphicGroup;
     Circle: new (options: GraphicElementOptions) => GraphicElement;
     Text: new (options: GraphicElementOptions) => GraphicElement;
+    LinearGradient?: new (
+      x0: number,
+      y0: number,
+      x1: number,
+      y1: number,
+      colorStops: Array<{ offset: number; color: string }>,
+      globalCoord?: boolean
+    ) => unknown;
+    makePath?: (path: string, options: GraphicElementOptions) => GraphicElement;
+    extendShape?: (definition: Record<string, unknown>) => WaterdropFusionGraphicConstructor;
   };
 }
 
@@ -156,6 +183,12 @@ interface CirclePackingRenderPayload {
   labelItems: CirclePackingLabelItem[];
 }
 
+interface CirclePackingFluidDrawPolicy {
+  hiddenCircleIds: Set<string>;
+  opaqueCircleIds: Set<string>;
+  elevatedCircleIds: Set<string>;
+}
+
 interface CirclePackingFocusController {
   dispose(): void;
 }
@@ -182,10 +215,13 @@ interface CirclePackingFocusOptions {
 
 const FOCUS_TRANSITION_SCOPE = 'circle-packing-focus';
 const LABEL_HOVER_DIM_OPACITY = 0.42;
+const PARENT_LABEL_PRIMARY_OFFSET = 0.62;
+const EPSILON = 1e-6;
 
 interface CirclePackingLabelItem {
   element: GraphicElement;
   node: CirclePackingNode;
+  allNodes: CirclePackingNode[];
   text: string;
   requestedFontSize: number;
   requestedLineHeight: number;
@@ -205,7 +241,8 @@ const optionKeys = [
   'nameField',
   'childrenField',
   'sort',
-  'colors'
+  'colors',
+  'fluid'
 ] as const satisfies ReadonlyArray<Extract<keyof CirclePackingLayoutOption, string>>;
 
 echartsHost.extendSeriesModel({
@@ -242,6 +279,15 @@ echartsHost.extendSeriesModel({
     childrenField: 'children',
     sort: true,
     colors: DEFAULT_CIRCLE_PACKING_COLORS,
+    fluid: {
+      enabled: false,
+      events: [],
+      currentTime: null,
+      bridgeOpacity: 0.78,
+      bridgeThreshold: 120,
+      bridgeColor: null,
+      renderMode: 'circlePacking'
+    },
     enterAnimation: true,
     focusAnimation: {
       duration: 520,
@@ -289,6 +335,7 @@ echartsHost.extendChartView({
       });
       const layout = resolveCirclePackingLayout(readLayoutOption(seriesModel, rect));
       if (this.__renderToken !== renderToken) return;
+      const useEvolutionFluidRender = isEvolutionFluidRenderMode(seriesModel);
       const rendered = renderAlive<CirclePackingSeriesModel, CirclePackingRenderPayload>(
         this,
         echartsHost,
@@ -301,7 +348,8 @@ echartsHost.extendChartView({
           layout,
           rect,
           this.__focusedNodeId ?? null
-        )
+        ),
+        useEvolutionFluidRender ? { duration: 0 } : undefined
       );
       const { hoverItems, payload } = rendered;
       this.__hoverController = installElementHover(hoverItems, {
@@ -399,9 +447,18 @@ function drawCirclePacking(
   const nodesById = createCirclePackingNodeMap(layout.root);
   const focusElementsByNodeId = new Map<string, GraphicElement[]>();
   const labelItems: CirclePackingLabelItem[] = [];
+  const fluidBridges = layout.fluid?.bridges || [];
+  const useEvolutionFluidRender = isEvolutionFluidRenderMode(seriesModel);
+  const fluidDrawPolicy = createCirclePackingFluidDrawPolicy(fluidBridges, nodesById);
+
+  if (useEvolutionFluidRender) {
+    drawCirclePackingFluidBridges(echartsInstance, chartGroup, fluidBridges, false);
+  }
 
   layout.nodes.forEach((node, index) => {
     if (node.r <= 0) return;
+    /* v8 ignore next -- draw policy tests cover hidden fluid ids; renderer receives these only from injected bridge metadata. */
+    if (useEvolutionFluidRender && fluidDrawPolicy.hiddenCircleIds.has(node.id)) return;
 
     const itemModel = node.dataIndex >= 0 && node.dataIndex < data.count() ? data.getItemModel(node.dataIndex) : null;
     const circleEl = new echartsInstance.graphic.Circle({
@@ -410,13 +467,30 @@ function drawCirclePacking(
         cy: node.y,
         r: node.r
       },
-      style: readNodeStyle(data, seriesModel, itemModel, node, index)
+      style: readCirclePackingRenderStyle(
+        data,
+        seriesModel,
+        itemModel,
+        node,
+        index,
+        useEvolutionFluidRender
+      ),
+      z2: useEvolutionFluidRender
+        ? resolveCirclePackingFluidCircleZ2(node, fluidDrawPolicy)
+        : undefined
     });
-    applyCircleEnterAnimation(circleEl, node.r, readEnterAnimation(seriesModel, index));
+    if (!useEvolutionFluidRender) {
+      applyCircleEnterAnimation(circleEl, node.r, readEnterAnimation(seriesModel, index));
+    } else {
+      setAliveRenderKey(circleEl, `circle-packing-node:${node.id}`);
+    }
 
     if (itemModel && node.dataIndex >= 0 && node.dataIndex < data.count()) {
       data.setItemLayout(node.dataIndex, [node.x, node.y, node.r]);
       data.setItemGraphicEl(node.dataIndex, circleEl);
+      if (useEvolutionFluidRender) {
+        setAliveRenderKey(circleEl, `circle-packing-node:${node.id}`);
+      }
       const hoverItem = createHoverItem(circleEl);
       hoverItems.push(hoverItem);
       hoverItemsByDataIndex.set(node.dataIndex, hoverItem);
@@ -427,6 +501,10 @@ function drawCirclePacking(
     chartGroup.add(circleEl);
   });
 
+  if (!useEvolutionFluidRender) {
+    drawCirclePackingFluidBridges(echartsInstance, chartGroup, fluidBridges, true);
+  }
+
   drawLabels(
     echartsInstance,
     chartGroup,
@@ -435,7 +513,8 @@ function drawCirclePacking(
     layout.nodes,
     hoverItemsByDataIndex,
     focusElementsByNodeId,
-    labelItems
+    labelItems,
+    useEvolutionFluidRender
   );
   includeDescendantsInHoverItems(layout.nodes, hoverItemsByNodeId);
   const focusTransform = createCirclePackingFocusTransform(
@@ -454,6 +533,206 @@ function drawCirclePacking(
       focusElementsByNodeId,
       labelItems
     }
+  };
+}
+
+function drawCirclePackingFluidBridges(
+  echartsInstance: EChartsHost,
+  group: GraphicGroup,
+  bridges: CirclePackingFluidBridge[],
+  useOpacity: boolean
+): void {
+  if (!bridges.length) return;
+  bridges.forEach((bridge) => {
+    const style: Record<string, unknown> = {
+      fill: createCirclePackingBridgeFill(echartsInstance, bridge),
+      stroke: null,
+      lineWidth: 0
+    };
+    if (useOpacity) style.opacity = bridge.opacity;
+    let path: GraphicElement | null | undefined = null;
+    if (bridge.renderPath && bridge.path && echartsInstance.graphic.makePath) {
+      path = echartsInstance.graphic.makePath(bridge.path, {
+        style,
+        silent: true,
+        z2: 4
+      });
+    }
+    if (!path) {
+      path = createWaterdropFusionGraphicElement(echartsInstance, bridge, style);
+    }
+    if (!path && bridge.path && echartsInstance.graphic.makePath) {
+      path = echartsInstance.graphic.makePath(bridge.path, {
+        style,
+        silent: true,
+        z2: 4
+      });
+    }
+    if (!path) return;
+    path.style = {
+      ...(path.style as Record<string, unknown> | undefined),
+      ...style
+    };
+    path.__circlePackingFluidBridge = bridge.id;
+    setAliveRenderKey(path, `fluid-bridge:${bridge.id}`);
+    group.add(path);
+  });
+}
+
+function createCirclePackingBridgeFill(
+  echartsInstance: EChartsHost,
+  bridge: CirclePackingFluidBridge
+): unknown {
+  if (!bridge.gradient || !echartsInstance.graphic.LinearGradient) return bridge.color;
+  return new echartsInstance.graphic.LinearGradient(
+    bridge.gradient.x0,
+    bridge.gradient.y0,
+    bridge.gradient.x1,
+    bridge.gradient.y1,
+    bridge.gradient.colorStops,
+    true
+  );
+}
+
+let WaterdropFusionGraphic: WaterdropFusionGraphicConstructor | null | undefined;
+
+function resetWaterdropFusionGraphicForTest(): void {
+  WaterdropFusionGraphic = undefined;
+}
+
+function createWaterdropFusionGraphicElement(
+  host: EChartsHost,
+  bridge: CirclePackingFluidBridge,
+  style: Record<string, unknown>
+): GraphicElement | null {
+  if (!bridge.surfaceShape) return null;
+  const WaterdropFusion = getWaterdropFusionGraphic(host);
+  if (!WaterdropFusion) return null;
+  return new WaterdropFusion({
+    shape: bridge.surfaceShape,
+    style: {
+      ...style,
+      fill: style.fill || '#ffffff'
+    },
+    silent: true,
+    z2: 4
+  });
+}
+
+function getWaterdropFusionGraphic(host: EChartsHost): WaterdropFusionGraphicConstructor | null {
+  if (WaterdropFusionGraphic !== undefined) return WaterdropFusionGraphic;
+  if (typeof host.graphic.extendShape !== 'function') {
+    WaterdropFusionGraphic = null;
+    return WaterdropFusionGraphic;
+  }
+  WaterdropFusionGraphic = host.graphic.extendShape({
+    type: 'circlePackingWaterdropFusion',
+    shape: { ...DEFAULT_WATERDROP_FUSION_SHAPE },
+    buildPath(ctx: CanvasRenderingContext2D, shape: WaterdropFusionGraphicShape) {
+      buildWaterdropFusionPath(ctx as unknown as WaterdropFusionPathContext, shape);
+    }
+  });
+  return WaterdropFusionGraphic;
+}
+
+function isEvolutionFluidRenderMode(seriesModel: CirclePackingSeriesModel): boolean {
+  return seriesModel.get(['fluid', 'renderMode']) === 'evolutionFluid'
+    || seriesModel.get(['fluid', 'renderer']) === 'evolutionFluid';
+}
+
+function resolveCirclePackingFluidCircleZ2(
+  node: CirclePackingNode,
+  drawPolicy: CirclePackingFluidDrawPolicy
+): number {
+  const hierarchyLayer = node.depth * 0.01;
+  if (node.fluidActiveTarget) {
+    return 7 + hierarchyLayer;
+  }
+  if (drawPolicy.opaqueCircleIds.has(node.id)) {
+    return 6 + hierarchyLayer + (drawPolicy.elevatedCircleIds.has(node.id) ? 0.5 : 0);
+  }
+  return (node.children.length ? 2 : 3) + hierarchyLayer;
+}
+
+function createCirclePackingFluidDrawPolicy(
+  bridges: CirclePackingFluidBridge[],
+  nodesById: Map<string, CirclePackingNode>
+): CirclePackingFluidDrawPolicy {
+  const hiddenCircleIds = new Set<string>();
+  const opaqueCircleIds = new Set<string>();
+  const elevatedCircleIds = new Set<string>();
+  bridges.forEach((bridge) => {
+    const sourceIds = bridge.sourceIds.length ? bridge.sourceIds : [bridge.sourceId];
+    const targetIds = bridge.targetIds.length ? bridge.targetIds : [bridge.targetId];
+    if (bridge.hiddenIds || bridge.opaqueIds || bridge.elevatedIds) {
+      (bridge.hiddenIds || []).forEach((id) => hiddenCircleIds.add(id));
+      (bridge.opaqueIds || []).forEach((id) => opaqueCircleIds.add(id));
+      (bridge.elevatedIds || []).forEach((id) => elevatedCircleIds.add(id));
+      return;
+    }
+    if (!bridge.surfaceShape) return;
+    if (bridge.surfaceShape.bridgeOnly) {
+      const opaqueIds = bridge.opaqueIds || [...sourceIds, ...targetIds];
+      opaqueIds.forEach((id) => opaqueCircleIds.add(id));
+      const elevatedIds = bridge.elevatedIds || (bridge.kind === 'split' ? targetIds : sourceIds);
+      elevatedIds.forEach((id) => elevatedCircleIds.add(id));
+      return;
+    }
+    if (bridge.kind === 'absorb') {
+      targetIds.forEach((id) => hiddenCircleIds.add(id));
+      sourceIds.forEach((id) => opaqueCircleIds.add(id));
+    } else if (bridge.kind === 'split') {
+      sourceIds.forEach((id) => hiddenCircleIds.add(id));
+      targetIds.forEach((id) => opaqueCircleIds.add(id));
+    } else {
+      sourceIds.forEach((id) => hiddenCircleIds.add(id));
+      targetIds.forEach((id) => hiddenCircleIds.add(id));
+    }
+  });
+  const elevatedSurfaceIds = Array.from(elevatedCircleIds);
+  elevatedSurfaceIds.forEach((id) => {
+    const node = nodesById.get(id);
+    if (!node) return;
+    collectCirclePackingDescendantIds(node).forEach((descendantId) => {
+      if (!hiddenCircleIds.has(descendantId)) elevatedCircleIds.add(descendantId);
+    });
+  });
+  const eventSurfaceIds = Array.from(opaqueCircleIds);
+  eventSurfaceIds.forEach((id) => {
+    const node = nodesById.get(id);
+    if (!node) return;
+    collectCirclePackingDescendantIds(node).forEach((descendantId) => {
+      /* v8 ignore next -- hidden descendant filtering is the paired fallback for injected opaque parent metadata. */
+      if (!hiddenCircleIds.has(descendantId)) opaqueCircleIds.add(descendantId);
+    });
+  });
+  return { hiddenCircleIds, opaqueCircleIds, elevatedCircleIds };
+}
+
+function collectCirclePackingDescendantIds(node: CirclePackingNode): string[] {
+  const ids: string[] = [];
+  node.children.forEach((child) => {
+    ids.push(child.id);
+    ids.push(...collectCirclePackingDescendantIds(child));
+  });
+  return ids;
+}
+
+function readCirclePackingRenderStyle(
+  data: SeriesData,
+  seriesModel: CirclePackingSeriesModel,
+  itemModel: EChartsModel | null,
+  node: CirclePackingNode,
+  index: number,
+  useEvolutionFluidRender: boolean
+): Record<string, unknown> {
+  const style = readNodeStyle(data, seriesModel, itemModel, node, index, useEvolutionFluidRender);
+  if (!useEvolutionFluidRender) return style;
+  delete style.opacity;
+  return {
+    ...style,
+    stroke: 'rgba(255, 255, 255, 0)',
+    lineWidth: 0
   };
 }
 
@@ -653,7 +932,8 @@ function drawLabels(
   nodes: CirclePackingNode[],
   hoverItemsByDataIndex: Map<number, ElementHoverItem>,
   focusElementsByNodeId: Map<string, GraphicElement[]> = new Map(),
-  labelItems: CirclePackingLabelItem[] = []
+  labelItems: CirclePackingLabelItem[] = [],
+  useEvolutionFluidRender = false
 ): void {
   const seriesLabelModel = seriesModel.getModel('label');
   if (!seriesLabelModel.get('show')) return;
@@ -672,6 +952,7 @@ function drawLabels(
     );
     const text = String(formatLabel(itemLabelModel?.get('formatter') || seriesLabelModel.get('formatter'), node));
     const textEl = new echartsInstance.graphic.Text({
+      z2: useEvolutionFluidRender ? resolveCirclePackingFluidLabelZ2(node) : undefined,
       style: {
         x: node.x,
         y: node.y,
@@ -685,6 +966,7 @@ function drawLabels(
       },
       silent: true
     });
+    setAliveRenderKey(textEl, `circle-packing-label:${node.id}`);
     applyFadeEnterAnimation(textEl, readEnterAnimation(seriesModel, node.dataIndex));
     setElementHoverDimOpacity(textEl, LABEL_HOVER_DIM_OPACITY);
     addHoverElement(hoverItemsByDataIndex.get(node.dataIndex), textEl);
@@ -693,12 +975,17 @@ function drawLabels(
     labelItems.push({
       element: textEl,
       node,
+      allNodes: nodes,
       text,
       requestedFontSize,
       requestedLineHeight: lineHeight,
       minRadius
     });
   });
+}
+
+function resolveCirclePackingFluidLabelZ2(node: CirclePackingNode): number {
+  return 20 + node.depth * 0.01;
 }
 
 function updateCirclePackingFocusLabels(
@@ -721,7 +1008,7 @@ function createCirclePackingFocusLabelState(
   const fontSize = visualFontSize / focusScale;
   const lineHeight = item.requestedLineHeight / focusScale;
   const wrappedText = wrapText(item.text, item.node.r * 1.5, fontSize, item.node.r);
-  const position = resolveLabelPosition(item.node, wrappedText, fontSize, lineHeight);
+  const position = resolveLabelPosition(item.node, wrappedText, fontSize, lineHeight, item.allNodes);
 
   return {
     ignore: visibleRadius < item.minRadius,
@@ -810,7 +1097,8 @@ function readNodeStyle(
   seriesModel: CirclePackingSeriesModel,
   itemModel: EChartsModel | null,
   node: CirclePackingNode,
-  index: number
+  index: number,
+  preferLayoutColor = false
 ): Record<string, unknown> {
   const seriesStyle = asRecord(seriesModel.get('itemStyle'));
   const rawStyle = readRawItemStyle(node.raw);
@@ -818,9 +1106,12 @@ function readNodeStyle(
   const visualStyle = node.dataIndex >= 0 && node.dataIndex < data.count()
     ? asRecord(data.getItemVisual(node.dataIndex, 'style'))
     : {};
+  const fill = preferLayoutColor
+    ? node.color || itemStyle.color || rawStyle.color || seriesStyle.color || visualStyle.fill || DEFAULT_CIRCLE_PACKING_COLORS[index % DEFAULT_CIRCLE_PACKING_COLORS.length]
+    : itemStyle.color || rawStyle.color || seriesStyle.color || visualStyle.fill || node.color || DEFAULT_CIRCLE_PACKING_COLORS[index % DEFAULT_CIRCLE_PACKING_COLORS.length];
 
   return {
-    fill: itemStyle.color || rawStyle.color || seriesStyle.color || visualStyle.fill || node.color || DEFAULT_CIRCLE_PACKING_COLORS[index % DEFAULT_CIRCLE_PACKING_COLORS.length],
+    fill,
     stroke: itemStyle.borderColor || rawStyle.borderColor || seriesStyle.borderColor || '#ffffff',
     lineWidth: finiteNumber(itemStyle.borderWidth ?? rawStyle.borderWidth ?? seriesStyle.borderWidth, 1.2),
     opacity: finiteNumber(itemStyle.opacity ?? rawStyle.opacity ?? seriesStyle.opacity, 0.88)
@@ -890,24 +1181,32 @@ function resolveLabelPosition(
   node: CirclePackingNode,
   text: string,
   fontSize: number,
-  lineHeight: number
+  lineHeight: number,
+  allNodes: CirclePackingNode[] = []
 ): LabelPosition {
-  const children = node.children ?? [];
-  if (!children.length) {
+  const avoidanceCircles = collectLabelAvoidanceCircles(node, allNodes);
+  const size = measureLabelText(text, fontSize, lineHeight);
+  if (!avoidanceCircles.length) {
     return {
       x: node.x,
       y: node.y
     };
   }
 
-  const size = measureLabelText(text, fontSize, lineHeight);
   const candidates = createParentLabelCandidates(node, size);
+  const stableCandidate = candidates.find((candidate) => {
+    const box = createCenteredLabelBox(candidate, size);
+    return labelBoxOverflowFromCircle(box, node) <= 0
+      && !labelBoxOverlapsCircles(box, avoidanceCircles);
+  });
+  if (stableCandidate) return stableCandidate;
+
   let best = candidates[0];
   let bestScore = Infinity;
 
   candidates.forEach((candidate) => {
     const box = createCenteredLabelBox(candidate, size);
-    const score = scoreParentLabelCandidate(node, box);
+    const score = scoreParentLabelCandidate(node, box, avoidanceCircles);
     if (score < bestScore) {
       best = candidate;
       bestScore = score;
@@ -930,8 +1229,9 @@ function createParentLabelCandidates(
   size: { width: number; height: number }
 ): LabelPosition[] {
   const gap = Math.max(4, Math.min(12, node.r * 0.08));
-  const childBounds = getChildCircleBounds(node.children);
-  const radialFactors = [0.86, 0.72, 0.58, 0.44, 0.3];
+  const fitOffset = Math.max(0, node.r - Math.max(size.width, size.height) / 2 - gap);
+  const primaryOffset = Math.min(node.r * PARENT_LABEL_PRIMARY_OFFSET, fitOffset);
+  const radialFactors = [0.92, 0.86, 0.72, 0.58, 0.44, 0.3];
   const angles = [
     -Math.PI / 2,
     -Math.PI * 0.72,
@@ -947,18 +1247,18 @@ function createParentLabelCandidates(
   const candidates: LabelPosition[] = [
     {
       x: node.x,
-      y: childBounds.minY - size.height / 2 - gap
+      y: node.y - primaryOffset
     },
     {
       x: node.x,
-      y: childBounds.maxY + size.height / 2 + gap
+      y: node.y + primaryOffset
     },
     {
-      x: childBounds.minX - size.width / 2 - gap,
+      x: node.x - primaryOffset,
       y: node.y
     },
     {
-      x: childBounds.maxX + size.width / 2 + gap,
+      x: node.x + primaryOffset,
       y: node.y
     }
   ];
@@ -981,20 +1281,6 @@ function createParentLabelCandidates(
   return dedupeLabelCandidates(candidates);
 }
 
-function getChildCircleBounds(children: CirclePackingNode[]): { minX: number; maxX: number; minY: number; maxY: number } {
-  return children.reduce((bounds, child) => ({
-    minX: Math.min(bounds.minX, child.x - child.r),
-    maxX: Math.max(bounds.maxX, child.x + child.r),
-    minY: Math.min(bounds.minY, child.y - child.r),
-    maxY: Math.max(bounds.maxY, child.y + child.r)
-  }), {
-    minX: Infinity,
-    maxX: -Infinity,
-    minY: Infinity,
-    maxY: -Infinity
-  });
-}
-
 function dedupeLabelCandidates(candidates: LabelPosition[]): LabelPosition[] {
   const seen = new Set<string>();
   return candidates.filter((candidate) => {
@@ -1014,15 +1300,45 @@ function createCenteredLabelBox(position: LabelPosition, size: { width: number; 
   };
 }
 
-function scoreParentLabelCandidate(node: CirclePackingNode, box: LabelBox): number {
-  const distances = node.children.map((child) => distanceFromBoxToCircle(box, child));
+function collectLabelAvoidanceCircles(
+  node: CirclePackingNode,
+  allNodes: CirclePackingNode[]
+): CirclePackingNode[] {
+  const circles: CirclePackingNode[] = [];
+  const seen = new Set<string>();
+  const pushCircle = (circle: CirclePackingNode | undefined) => {
+    if (!circle || circle.id === node.id || circle.r <= 0) return;
+    if (seen.has(circle.id)) return;
+    seen.add(circle.id);
+    circles.push(circle);
+  };
+
+  (node.children ?? []).forEach(pushCircle);
+  allNodes.forEach((candidate) => {
+    if (candidate.id === node.id || candidate.r <= 0 || candidate.r >= node.r - EPSILON) return;
+    if (!circlesOverlap(node, candidate)) return;
+    pushCircle(candidate);
+  });
+  return circles;
+}
+
+function labelBoxOverlapsCircles(box: LabelBox, circles: CirclePackingNode[]): boolean {
+  return circles.some((circle) => distanceFromBoxToCircle(box, circle) < 0);
+}
+
+function scoreParentLabelCandidate(node: CirclePackingNode, box: LabelBox, avoidanceCircles: CirclePackingNode[]): number {
+  const distances = avoidanceCircles.map((circle) => distanceFromBoxToCircle(box, circle));
   const overlapPenalty = distances.reduce((sum, distance, index) => (
-    sum + (distance < 0 ? 100000 + Math.abs(distance) * 1000 + node.children[index].r : 0)
+    sum + (distance < 0 ? 100000 + Math.abs(distance) * 1000 + avoidanceCircles[index].r : 0)
   ), 0);
   const clearance = Math.min(...distances);
   const parentOverflow = labelBoxOverflowFromCircle(box, node);
   const centerDistance = Math.hypot(box.x + box.width / 2 - node.x, box.y + box.height / 2 - node.y);
   return overlapPenalty + parentOverflow * 50 - clearance + centerDistance * 0.01;
+}
+
+function circlesOverlap(left: CirclePackingNode, right: CirclePackingNode): boolean {
+  return Math.hypot(left.x - right.x, left.y - right.y) < left.r + right.r;
 }
 
 function distanceFromBoxToCircle(box: LabelBox, circle: CirclePackingNode): number {
@@ -1228,6 +1544,14 @@ export const __test__ = {
   readInitialDataOptions,
   readLayoutOption,
   drawCirclePacking,
+  drawCirclePackingFluidBridges,
+  createCirclePackingBridgeFill,
+  createWaterdropFusionGraphicElement,
+  getWaterdropFusionGraphic,
+  resetWaterdropFusionGraphicForTest,
+  resolveCirclePackingFluidCircleZ2,
+  createCirclePackingFluidDrawPolicy,
+  collectCirclePackingDescendantIds,
   installCirclePackingFocus,
   handleCirclePackingFocusClick,
   createCirclePackingNodeMap,

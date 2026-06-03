@@ -12,8 +12,8 @@
     <header class="demo-header">
       <div>
         <p class="eyebrow">echarts-circle-packing</p>
-        <h1>Circle Packing</h1>
-        <p>Hierarchical values are packed into nested circles without external layout dependencies.</p>
+        <h1>Circle Packing: Company Incubation</h1>
+        <p>A compact fluid story of teams spinning out, acquiring each other, returning to the parent company, and splitting into new operating groups.</p>
       </div>
       <nav class="demo-links" aria-label="Example navigation">
         <a href="../../">All examples</a>
@@ -24,7 +24,7 @@
     <section class="demo-stage"><div class="chart-frame"><div id="chart"></div></div></section>
   </main>
   <script src="../../../node_modules/echarts/dist/echarts.min.js"></script>
-  <script src="../../../packages/echarts-circle-packing/dist/echarts-circle-packing.js?v=focus-drilldown-1"></script>
-  <script src="../../shared/demo-runner.js?v=circle-packing"></script>
+  <script src="../../../packages/echarts-circle-packing/dist/echarts-circle-packing.js?v=fluid-render-92"></script>
+  <script src="../../shared/demo-runner.js?v=circle-packing-fluid-5"></script>
 </body>
 </html>

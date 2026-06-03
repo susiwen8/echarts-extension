@@ -48,13 +48,39 @@ chart.setOption({
 - 名称默认读取 `name`；自定义数据可使用 `nameField`。
 - 传入数组时，设置 `rootVisible: false` 可隐藏合成根节点。
 
+### 流体演化
+
+设置 `fluid.enabled` 后，Circle Packing 会使用 Evolution Fluid 风格的事件时间线演化节点。已完成的 merge/acquire 事件会隐藏源节点、把数值转移到目标节点并重新 pack 层级；split/spinOff 事件会让待出现的目标节点从源节点中长出；move/relocate/transfer 事件会把一个已有节点从一个父节点移动到另一个父节点。进行中的事件会在前后两套布局之间插值，并绘制液态 surface。需要把圆堆积结果当成水滴渲染时，设置 `fluid.renderMode: 'evolutionFluid'`。
+
+```js
+chart.setOption({
+  series: [{
+    type: 'circlePacking',
+    data,
+    fluid: {
+      enabled: true,
+      renderMode: 'evolutionFluid',
+      currentTime: 9.5,
+      events: [
+        { time: 10, type: 'merge', sources: ['search'], targets: ['editor'] },
+        { time: 12, type: 'split', sources: ['editor'], targets: ['console'], duration: 0.5 },
+        { time: 14, type: 'move', sources: ['console'], targets: ['platform'] },
+        { time: 14.2, type: 'checkpoint', targets: ['platform'], bridge: false }
+      ],
+      bridgeOpacity: 0.82,
+      bridgeThreshold: 180
+    }
+  }]
+});
+```
+
 ## 常用选项
 
 - `padding`, `nodePadding`, `siblingGap`：间距设置。
 - `center`, `radius`：圆堆积视口设置。
 - `rootName`, `rootVisible`：根节点行为。
 - `sort`：`value`, `name`, `asc`, `desc`, `none`, `true`, or `false`.
-- `colors`, `itemStyle`, `label`, `emphasis`, `enterAnimation`, `focusAnimation`：展示样式与点击聚焦动画。
+- `fluid`, `colors`, `itemStyle`, `label`, `emphasis`, `enterAnimation`, `focusAnimation`：事件演化、展示样式与点击聚焦动画。
 
 ## 配置项
 
@@ -148,6 +174,28 @@ chart.setOption({
 | `childrenField` | 字段 containing 子项 节点。 | `字符串` |
 | `sort` | 对层级 节点 before 布局排序。 | `布尔值 \| 'none' \| 'value' \| 'name' \| 'asc' \| 'desc'` |
 | `colors` | depth or groups使用的调色板。 | `字符串[]` |
+| `fluid` | 启用 Evolution Fluid 风格的时间事件演化。 | `对象` |
+| `fluid.enabled` | 为 true 时启用流体事件处理。 | `布尔值` |
+| `fluid.renderMode` | 使用普通圆堆积渲染，或使用 Evolution Fluid 水滴渲染进行事件叙事。 | `'circlePacking' \| 'evolutionFluid'` |
+| `fluid.currentTime` | 当前播放时间。 | `字符串 \| 数字 \| Date \| null` |
+| `fluid.events` | circle 节点之间的 merge、acquire、split、spin-off、move、relocate、transfer 或 checkpoint 事件。 | `数组<对象>` |
+| `fluid.events.time` | 事件时间或离散步骤。 | `字符串 \| 数字 \| Date` |
+| `fluid.events.type` | 事件类型。 | `'merge' \| 'acquire' \| 'split' \| 'spinOff' \| 'move' \| 'relocate' \| 'transfer' \| 'checkpoint' \| 字符串` |
+| `fluid.events.sources` | 源节点 ID、原始 ID 或名称。 | `数组<字符串 \| 数字>` |
+| `fluid.events.source` | 单个源节点 ID、原始 ID、名称或源节点数组别名。 | `字符串 \| 数字 \| 数组<字符串 \| 数字>` |
+| `fluid.events.from` | `source` / `sources` 的别名。 | `字符串 \| 数字 \| 数组<字符串 \| 数字>` |
+| `fluid.events.targets` | 目标节点 ID、原始 ID 或名称。 | `数组<字符串 \| 数字>` |
+| `fluid.events.target` | 单个目标节点 ID、原始 ID、名称或目标节点数组别名。 | `字符串 \| 数字 \| 数组<字符串 \| 数字>` |
+| `fluid.events.to` | `target` / `targets` 的别名。 | `字符串 \| 数字 \| 数组<字符串 \| 数字>` |
+| `fluid.events.value` | 可选事件规模元数据。 | `数字 \| 字符串` |
+| `fluid.events.duration` | 可选事件时长，单位与 `time` 相同。 | `数字` |
+| `fluid.events.span` | `duration` 的别名。 | `数字` |
+| `fluid.events.bridge` | 设为 false 时只应用事件，不绘制液态连接桥。 | `布尔值` |
+| `fluid.events.showBridge` | `bridge` 的别名。 | `布尔值` |
+| `fluid.events.drawBridge` | `bridge` 的别名。 | `布尔值` |
+| `fluid.bridgeOpacity` | 进行中液态连接桥的透明度。 | `数字` |
+| `fluid.bridgeThreshold` | 绘制连接桥的偏好最大距离。 | `数字` |
+| `fluid.bridgeColor` | 连接桥填充颜色覆盖值。 | `字符串` |
 | `layout` | Nested 层级 布局 options。 | `对象` |
 | `layout.rootName` | Display 名称 for an implicit 根 节点。 | `字符串` |
 | `layout.rootVisible` | 为 true 时显示根 circle。 | `布尔值` |
