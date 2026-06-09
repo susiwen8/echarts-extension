@@ -465,6 +465,31 @@ test('subway private renderer helpers cover route style, label collision, hover,
     { x: 0, y: 0 },
     { x: 1, y: 1 }
   ]).map((point) => [point.x, point.y]), [[0, 0], [1, 1]]);
+  assert.deepEqual(subway.createContinuousOffsetRoutePoints([
+    {
+      start: { x: -80, y: 0 },
+      end: { x: 0, y: 0 },
+      offset: { offsetX: 0, offsetY: 10 }
+    },
+    {
+      start: { x: 0, y: 0 },
+      end: { x: 0, y: -80 },
+      offset: { offsetX: -10, offsetY: 0 }
+    }
+  ]).map((point) => [point.x, point.y]), [[-80, 10], [10, 10], [10, -80]]);
+  assert.equal(subway.routeLeftNormal({ x: 0, y: 0 }, { x: 0, y: 0 }), null);
+  assert.equal(subway.signedRouteOffsetSide({ x: 0, y: 0 }, { x: 0, y: 0 }, { offsetX: 1, offsetY: 0 }), 0);
+  assert.equal(subway.signedRouteOffsetSide({ x: 0, y: 0 }, { x: 10, y: 0 }, { offsetX: 1, offsetY: 0 }), 0);
+  assert.equal(subway.alignOffsetRouteSegmentSide({
+    start: { x: 0, y: 0 },
+    end: { x: 0, y: 0 },
+    offset: { offsetX: 1, offsetY: 0 }
+  }, {
+    start: { x: 0, y: 0 },
+    end: { x: 10, y: 0 },
+    offset: { offsetX: 0, offsetY: 1 }
+  }).offset.offsetY, 1);
+  assert.deepEqual(subway.flipRouteSegmentOffset({ offsetX: 2, offsetY: -3 }), { offsetX: -2, offsetY: 3 });
   assert.deepEqual(subway.createContinuousOffsetRoutePoints([]), []);
   subway.drawRouteLabels(host, group, createSeriesModel({ routeLabel: { show: true, position: 'start' } }), [{ ...route, points: [] }], new Map());
   subway.drawRouteLabels(host, group, createSeriesModel({ routeLabel: { show: true, position: 'start' } }), [{ ...route, points: [route.points[0]] }], new Map());

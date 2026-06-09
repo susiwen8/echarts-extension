@@ -377,6 +377,8 @@ function drawRoute(
   let normalStyle: RouteDrawStyle | null = null;
   let offsetFragment: OffsetRouteSegment[] = [];
   let offsetStyle: RouteDrawStyle | null = null;
+  let previousOffsetSegment: OffsetRouteSegment | null = null;
+  let previousOffsetSegmentIndex = -1;
 
   const flushNormalFragment = () => {
     if (!normalStyle) {
@@ -415,21 +417,29 @@ function drawRoute(
 
     if (segmentOffset) {
       flushNormalFragment();
+      let offsetSegment: OffsetRouteSegment = {
+        start: previous,
+        end: current,
+        offset: segmentOffset
+      };
+      if (previousOffsetSegment && previousOffsetSegmentIndex === segmentIndex - 1) {
+        offsetSegment = alignOffsetRouteSegmentSide(previousOffsetSegment, offsetSegment);
+      }
       if (!offsetFragment.length) {
         offsetStyle = drawStyle;
       } else if (offsetStyle?.key !== drawStyle.key) {
         flushOffsetFragment();
         offsetStyle = drawStyle;
       }
-      offsetFragment.push({
-        start: previous,
-        end: current,
-        offset: segmentOffset
-      });
+      offsetFragment.push(offsetSegment);
+      previousOffsetSegment = offsetSegment;
+      previousOffsetSegmentIndex = segmentIndex;
       continue;
     }
 
     flushOffsetFragment();
+    previousOffsetSegment = null;
+    previousOffsetSegmentIndex = -1;
     if (!normalFragment.length) {
       normalFragment.push(previous);
       normalStyle = drawStyle;
@@ -543,17 +553,62 @@ function offsetRoutePoint(point: SubwayRouteLayout['points'][number], offset: Ro
 
 function createContinuousOffsetRoutePoints(segments: OffsetRouteSegment[]): SubwayRouteLayout['points'] {
   if (!segments.length) return [];
+  let previousSegment = segments[0];
   const points: SubwayRouteLayout['points'] = [
-    offsetRoutePoint(segments[0].start, segments[0].offset)
+    offsetRoutePoint(previousSegment.start, previousSegment.offset)
   ];
 
   for (let index = 1; index < segments.length; index += 1) {
-    points.push(...resolveOffsetRouteJoinPoints(segments[index - 1], segments[index]));
+    const nextSegment = alignOffsetRouteSegmentSide(previousSegment, segments[index]);
+    points.push(...resolveOffsetRouteJoinPoints(previousSegment, nextSegment));
+    previousSegment = nextSegment;
   }
 
-  const last = segments[segments.length - 1];
-  points.push(offsetRoutePoint(last.end, last.offset));
+  points.push(offsetRoutePoint(previousSegment.end, previousSegment.offset));
   return withoutConsecutiveDuplicatePoints(points);
+}
+
+function alignOffsetRouteSegmentSide(previous: OffsetRouteSegment, next: OffsetRouteSegment): OffsetRouteSegment {
+  const previousSide = signedRouteOffsetSide(previous.start, previous.end, previous.offset);
+  const nextSide = signedRouteOffsetSide(next.start, next.end, next.offset);
+  if (!previousSide || !nextSide || previousSide * nextSide > 0) return next;
+  return {
+    ...next,
+    offset: flipRouteSegmentOffset(next.offset)
+  };
+}
+
+function signedRouteOffsetSide(
+  start: SubwayRouteLayout['points'][number],
+  end: SubwayRouteLayout['points'][number],
+  offset: RouteSegmentOffset
+): number {
+  const normal = routeLeftNormal(start, end);
+  if (!normal) return 0;
+  const side = offset.offsetX * normal.x + offset.offsetY * normal.y;
+  return Math.abs(side) < 1e-9 ? 0 : side;
+}
+
+function routeLeftNormal(
+  start: SubwayRouteLayout['points'][number],
+  end: SubwayRouteLayout['points'][number]
+): { x: number; y: number } | null {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const length = Math.hypot(dx, dy);
+  if (!length) return null;
+  return {
+    x: -dy / length,
+    y: dx / length
+  };
+}
+
+function flipRouteSegmentOffset(offset: RouteSegmentOffset): RouteSegmentOffset {
+  return {
+    ...offset,
+    offsetX: -offset.offsetX,
+    offsetY: -offset.offsetY
+  };
 }
 
 function resolveOffsetRouteJoinPoints(previous: OffsetRouteSegment, next: OffsetRouteSegment): SubwayRouteLayout['points'] {
@@ -1538,6 +1593,10 @@ export const __test__ = {
   getSubwayRoutePathCtor,
   offsetRoutePoint,
   createContinuousOffsetRoutePoints,
+  alignOffsetRouteSegmentSide,
+  signedRouteOffsetSide,
+  routeLeftNormal,
+  flipRouteSegmentOffset,
   resolveOffsetRouteJoinPoints,
   intersectLines,
   withoutConsecutiveDuplicatePoints,
