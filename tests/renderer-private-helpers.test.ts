@@ -427,6 +427,45 @@ test('subway private renderer helpers cover route style, label collision, hover,
   });
   assert.deepEqual(subway.drawRoute(host, group, model, { ...route, points: [] }, 0, new Map()), []);
   assert.deepEqual(subway.drawRoutePath(host, group, [], {}, 0, disabledAnimation), []);
+  const styledOffsetGroup = new host.graphic.Group();
+  subway.drawRoute(host, styledOffsetGroup, createSeriesModel({
+    lineStyle: { cornerRadius: 0 }
+  }), {
+    ...route,
+    points: route.points.slice(0, 3),
+    stationIds: route.stationIds.slice(0, 3),
+    raw: {
+      segments: [
+        { segmentIndex: 1, lineStyle: { color: '#00f' } }
+      ]
+    }
+  }, 0, new Map([
+    ['r1\x000', { offsetX: 0, offsetY: 1 }],
+    ['r1\x001', { offsetX: 0, offsetY: 1 }]
+  ]));
+  assert.equal(styledOffsetGroup.childrenList.length, 2);
+  assert.equal(styledOffsetGroup.childrenList[1].style.stroke, '#00f');
+  assert.deepEqual(subway.resolveOffsetRouteJoinPoints({
+    start: { x: 0, y: 0 },
+    end: { x: 10, y: 0 },
+    offset: { offsetX: 0, offsetY: 1 }
+  }, {
+    start: { x: 10, y: 0 },
+    end: { x: 20, y: 0 },
+    offset: { offsetX: 0, offsetY: 3 }
+  }).map((point) => [point.x, point.y]), [[10, 1], [10, 3]]);
+  assert.equal(subway.intersectLines(
+    { x: 0, y: 0 },
+    { x: Infinity, y: 0 },
+    { x: 1, y: 1 },
+    { x: 1, y: 2 }
+  ), null);
+  assert.deepEqual(subway.withoutConsecutiveDuplicatePoints([
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 1, y: 1 }
+  ]).map((point) => [point.x, point.y]), [[0, 0], [1, 1]]);
+  assert.deepEqual(subway.createContinuousOffsetRoutePoints([]), []);
   subway.drawRouteLabels(host, group, createSeriesModel({ routeLabel: { show: true, position: 'start' } }), [{ ...route, points: [] }], new Map());
   subway.drawRouteLabels(host, group, createSeriesModel({ routeLabel: { show: true, position: 'start' } }), [{ ...route, points: [route.points[0]] }], new Map());
   subway.drawRouteLabels(host, group, createSeriesModel({ routeLabel: { show: true, position: 'end' } }), [{ ...route, points: [route.points[0]] }], new Map());

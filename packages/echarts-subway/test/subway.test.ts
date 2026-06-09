@@ -182,6 +182,43 @@ test('offsets routes that share the same station-to-station segment', () => {
   assert.equal(Math.round((yellow.offsetY + green.offsetY) * 1000), 0);
 });
 
+test('keeps consecutive offset segments continuous through route bends', () => {
+  const svg = renderSubwaySvg([
+    {
+      id: 'red',
+      name: 'Red',
+      color: '#d51f2a',
+      stations: [
+        { id: 'south', name: 'South', coord: [0, 80] },
+        { id: 'east', name: 'East', coord: [80, 0] }
+      ],
+      waypoints: [
+        ['south', 0, 80],
+        [0, 0],
+        ['east', 80, 0]
+      ]
+    },
+    {
+      id: 'teal',
+      name: 'Teal',
+      color: '#00a6a6',
+      stations: [
+        { id: 'south', name: 'South', coord: [0, 80] },
+        { id: 'east', name: 'East', coord: [80, 0] }
+      ],
+      waypoints: [
+        ['south', 0, 80],
+        [0, 0],
+        ['east', 80, 0]
+      ]
+    }
+  ]);
+  const redRouteElements = routeStrokeElements(svg, '#d51f2a');
+
+  assert.equal(redRouteElements.length, 1);
+  assert.match(redRouteElements[0], /Q/);
+});
+
 test('renders planned subway routes as dashed lines', () => {
   const svg = renderSubwaySvg([
     {

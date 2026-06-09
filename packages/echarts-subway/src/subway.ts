@@ -141,6 +141,12 @@ interface RouteDrawStyle {
   key: string;
 }
 
+interface OffsetRouteSegment {
+  start: SubwayRouteLayout['points'][number];
+  end: SubwayRouteLayout['points'][number];
+  offset: RouteSegmentOffset;
+}
+
 interface StationMarkerCircleGeometry {
   type: 'circle';
 }
@@ -369,6 +375,8 @@ function drawRoute(
   const animation = readEnterAnimation(seriesModel, routeIndex);
   let normalFragment: SubwayRouteLayout['points'] = [];
   let normalStyle: RouteDrawStyle | null = null;
+  let offsetFragment: OffsetRouteSegment[] = [];
+  let offsetStyle: RouteDrawStyle | null = null;
 
   const flushNormalFragment = () => {
     if (!normalStyle) {
@@ -378,6 +386,23 @@ function drawRoute(
     elements.push(...drawRoutePath(echartsInstance, group, normalFragment, normalStyle.style, normalStyle.cornerRadius, animation));
     normalFragment = [];
     normalStyle = null;
+  };
+
+  const flushOffsetFragment = () => {
+    if (!offsetStyle) {
+      offsetFragment = [];
+      return;
+    }
+    elements.push(...drawRoutePath(
+      echartsInstance,
+      group,
+      createContinuousOffsetRoutePoints(offsetFragment),
+      offsetStyle.style,
+      offsetStyle.cornerRadius,
+      animation
+    ));
+    offsetFragment = [];
+    offsetStyle = null;
   };
 
   for (let segmentIndex = 0; segmentIndex < route.points.length - 1; segmentIndex += 1) {
@@ -390,13 +415,21 @@ function drawRoute(
 
     if (segmentOffset) {
       flushNormalFragment();
-      elements.push(...drawRoutePath(echartsInstance, group, [
-        offsetRoutePoint(previous, segmentOffset),
-        offsetRoutePoint(current, segmentOffset)
-      ], drawStyle.style, 0, animation));
+      if (!offsetFragment.length) {
+        offsetStyle = drawStyle;
+      } else if (offsetStyle?.key !== drawStyle.key) {
+        flushOffsetFragment();
+        offsetStyle = drawStyle;
+      }
+      offsetFragment.push({
+        start: previous,
+        end: current,
+        offset: segmentOffset
+      });
       continue;
     }
 
+    flushOffsetFragment();
     if (!normalFragment.length) {
       normalFragment.push(previous);
       normalStyle = drawStyle;
@@ -409,6 +442,7 @@ function drawRoute(
   }
 
   flushNormalFragment();
+  flushOffsetFragment();
   return elements;
 }
 
@@ -505,6 +539,74 @@ function offsetRoutePoint(point: SubwayRouteLayout['points'][number], offset: Ro
     x: point.x + offset.offsetX,
     y: point.y + offset.offsetY
   };
+}
+
+function createContinuousOffsetRoutePoints(segments: OffsetRouteSegment[]): SubwayRouteLayout['points'] {
+  if (!segments.length) return [];
+  const points: SubwayRouteLayout['points'] = [
+    offsetRoutePoint(segments[0].start, segments[0].offset)
+  ];
+
+  for (let index = 1; index < segments.length; index += 1) {
+    points.push(...resolveOffsetRouteJoinPoints(segments[index - 1], segments[index]));
+  }
+
+  const last = segments[segments.length - 1];
+  points.push(offsetRoutePoint(last.end, last.offset));
+  return withoutConsecutiveDuplicatePoints(points);
+}
+
+function resolveOffsetRouteJoinPoints(previous: OffsetRouteSegment, next: OffsetRouteSegment): SubwayRouteLayout['points'] {
+  const previousStart = offsetRoutePoint(previous.start, previous.offset);
+  const previousEnd = offsetRoutePoint(previous.end, previous.offset);
+  const nextStart = offsetRoutePoint(next.start, next.offset);
+  const nextEnd = offsetRoutePoint(next.end, next.offset);
+  const intersection = intersectLines(previousStart, previousEnd, nextStart, nextEnd);
+
+  if (intersection) {
+    return [{
+      ...previous.end,
+      x: intersection.x,
+      y: intersection.y
+    }];
+  }
+  if (sameRoutePoint(previousEnd, nextStart)) return [previousEnd];
+  return [previousEnd, nextStart];
+}
+
+function intersectLines(
+  firstStart: SubwayRouteLayout['points'][number],
+  firstEnd: SubwayRouteLayout['points'][number],
+  secondStart: SubwayRouteLayout['points'][number],
+  secondEnd: SubwayRouteLayout['points'][number]
+): { x: number; y: number } | null {
+  const firstDx = firstEnd.x - firstStart.x;
+  const firstDy = firstEnd.y - firstStart.y;
+  const secondDx = secondEnd.x - secondStart.x;
+  const secondDy = secondEnd.y - secondStart.y;
+  const denominator = firstDx * secondDy - firstDy * secondDx;
+  if (Math.abs(denominator) < 1e-9) return null;
+
+  const startDx = secondStart.x - firstStart.x;
+  const startDy = secondStart.y - firstStart.y;
+  const ratio = (startDx * secondDy - startDy * secondDx) / denominator;
+  const x = firstStart.x + ratio * firstDx;
+  const y = firstStart.y + ratio * firstDy;
+  return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+}
+
+function withoutConsecutiveDuplicatePoints(points: SubwayRouteLayout['points']): SubwayRouteLayout['points'] {
+  const unique: SubwayRouteLayout['points'] = [];
+  points.forEach((point) => {
+    if (!unique.length || !sameRoutePoint(unique[unique.length - 1], point)) {
+      unique.push(point);
+    }
+  });
+  return unique;
+}
+
+function sameRoutePoint(left: SubwayRouteLayout['points'][number], right: SubwayRouteLayout['points'][number]): boolean {
+  return Math.abs(left.x - right.x) < 1e-9 && Math.abs(left.y - right.y) < 1e-9;
 }
 
 function drawStation(
@@ -1435,6 +1537,11 @@ export const __test__ = {
   drawRoutePath,
   getSubwayRoutePathCtor,
   offsetRoutePoint,
+  createContinuousOffsetRoutePoints,
+  resolveOffsetRouteJoinPoints,
+  intersectLines,
+  withoutConsecutiveDuplicatePoints,
+  sameRoutePoint,
   drawStation,
   createCircleStationMarker,
   createCapsuleStationMarker,
