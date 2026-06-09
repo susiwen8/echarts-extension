@@ -713,6 +713,214 @@ test('reveals lines and delays bar error lines during enter animation', () => {
   assert.ok(horizontalErrorLines.every((element) => element.animations.find((animation) => animation.key === 'style')?.delay === 24));
 });
 
+test('delays line-symbol animation by vertical line-reveal ratio', () => {
+  const ecData = new WeakMap<object, Record<string, unknown>>();
+  const host = createTooltipBindingHost(ecData);
+  const group = new TestGraphicGroup();
+  const layout = layoutErrorChart([
+    { month: 'Start', duration: 0 },
+    { month: 'End', duration: 100 }
+  ], {
+    variant: 'line',
+    width: 220,
+    height: 180,
+    padding: 20,
+    categoryField: 'month',
+    valueField: 'duration',
+    min: 0,
+    max: 100,
+    orientation: 'vertical',
+    baseline: 0
+  });
+  const data = createRenderSeriesData(2);
+  const seriesModel = createRenderSeriesModel(data, {
+    animation: true,
+    enterAnimation: {
+      duration: 140,
+      delay: 0,
+      stagger: 0,
+      easing: 'linear'
+    }
+  });
+
+  rendererInternals.drawSeries(host as never, group as never, seriesModel as never, layout as never, {
+    x: 0,
+    y: 0,
+    width: 220,
+    height: 180
+  });
+
+  const symbols = group.children.filter((element) => element.shape?.cx != null);
+  assert.equal(symbols.length, 2);
+  assert.equal(symbols[0].animations[0]?.target.r, 4);
+  assert.equal(symbols[0].animations[0]?.delay, 0);
+  assert.equal(symbols[1].animations[0]?.delay, 140);
+});
+
+test('delays line-symbol animation by horizontal line-reveal ratio', () => {
+  const ecData = new WeakMap<object, Record<string, unknown>>();
+  const host = createTooltipBindingHost(ecData);
+  const group = new TestGraphicGroup();
+  const layout = layoutErrorChart([
+    { month: 'Start', duration: 0 },
+    { month: 'End', duration: 100 }
+  ], {
+    variant: 'line',
+    width: 220,
+    height: 180,
+    padding: 20,
+    categoryField: 'month',
+    valueField: 'duration',
+    min: 0,
+    max: 100,
+    orientation: 'horizontal',
+    baseline: 0
+  });
+  const data = createRenderSeriesData(2);
+  const seriesModel = createRenderSeriesModel(data, {
+    animation: true,
+    enterAnimation: {
+      duration: 200,
+      delay: 0,
+      stagger: 0,
+      easing: 'linear'
+    }
+  });
+
+  rendererInternals.drawSeries(host as never, group as never, seriesModel as never, layout as never, {
+    x: 0,
+    y: 0,
+    width: 220,
+    height: 180
+  });
+
+  const symbols = group.children.filter((element) => element.shape?.cx != null);
+  assert.equal(symbols.length, 2);
+  assert.equal(symbols[1].animations[0]?.delay, 200);
+});
+
+test('skips line point animation when animation is disabled', () => {
+  const ecData = new WeakMap<object, Record<string, unknown>>();
+  const host = createTooltipBindingHost(ecData);
+  const group = new TestGraphicGroup();
+  const layout = layoutErrorChart([
+    { month: 'Start', duration: 20 },
+    { month: 'End', duration: 80 }
+  ], {
+    variant: 'line',
+    width: 220,
+    height: 180,
+    padding: 20,
+    categoryField: 'month',
+    valueField: 'duration',
+    min: 0,
+    max: 100,
+    baseline: 0
+  });
+  const data = createRenderSeriesData(2);
+  const seriesModel = createRenderSeriesModel(data, {
+    animation: false,
+    enterAnimation: {
+      duration: 120,
+      delay: 10,
+      easing: 'linear'
+    }
+  });
+
+  rendererInternals.drawSeries(host as never, group as never, seriesModel as never, layout as never, {
+    x: 0,
+    y: 0,
+    width: 220,
+    height: 180
+  });
+
+  const symbols = group.children.filter((element) => element.shape?.cx != null);
+  assert.equal(symbols.length, 2);
+  assert.equal(symbols[0].animations.length, 0);
+});
+
+test('animates column rectangles for vertical and horizontal branches', () => {
+  const shape = new TestGraphicElement();
+  const row = { y: 10, baseY: 4 } as never;
+  const columnLayout = { orientation: 'vertical', plot: { left: 0, top: 0, width: 100, height: 20 } } as never;
+  const lineLayout = { orientation: 'horizontal', plot: { left: 0, top: 0, width: 100, height: 20 } } as never;
+  const animation = { enabled: true, duration: 20, delay: 0, easing: 'linear' } as const;
+
+  rendererInternals.applyRectEnterAnimation(shape as never, row as never, columnLayout as never, animation);
+  assert.equal(shape.shape?.y, 4);
+  assert.deepEqual(shape.shape, { y: 4, height: 0 });
+  assert.equal(shape.shape?.height, 0);
+  assert.equal(shape.animations.length, 1);
+  assert.deepEqual(shape.animations[0].target, { y: 4, height: 6 });
+
+  const shapeHorizontal = new TestGraphicElement();
+  const rowHorizontal = { x: 12, baseX: 4 } as never;
+  rendererInternals.applyRectEnterAnimation(shapeHorizontal as never, rowHorizontal as never, lineLayout as never, animation);
+  assert.equal(shapeHorizontal.shape?.x, 4);
+  assert.equal(shapeHorizontal.shape?.width, 0);
+  assert.deepEqual(shapeHorizontal.shape, { x: 4, width: 0 });
+  assert.equal(shapeHorizontal.shape?.height, undefined);
+  assert.equal(shapeHorizontal.animations.length, 1);
+  assert.deepEqual(shapeHorizontal.animations[0].target, { x: 4, width: 8 });
+});
+
+test('renders x-axis name text using style fallback values', () => {
+  const host = createTooltipBindingHost(new WeakMap<object, Record<string, unknown>>());
+  const group = new TestGraphicGroup();
+  const layout = layoutErrorChart([{ month: 'A', duration: 12 }], {
+    variant: 'scatter',
+    width: 220,
+    height: 140,
+    padding: 20,
+    xMin: 0,
+    xMax: 20,
+    min: 0,
+    max: 20
+  });
+
+  const axisModel = createTooltipModel({
+    name: 'Cost Axis',
+    nameTextStyle: {
+      color: '#334155',
+      fontSize: '16',
+      fontWeight: 700
+    },
+    label: { show: true }
+  });
+  rendererInternals.drawXValueAxisLabels(host as never, group as never, axisModel as never, layout as never);
+
+  const text = group.children.find((element) => element.style?.text === 'Cost Axis');
+  assert.ok(text);
+  assert.equal(text?.style?.fill, '#334155');
+  assert.equal(text?.style?.fontSize, 16);
+  assert.equal(text?.style?.fontWeight, 700);
+});
+
+test('renders x-axis name fallback text style when nameTextStyle is empty', () => {
+  const host = createTooltipBindingHost(new WeakMap<object, Record<string, unknown>>());
+  const group = new TestGraphicGroup();
+  const layout = layoutErrorChart([{ month: 'A', duration: 12 }], {
+    variant: 'scatter',
+    width: 220,
+    height: 140,
+    padding: 20,
+    xMin: 0,
+    xMax: 20,
+    min: 0,
+    max: 20
+  });
+
+  rendererInternals.drawXValueAxisLabels(host as never, group as never, createTooltipModel({
+    name: 'Fallback Axis',
+    label: { show: true }
+  }) as never, layout as never);
+
+  const text = group.children.find((element) => element.style?.text === 'Fallback Axis');
+  assert.ok(text);
+  assert.equal(text?.style?.fill, '#64748b');
+  assert.equal(text?.style?.fontWeight, 600);
+});
+
 class TestGraphicElement {
   [key: string]: unknown;
   shape?: Record<string, unknown>;

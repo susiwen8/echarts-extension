@@ -85,6 +85,47 @@ test('arc example exposes a horizontal and vertical layout switch', () => {
   assert.equal(option.series[0].layout.orient, 'horizontal');
 });
 
+test('graph examples expose a draggable control', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+
+  for (const exampleName of ['radial', 'concentric', 'grid', 'mds', 'arc']) {
+    const entry = namespace.registry[exampleName];
+    assert.ok(entry, `${exampleName} example should exist`);
+
+    const control = entry.controls.find((item) => item.id === 'draggable');
+    assert.ok(control, `${exampleName} should expose draggable control`);
+    assert.equal(control.type, 'checkbox');
+    assert.deepEqual(Array.from(control.targets), ['series.0.draggable']);
+    assert.equal(control.defaultValue, true);
+
+    const state = namespace.createControlState(entry.controls);
+    let option = namespace.createDemoOption(exampleName, data, state);
+    assert.equal(option.series[0].draggable, true, `${exampleName} draggable defaults on`);
+
+    state.draggable = false;
+    option = namespace.createDemoOption(exampleName, data, state);
+    assert.equal(option.series[0].draggable, false, `${exampleName} draggable can be disabled`);
+  }
+});
+
+test('examples do not expose hand-drawn controls or options', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+
+  for (const exampleName of Object.keys(namespace.registry)) {
+    const entry = namespace.registry[exampleName];
+    const control = entry.controls.find((item) => item.id === 'handDrawn');
+    assert.equal(control, undefined, `${exampleName} should not expose hand-drawn control`);
+
+    const state = namespace.createControlState(entry.controls);
+    const option = namespace.createDemoOption(exampleName, data, state);
+    const seriesList = Array.isArray(option.series) ? option.series : [option.series].filter(Boolean);
+    assert.ok(seriesList.length > 0, `${exampleName} should render at least one series`);
+    assert.ok(seriesList.every((series) => !Object.prototype.hasOwnProperty.call(series, 'handDrawn')), `${exampleName} should not write handDrawn options`);
+  }
+});
+
 test('shared examples can delete an existing data item before add-data', () => {
   const namespace = loadDemoNamespace();
   const missingDelete = [];
@@ -215,4 +256,14 @@ test('delete-data buttons keep their labels on one line', () => {
 
   assert.match(demoPageCss, /\.demo-control-button[^{]*\{[^}]*white-space:\s*nowrap/s);
   assert.match(layoutCoreHtml, /\.layout-card__button[^{]*\{[^}]*white-space:\s*nowrap/s);
+});
+
+test('standalone example pages and layout-core package do not include hand-drawn wiring', () => {
+  const fractalHtml = readFileSync(new URL('../docs/templates/packages/echarts-fractal/index.tpl', import.meta.url), 'utf8');
+  const sequenceHtml = readFileSync(new URL('../docs/templates/packages/echarts-sequence-diagram/index.tpl', import.meta.url), 'utf8');
+  const layoutCorePackage = JSON.parse(readFileSync(new URL('../packages/echarts-layout-core/package.json', import.meta.url), 'utf8'));
+
+  assert.doesNotMatch(fractalHtml, /hand-?drawn|handDrawn/i);
+  assert.doesNotMatch(sequenceHtml, /hand-?drawn|handDrawn/i);
+  assert.equal(layoutCorePackage.dependencies?.roughjs, undefined);
 });

@@ -2250,10 +2250,10 @@ In `tests/renderer-registration.test.ts`, add this object to the `cases` array i
 Run this inspection command:
 
 ```bash
-rg "evolutionFluid|echarts-evolution-fluid|custom chart packages|remaining custom series" tests/renderer-registration.test.ts tests/alive-render.test.ts tests/animations.test.ts tests/hand-drawn-render.test.ts
+rg "evolutionFluid|echarts-evolution-fluid|custom chart packages|remaining custom series" tests/renderer-registration.test.ts tests/alive-render.test.ts tests/animations.test.ts
 ```
 
-Expected: `tests/renderer-registration.test.ts` and `tests/alive-render.test.ts` contain the new package. `tests/animations.test.ts` and `tests/hand-drawn-render.test.ts` do not require changes because they cover narrower renderer capabilities, not every package.
+Expected: `tests/renderer-registration.test.ts` and `tests/alive-render.test.ts` contain the new package. `tests/animations.test.ts` does not require changes because it covers narrower renderer capabilities, not every package.
 
 - [ ] **Step 4: Run lifecycle tests**
 

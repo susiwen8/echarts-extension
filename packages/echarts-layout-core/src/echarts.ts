@@ -178,7 +178,7 @@ interface RenderNode {
 }
 
 interface RenderedNodeElement {
-  group: GraphicElement;
+  group: GraphicGroup;
   circle: GraphicElement;
   baseStyle: Record<string, unknown>;
   valueLabel: GraphicElement | null;
@@ -189,6 +189,8 @@ interface RenderedNodeElement {
 
 interface RenderedNode {
   id: string;
+  dataIndex: number;
+  group: GraphicGroup;
   baseX: number;
   baseY: number;
   baseRadius: number;
@@ -238,6 +240,26 @@ interface GraphRenderState {
 
 interface GraphHoverController {
   dispose(): void;
+}
+
+interface GraphDragPayload {
+  enabled: boolean;
+  renderState: GraphRenderState;
+  node: RenderedNode;
+  data: SeriesData;
+}
+
+interface DraggableGraphicElement extends GraphicElement {
+  draggable?: boolean;
+  cursor?: unknown;
+  transform?: unknown;
+  invTransform?: unknown;
+  x?: unknown;
+  y?: unknown;
+  dirty?: () => void;
+  markRedraw?: () => void;
+  ondrag?: (this: DraggableGraphicElement, event?: ZRenderEvent) => void;
+  __echartsExtensionGraphDrag?: GraphDragPayload;
 }
 
 interface EdgeAnimationConfig {
@@ -365,6 +387,7 @@ export function installGraphLayout(echarts: unknown, config: InstallGraphLayoutC
           );
           const renderState = mapGraphRenderState(aliveRender.payload as GraphRenderState, aliveRender.mapElement);
           this.__graphHoverController = installGraphHover(renderState, api);
+          installGraphDrag(renderState, seriesModel.getData(), seriesModel.get('draggable') !== false);
           this.__graphRenderState = renderState;
           this.__graphRenderSignature = renderSignature;
           this.__fisheyeSignature = fisheyeSignature;
@@ -418,6 +441,7 @@ function createDefaultOption(layoutType: string) {
     width: '80%',
     height: '80%',
     symbolSize: null,
+    draggable: true,
     layout: {},
     layoutAnimation: false,
     enterAnimation: true,
@@ -623,6 +647,8 @@ function drawGraph(
     nodeGroup.add(renderedNode.group);
     renderedNodes.push({
       id: renderNode.node.id,
+      dataIndex: renderNode.dataIndex,
+      group: renderedNode.group,
       baseX: renderNode.node.x,
       baseY: renderNode.node.y,
       baseRadius: renderNode.size / 2,
@@ -678,6 +704,7 @@ function mapGraphRenderState(
     ...renderState,
     nodes: renderState.nodes.map((node) => ({
       ...node,
+      group: mapElement(node.group) as GraphicGroup,
       circle: mapElement(node.circle),
       valueLabel: mapElement(node.valueLabel)
     })),
@@ -911,6 +938,135 @@ function installGraphHover(renderState: GraphRenderState, api?: EChartsApi): Gra
       reset(true);
     }
   };
+}
+
+function installGraphDrag(renderState: GraphRenderState, data: SeriesData, enabled: boolean): void {
+  renderState.nodes.forEach((node) => {
+    configureGraphDragElement(node.group, renderState, node, data, enabled);
+    configureGraphDragElement(node.circle, renderState, node, data, enabled);
+    if (node.valueLabel) configureGraphDragElement(node.valueLabel, renderState, node, data, enabled);
+  });
+}
+
+function configureGraphDragElement(
+  element: GraphicElement,
+  renderState: GraphRenderState,
+  node: RenderedNode,
+  data: SeriesData,
+  enabled: boolean
+): void {
+  const target = element as DraggableGraphicElement;
+  target.draggable = enabled;
+  target.cursor = enabled ? 'move' : 'pointer';
+  target.__echartsExtensionGraphDrag = {
+    enabled,
+    renderState,
+    node,
+    data
+  };
+  target.ondrag = handleGraphNodeDrag;
+}
+
+function handleGraphNodeDrag(this: DraggableGraphicElement, event?: ZRenderEvent): void {
+  const payload = this.__echartsExtensionGraphDrag;
+  if (!payload?.enabled) return;
+  moveGraphNode(
+    payload.renderState,
+    payload.data,
+    payload.node,
+    resolveGraphDragPoint(this, payload.node, event)
+  );
+}
+
+function resolveGraphDragPoint(element: DraggableGraphicElement, node: RenderedNode, event?: ZRenderEvent): Point {
+  const [translateX, translateY] = readGraphElementTranslation(element);
+  if (translateX !== 0 || translateY !== 0) {
+    return [node.baseX + translateX, node.baseY + translateY];
+  }
+
+  const eventX = finiteNumber(event?.offsetX, finiteNumber(event?.zrX, NaN));
+  const eventY = finiteNumber(event?.offsetY, finiteNumber(event?.zrY, NaN));
+  return Number.isFinite(eventX) && Number.isFinite(eventY)
+    ? [eventX, eventY]
+    : [node.baseX, node.baseY];
+}
+
+function moveGraphNode(renderState: GraphRenderState, data: SeriesData, node: RenderedNode, point: Point): void {
+  const previousX = node.baseX;
+  const previousY = node.baseY;
+  const nextX = point[0];
+  const nextY = point[1];
+  const dx = nextX - previousX;
+  const dy = nextY - previousY;
+
+  node.baseX = nextX;
+  node.baseY = nextY;
+  resetGraphNodeDragTransforms(node);
+  setGraphicShape(node.circle, {
+    cx: nextX,
+    cy: nextY
+  });
+
+  if (node.valueLabel) {
+    setGraphicStyle(node.valueLabel, {
+      x: nextX,
+      y: nextY
+    });
+  }
+
+  renderState.labels.forEach((label) => {
+    if (label.nodeId !== node.id) return;
+    const style = asRecord(label.element.style);
+    const currentX = finiteNumber(style.x, label.baseX);
+    const currentY = finiteNumber(style.y, label.baseY);
+    label.baseX += dx;
+    label.baseY += dy;
+    setGraphicStyle(label.element, {
+      x: currentX + dx,
+      y: currentY + dy
+    });
+  });
+
+  data.setItemLayout(node.dataIndex, [nextX, nextY]);
+  updateConnectedGraphEdges(renderState, node.id);
+}
+
+function resetGraphNodeDragTransforms(node: RenderedNode): void {
+  resetGraphicTranslation(node.group);
+  resetGraphicTranslation(node.circle);
+  if (node.valueLabel) resetGraphicTranslation(node.valueLabel);
+}
+
+function readGraphElementTranslation(element: DraggableGraphicElement): Point {
+  const translateX = finiteNumber(element.x, 0);
+  const translateY = finiteNumber(element.y, 0);
+  if (translateX !== 0 || translateY !== 0) return [translateX, translateY];
+
+  const transform = Array.isArray(element.transform) ? element.transform : [];
+  return [
+    finiteNumber(transform[4], 0),
+    finiteNumber(transform[5], 0)
+  ];
+}
+
+function resetGraphicTranslation(element: GraphicElement): void {
+  const target = element as DraggableGraphicElement;
+  target.x = 0;
+  target.y = 0;
+  target.transform = undefined;
+  target.invTransform = undefined;
+  target.dirty?.();
+  target.markRedraw?.();
+}
+
+function updateConnectedGraphEdges(renderState: GraphRenderState, nodeId: string): void {
+  const nodeById = new Map(renderState.nodes.map((node) => [node.id, node]));
+  renderState.edges.forEach((edge) => {
+    if (edge.sourceId !== nodeId && edge.targetId !== nodeId) return;
+    const source = nodeById.get(edge.sourceId) as RenderedNode;
+    const target = nodeById.get(edge.targetId) as RenderedNode;
+    updateFisheyeEdge(edge, [source.baseX, source.baseY], [target.baseX, target.baseY], false);
+  });
 }
 
 function isGraphHoverTarget(target: unknown, hoverTargets: WeakSet<object>): boolean {
@@ -1435,6 +1591,7 @@ function updateFisheyeEdge(edge: RenderedEdge, source: Point, target: Point, act
     setGraphicIgnore(edge.element, active);
     setGraphicIgnore(edge.fisheyeElement, !active);
     setGraphicShape(edge.fisheyeElement, shape);
+    if (!active) setGraphicShape(edge.element, createArcShape(source, target));
     return;
   }
 
@@ -2016,6 +2173,9 @@ export const __test__ = {
   shouldAbortGraphRender,
   formatNodeValue,
   installGraphHover,
+  installGraphDrag,
+  resolveGraphDragPoint,
+  moveGraphNode,
   isGraphHoverTarget,
   createHoverAdjacency,
   applyEdgeHover,

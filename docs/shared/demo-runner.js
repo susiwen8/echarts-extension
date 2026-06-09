@@ -214,7 +214,8 @@
       'Lens opacity': '镜片透明度',
       'Dot scale': '点大小比例',
       'Dot opacity': '点透明度',
-      'Legend': '图例'
+      'Legend': '图例',
+      'Draggable': '节点拖拽'
     }
   };
 
@@ -1845,6 +1846,7 @@
       ...commonChartControls(defaultTitle, [0]),
       checkboxControl('labelShow', 'Labels', 'series.0.label.show', true),
       rangeControl('labelFontSize', 'Label size', 'series.0.label.fontSize', 12, 8, 24, 1),
+      checkboxControl('draggable', 'Draggable', 'series.0.draggable', true),
       checkboxControl('fisheyeShow', 'Fisheye', 'series.0.fisheye.show', false),
       rangeControl('fisheyeRadius', 'Fisheye radius', 'series.0.fisheye.radius', 220, 60, 420, 5),
       rangeControl('fisheyeScale', 'Fisheye scale', 'series.0.fisheye.scale', 2.2, 1, 4, 0.1),
@@ -2017,6 +2019,36 @@
     applyDataMutationAnimation(option, context);
     applyRealtimeControlContext(option, context);
     return applyDemoInteractionDefaults(option);
+  }
+
+  function resolveEvolutionFluidEventPlaybackRange(events, eventTime, limits = {}) {
+    const times = Array.from(new Set((Array.isArray(events) ? events : [])
+      .map((event) => timeToPlaybackNumber(event?.time))
+      .filter((value) => Number.isFinite(value))))
+      .sort((left, right) => left - right);
+    const end = timeToPlaybackNumber(eventTime);
+    const index = times.findIndex((time) => Math.abs(time - end) <= 1e-9);
+    const previousGap = index > 0 ? end - times[index - 1] : 0;
+    const nextGap = index >= 0 && index < times.length - 1 ? times[index + 1] - end : 0;
+    const fallbackGap = previousGap || nextGap || 1;
+    const window = Math.max(1e-6, Math.max(previousGap || 0, fallbackGap) * 0.82);
+    const min = finiteNumber(Number(limits.min), times[0] ?? end);
+    const max = finiteNumber(Number(limits.max), times[times.length - 1] ?? end);
+
+    return {
+      start: roundTimelineValue(clamp(end - window, min, max)),
+      end: roundTimelineValue(clamp(end, min, max))
+    };
+  }
+
+  function timeToPlaybackNumber(value) {
+    if (value instanceof Date) return value.getTime();
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : NaN;
+  }
+
+  function roundTimelineValue(value) {
+    return Number(finiteNumber(Number(value), 0).toFixed(3));
   }
 
   function applyControlValues(option, controls, controlValues, context = {}) {
@@ -4149,6 +4181,7 @@
   namespace.mount = mount;
   namespace.createControlState = createControlState;
   namespace.createDemoOption = createDemoOption;
+  namespace.resolveEvolutionFluidEventPlaybackRange = resolveEvolutionFluidEventPlaybackRange;
   namespace.applyControlValues = applyControlValues;
   namespace.applyDemoInteractionDefaults = applyDemoInteractionDefaults;
   namespace.loadExampleData = loadExampleData;

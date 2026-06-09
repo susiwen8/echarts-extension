@@ -191,6 +191,61 @@ test('layout core private helpers cover hover and fisheye state fallbacks', () =
   assert.ok(group.added);
 });
 
+test('layout core private helpers cover graph drag fallbacks', () => {
+  const node = {
+    id: 'dragged',
+    dataIndex: 2,
+    group: createElement({}, { attr: true }),
+    baseX: 5,
+    baseY: 7,
+    baseRadius: 8,
+    baseStyle: { opacity: 1 },
+    circle: createElement({ fill: '#2563eb', opacity: 1 }, { attr: true }),
+    valueLabel: null,
+    valueLabelBaseStyle: null,
+    valueFontSize: 0,
+    valueLineWidth: 0
+  };
+  const label = {
+    nodeId: 'dragged',
+    element: createElement({ opacity: 1 }, { attr: true }),
+    baseStyle: { opacity: 1 },
+    baseX: 9,
+    baseY: 10,
+    baseFontSize: 10,
+    baseLineHeight: 12
+  };
+  const renderState = {
+    nodes: [node],
+    labels: [label],
+    edges: [],
+    lens: null
+  };
+  const layouts = [];
+  const data = {
+    setItemLayout(index, layout) {
+      layouts.push([index, layout]);
+    }
+  };
+
+  assert.deepEqual(graphInternals.resolveGraphDragPoint({ x: 0, y: 0 }, node, { zrX: 11, zrY: 12 }), [11, 12]);
+  assert.deepEqual(graphInternals.resolveGraphDragPoint({ x: 0, y: 0 }, node, {}), [5, 7]);
+  assert.deepEqual(
+    graphInternals.resolveGraphDragPoint({ x: 0, y: 0, transform: [1, 0, 0, 1, 3, 4] }, node, {}),
+    [8, 11]
+  );
+
+  graphInternals.moveGraphNode(renderState, data, node, [13, 17]);
+
+  assert.equal(node.circle.shape.cx, 13);
+  assert.equal(node.circle.shape.cy, 17);
+  assert.deepEqual(layouts, [[2, [13, 17]]]);
+  assert.equal(label.baseX, 17);
+  assert.equal(label.baseY, 20);
+  assert.equal(label.element.style.x, 17);
+  assert.equal(label.element.style.y, 20);
+});
+
 test('layout core private helpers cover graph option, layout, hover controller, and lens boundaries', () => {
   const host = createEChartsHost();
   installGraphLayout(host, { chartType: 'testGraph', layoutType: 'arc' });
@@ -574,6 +629,8 @@ function createEChartsHost() {
 function createRenderState(edge, lineEdge) {
   const nodeA = {
     id: 'a',
+    dataIndex: 0,
+    group: createElement({}, { attr: true }),
     baseX: 0,
     baseY: 0,
     baseRadius: 8,
@@ -586,6 +643,8 @@ function createRenderState(edge, lineEdge) {
   };
   const nodeB = {
     id: 'b',
+    dataIndex: 1,
+    group: createElement({}, { attr: true }),
     baseX: 20,
     baseY: 0,
     baseRadius: 8,

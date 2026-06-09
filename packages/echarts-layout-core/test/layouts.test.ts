@@ -852,6 +852,232 @@ test('renders node data values centered on graph circles across graph layouts', 
   }
 });
 
+test('drags graph nodes and keeps labels, edges, and data layout in sync', () => {
+  const host = createFakeEChartsHost();
+  installGraphLayout(host, {
+    chartType: 'radial',
+    layoutType: 'radial'
+  });
+
+  const seriesModel = createFakeSeriesModel({
+    ...sampleGraph,
+    animation: false,
+    symbolSize: 32,
+    draggable: true,
+    label: {
+      show: true,
+      fontSize: 12
+    },
+    layout: {
+      linkDistance: 70,
+      nodeSize: 32
+    }
+  });
+  const view = { group: new host.graphic.Group() };
+
+  host.chartView.render.call(view, seriesModel, null, createFakeApi(host));
+
+  const edgeGroup = view.group.children[0];
+  const nodeGroup = view.group.children[1];
+  const labelGroup = view.group.children[2];
+  const rootCircle = nodeGroup.children[0].children[0];
+  const rootValueLabel = nodeGroup.children[0].children.find((element) => element.style?.text === '10');
+  const rootLabel = collectTextElements(labelGroup).find((element) => element.style.text === 'root');
+  const rootToAEdge = edgeGroup.children[0];
+  const baseX = rootCircle.shape.cx;
+  const baseY = rootCircle.shape.cy;
+  const baseLabelX = rootLabel.style.x;
+  const baseLabelY = rootLabel.style.y;
+
+  assert.equal(rootCircle.draggable, true);
+  assert.equal(rootValueLabel.draggable, true);
+
+  rootCircle.trigger('drag', {
+    offsetX: baseX + 36,
+    offsetY: baseY + 24
+  });
+
+  assert.equal(rootCircle.shape.cx, baseX + 36);
+  assert.equal(rootCircle.shape.cy, baseY + 24);
+  assert.equal(rootValueLabel.style.x, baseX + 36);
+  assert.equal(rootValueLabel.style.y, baseY + 24);
+  assert.equal(rootLabel.style.x, baseLabelX + 36);
+  assert.equal(rootLabel.style.y, baseLabelY + 24);
+  assert.deepEqual(seriesModel.getData().layouts.get(0), [baseX + 36, baseY + 24]);
+  assert.equal(rootToAEdge.shape.x1, baseX + 36);
+  assert.equal(rootToAEdge.shape.y1, baseY + 24);
+});
+
+test('dragging concentric graph nodes clears zrender transforms and updates edges', () => {
+  const host = createFakeEChartsHost();
+  installGraphLayout(host, {
+    chartType: 'concentric',
+    layoutType: 'concentric'
+  });
+
+  const seriesModel = createFakeSeriesModel({
+    ...sampleGraph,
+    animation: false,
+    symbolSize: 32,
+    draggable: true,
+    layout: {
+      nodeSize: 32,
+      linkDistance: 70
+    }
+  });
+  const view = { group: new host.graphic.Group() };
+
+  host.chartView.render.call(view, seriesModel, null, createFakeApi(host));
+
+  const edgeGroup = view.group.children[0];
+  const nodeGroup = view.group.children[1];
+  const rootItemGroup = nodeGroup.children[0];
+  const rootCircle = rootItemGroup.children[0];
+  const rootToAEdge = edgeGroup.children[0];
+  const rootToBEdge = edgeGroup.children[1];
+  const baseX = rootCircle.shape.cx;
+  const baseY = rootCircle.shape.cy;
+
+  rootCircle.x = 42;
+  rootCircle.y = 28;
+  rootCircle.transform = [1, 0, 0, 1, 42, 28];
+  rootCircle.trigger('drag');
+
+  assert.equal(rootCircle.x, 0);
+  assert.equal(rootCircle.y, 0);
+  assert.equal(rootCircle.transform, undefined);
+  assert.equal(rootCircle.shape.cx, baseX + 42);
+  assert.equal(rootCircle.shape.cy, baseY + 28);
+  assert.equal(rootToAEdge.shape.x1, baseX + 42);
+  assert.equal(rootToAEdge.shape.y1, baseY + 28);
+  assert.equal(rootToBEdge.shape.x1, baseX + 42);
+  assert.equal(rootToBEdge.shape.y1, baseY + 28);
+});
+
+test('dragging graph node groups updates connected edges', () => {
+  const host = createFakeEChartsHost();
+  installGraphLayout(host, {
+    chartType: 'concentric',
+    layoutType: 'concentric'
+  });
+
+  const seriesModel = createFakeSeriesModel({
+    ...sampleGraph,
+    animation: false,
+    symbolSize: 32,
+    draggable: true,
+    layout: {
+      nodeSize: 32,
+      linkDistance: 70
+    }
+  });
+  const view = { group: new host.graphic.Group() };
+
+  host.chartView.render.call(view, seriesModel, null, createFakeApi(host));
+
+  const edgeGroup = view.group.children[0];
+  const nodeGroup = view.group.children[1];
+  const rootItemGroup = nodeGroup.children[0];
+  const rootCircle = rootItemGroup.children[0];
+  const rootToAEdge = edgeGroup.children[0];
+  const baseX = rootCircle.shape.cx;
+  const baseY = rootCircle.shape.cy;
+
+  rootItemGroup.x = 48;
+  rootItemGroup.y = 30;
+  rootItemGroup.transform = [1, 0, 0, 1, 48, 30];
+  rootItemGroup.ondrag?.call(rootItemGroup);
+
+  assert.equal(rootItemGroup.draggable, true);
+  assert.equal(rootItemGroup.x, 0);
+  assert.equal(rootItemGroup.y, 0);
+  assert.equal(rootItemGroup.transform, undefined);
+  assert.equal(rootCircle.shape.cx, baseX + 48);
+  assert.equal(rootCircle.shape.cy, baseY + 30);
+  assert.equal(rootToAEdge.shape.x1, baseX + 48);
+  assert.equal(rootToAEdge.shape.y1, baseY + 30);
+});
+
+test('can disable graph node dragging from the series option', () => {
+  const host = createFakeEChartsHost();
+  installGraphLayout(host, {
+    chartType: 'radial',
+    layoutType: 'radial'
+  });
+
+  const seriesModel = createFakeSeriesModel({
+    ...sampleGraph,
+    animation: false,
+    symbolSize: 32,
+    draggable: false,
+    layout: {
+      linkDistance: 70,
+      nodeSize: 32
+    }
+  });
+  const view = { group: new host.graphic.Group() };
+
+  host.chartView.render.call(view, seriesModel, null, createFakeApi(host));
+
+  const rootCircle = view.group.children[1].children[0].children[0];
+  const baseX = rootCircle.shape.cx;
+  const baseY = rootCircle.shape.cy;
+
+  assert.equal(rootCircle.draggable, false);
+
+  rootCircle.trigger('drag', {
+    offsetX: baseX + 36,
+    offsetY: baseY + 24
+  });
+
+  assert.equal(rootCircle.shape.cx, baseX);
+  assert.equal(rootCircle.shape.cy, baseY);
+});
+
+test('dragging arc graph nodes updates arc geometry from translated elements', () => {
+  const host = createFakeEChartsHost();
+  installGraphLayout(host, {
+    chartType: 'arc',
+    layoutType: 'arc'
+  });
+
+  const seriesModel = createFakeSeriesModel({
+    ...sampleGraph,
+    animation: false,
+    symbolSize: 20,
+    draggable: true,
+    layout: {
+      nodeSep: 12,
+      nodeSize: 20
+    }
+  });
+  const view = { group: new host.graphic.Group() };
+
+  host.chartView.render.call(view, seriesModel, null, createFakeApi(host));
+
+  const firstEdge = view.group.children[0].children[0];
+  const rootCircle = view.group.children[1].children[0].children[0];
+  const baseX = rootCircle.shape.cx;
+  const baseY = rootCircle.shape.cy;
+
+  rootCircle.x = 18;
+  rootCircle.y = 14;
+  rootCircle.trigger('drag');
+
+  assert.equal(rootCircle.shape.cx, baseX + 18);
+  assert.equal(rootCircle.shape.cy, baseY + 14);
+  assert.equal(rootCircle.x, 0);
+  assert.equal(rootCircle.y, 0);
+  assert.deepEqual(arcEdgeGeometry(firstEdge), {
+    cx: 209,
+    cy: 79,
+    r: 12.727922061357857,
+    startAngle: -Math.PI / 4,
+    endAngle: 3 * Math.PI / 4,
+    clockwise: false
+  });
+});
+
 test('applies fisheye magnifier to graph nodes and labels on pointer move', () => {
   const valueGraph = {
     nodes: [
@@ -1352,6 +1578,10 @@ function createFakeEChartsHost() {
         target: this,
         ...payload
       }));
+      this[`on${eventName}`]?.({
+        target: this,
+        ...payload
+      });
     }
 
     attr(keyOrObj, value) {
@@ -1501,6 +1731,8 @@ function createPlainHoverElement(style) {
 
 function createFakeSeriesModel(option) {
   const data = {
+    layouts: new Map(),
+    graphicEls: new Map(),
     getItemModel(index) {
       return createFakeModel(option.nodes[index] || {});
     },
@@ -1508,8 +1740,12 @@ function createFakeSeriesModel(option) {
       if (key === 'style') return {};
       return undefined;
     },
-    setItemLayout() {},
-    setItemGraphicEl() {}
+    setItemLayout(index, layout) {
+      this.layouts.set(index, layout);
+    },
+    setItemGraphicEl(index, element) {
+      this.graphicEls.set(index, element);
+    }
   };
 
   return {
