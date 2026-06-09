@@ -10,8 +10,11 @@ export function resolveScreenshotSelector(visualCase) {
   }
 
   const readySelector = normalizeSelector(visualCase.readySelector);
+  if (readySelector.includes('#chart canvas') || readySelector.includes('#chart svg')) {
+    return readySelector;
+  }
   if (readySelector.includes('.layout-card')) return '.layout-card__visual';
-  if (readySelector.includes('#chart')) return '#chart';
+  if (readySelector.includes('#chart')) return '#chart canvas, #chart svg';
 
   return screenshotSelector || readySelector || 'body';
 }

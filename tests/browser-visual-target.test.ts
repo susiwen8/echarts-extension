@@ -10,7 +10,7 @@ test('browser visual diffs target chart regions instead of surrounding controls'
       readySelector: '#chart canvas, #chart svg',
       screenshotSelector: 'main'
     }),
-    '#chart'
+    '#chart canvas, #chart svg'
   );
   assert.equal(
     resolveScreenshotSelector({

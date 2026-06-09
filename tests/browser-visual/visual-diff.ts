@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
-import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import pixelmatch from 'pixelmatch';
@@ -8,6 +8,8 @@ import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
 
 import { browserVisualCases } from './cases.ts';
+import { writeBrowserVisualReportPage } from './report-page.ts';
+import { stitchPngs } from './screenshot-stitch.ts';
 import { resolveScreenshotSelector } from './visual-target.ts';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -71,8 +73,10 @@ try {
 }
 
 await writeFile(path.join(resultDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
+const reportPagePath = await writeBrowserVisualReportPage(report, { rootDir: root, resultDir });
 
 if (failures.length > 0) {
+  console.error(`Browser visual diff report written: ${relative(reportPagePath)}`);
   const details = failures
     .map((failure) => `- ${failure.name}: ${failure.message}`)
     .join('\n');
@@ -94,6 +98,9 @@ async function runVisualCase(context, visualCase, baseUrl) {
   const diffPath = path.join(resultDir, `${visualCase.name}.diff.png`);
 
   try {
+    await rm(actualPath, { force: true });
+    await rm(diffPath, { force: true });
+
     await page.goto(`${baseUrl}${visualCase.path}`, {
       waitUntil: 'domcontentloaded',
       timeout: 30000
@@ -120,8 +127,9 @@ async function runVisualCase(context, visualCase, baseUrl) {
       };
     }
 
+    await writeFile(actualPath, screenshot);
+
     if (!(await exists(snapshotPath))) {
-      await writeFile(actualPath, screenshot);
       return {
         name: visualCase.name,
         ok: false,
@@ -136,11 +144,14 @@ async function runVisualCase(context, visualCase, baseUrl) {
     const expected = PNG.sync.read(await readFile(snapshotPath));
     const actual = PNG.sync.read(screenshot);
     if (actual.width !== expected.width || actual.height !== expected.height) {
-      await writeFile(actualPath, screenshot);
+      const dimensionDiff = createImageDiff(expected, actual);
+      await writeFile(diffPath, PNG.sync.write(dimensionDiff.diff));
       return {
         name: visualCase.name,
         ok: false,
         actualPath: relative(actualPath),
+        diffPath: relative(diffPath),
+        diffPixels: dimensionDiff.diffPixels,
         message: `size changed from ${expected.width}x${expected.height} to ${actual.width}x${actual.height}`,
         screenshotSelector: screenshotTarget.selector,
         snapshotPath: relative(snapshotPath),
@@ -148,14 +159,10 @@ async function runVisualCase(context, visualCase, baseUrl) {
       };
     }
 
-    const diff = new PNG({ width: actual.width, height: actual.height });
-    const diffPixels = pixelmatch(expected.data, actual.data, diff.data, actual.width, actual.height, {
-      threshold: pixelThreshold
-    });
+    const { diff, diffPixels } = createImageDiff(expected, actual);
     const allowedDiffPixels = visualCase.maxDiffPixels ?? maxDiffPixels;
 
     if (diffPixels > allowedDiffPixels) {
-      await writeFile(actualPath, screenshot);
       await writeFile(diffPath, PNG.sync.write(diff));
       return {
         name: visualCase.name,
@@ -174,6 +181,7 @@ async function runVisualCase(context, visualCase, baseUrl) {
     return {
       name: visualCase.name,
       ok: true,
+      actualPath: relative(actualPath),
       diffPixels,
       maxDiffPixels: allowedDiffPixels,
       screenshotSelector: screenshotTarget.selector,
@@ -182,6 +190,52 @@ async function runVisualCase(context, visualCase, baseUrl) {
     };
   } finally {
     await page.close();
+  }
+}
+
+function createImageDiff(expected, actual) {
+  const width = Math.max(expected.width, actual.width);
+  const height = Math.max(expected.height, actual.height);
+  const expectedImage = expected.width === width && expected.height === height
+    ? expected
+    : padImage(expected, width, height);
+  const actualImage = actual.width === width && actual.height === height
+    ? actual
+    : padImage(actual, width, height);
+  const diff = new PNG({ width, height });
+  const diffPixels = pixelmatch(expectedImage.data, actualImage.data, diff.data, width, height, {
+    threshold: pixelThreshold
+  });
+
+  return { diff, diffPixels };
+}
+
+function padImage(image, width, height) {
+  const padded = new PNG({ width, height });
+  fillPng(padded, 255, 255, 255, 255);
+  copyPng(image, padded);
+  return padded;
+}
+
+function fillPng(image, red, green, blue, alpha) {
+  for (let index = 0; index < image.data.length; index += 4) {
+    image.data[index] = red;
+    image.data[index + 1] = green;
+    image.data[index + 2] = blue;
+    image.data[index + 3] = alpha;
+  }
+}
+
+function copyPng(source, target) {
+  for (let y = 0; y < source.height; y += 1) {
+    for (let x = 0; x < source.width; x += 1) {
+      const sourceIndex = (y * source.width + x) * 4;
+      const targetIndex = (y * target.width + x) * 4;
+      target.data[targetIndex] = source.data[sourceIndex];
+      target.data[targetIndex + 1] = source.data[sourceIndex + 1];
+      target.data[targetIndex + 2] = source.data[sourceIndex + 2];
+      target.data[targetIndex + 3] = source.data[sourceIndex + 3];
+    }
   }
 }
 
@@ -231,26 +285,32 @@ async function screenshotVisualTarget(page, visualCase) {
     };
   }
 
-  const clip = unionClip(regions.map((region) => region.box));
+  const orderedRegions = sortRegionsByPosition(regions);
+  const screenshots = [];
+  for (const region of orderedRegions) {
+    const buffer = await locator.nth(region.index).screenshot({ animations: 'disabled' });
+    screenshots.push(PNG.sync.read(buffer));
+  }
+
+  const stitched = stitchPngs(screenshots, {
+    columns: inferColumnCount(orderedRegions)
+  });
   return {
-    screenshot: await page.screenshot({ animations: 'disabled', clip }),
+    screenshot: PNG.sync.write(stitched),
     selector
   };
 }
 
-function unionClip(boxes) {
-  const minX = Math.min(...boxes.map((box) => box.x));
-  const minY = Math.min(...boxes.map((box) => box.y));
-  const maxX = Math.max(...boxes.map((box) => box.x + box.width));
-  const maxY = Math.max(...boxes.map((box) => box.y + box.height));
-  const x = Math.max(0, Math.floor(minX));
-  const y = Math.max(0, Math.floor(minY));
-  return {
-    x,
-    y,
-    width: Math.ceil(maxX) - x,
-    height: Math.ceil(maxY) - y
-  };
+function sortRegionsByPosition(regions) {
+  return regions.slice().sort((left, right) => {
+    if (Math.abs(left.box.y - right.box.y) > 8) return left.box.y - right.box.y;
+    return left.box.x - right.box.x;
+  });
+}
+
+function inferColumnCount(regions) {
+  const firstRowY = regions[0]?.box.y ?? 0;
+  return Math.max(1, regions.filter((region) => Math.abs(region.box.y - firstRowY) <= 8).length);
 }
 
 async function disableAnimationControls(page) {
