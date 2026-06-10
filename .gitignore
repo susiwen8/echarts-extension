@@ -13,3 +13,5 @@ docs/**/*.html
 .worktrees/
 packages/*/dist/
 packages/*/lib/
+.tmp
+docs/superpowers

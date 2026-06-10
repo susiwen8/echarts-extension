@@ -72,6 +72,7 @@
       'Title': '标题',
       'Background': '背景',
       'Time': '时间',
+      'Year': '年份',
       'Step': '阶段',
       'Arc': '弧线图',
       'Beeswarm': '蜂群图',
@@ -109,6 +110,7 @@
       'Population Pack Bubble': '人口打包气泡图',
       'Product Circle Packing': '产品圆形打包图',
       'Company Incubation Timeline': '公司孵化与并购时间线',
+      'China 1911-1949 Timeline': '1911-1949 中国政局时间线',
       'Until sunset': '距离日落',
       'Until sunrise': '距离日出',
       'Updated': '更新于',
@@ -181,8 +183,11 @@
       'Tick count': '刻度数',
       'Band opacity': '范围带透明度',
       'Line width': '线宽',
+      'Highlight width': '高亮线宽',
+      'History opacity': '历史透明度',
       'Bridge threshold': '融合距离',
       'Show symbols': '显示符号',
+      'Highlight symbols': '高亮符号',
       'Box width': '箱体宽度',
       'Cap width': '端帽宽度',
       'Variant': '形态',
@@ -1318,97 +1323,13 @@
     },
     'error-chart': {
       controls: [
-        textControl('titleText', 'Title', 'title.text', 'Project Lead Time'),
-        colorControl('backgroundColor', 'Background', 'backgroundColor', '#ffffff'),
-        checkboxControl('animationEnabled', 'Animation', [
-          'animation',
-          'series.0.animation'
-        ], true),
-        selectControl('variant', 'Variant', 'series.0.variant', 'line', ['line', 'column', 'bar']),
-        rangeControl('valueMax', 'Value max', 'series.0.max', 320, 120, 420, 10),
-        rangeControl('tickCount', 'Tick count', 'series.0.tickCount', 5, 2, 9, 1),
-        rangeControl('capWidth', 'Cap width', 'series.0.capWidth', 14, 4, 36, 1),
-        rangeControl('errorWidth', 'Error width', 'series.0.errorBarStyle.width', 1.4, 0.5, 5, 0.1),
-        rangeControl('symbolSize', 'Dot size', 'series.0.symbolSize', 8, 0, 20, 1),
-        rangeControl('categoryRotate', 'Category rotate', 'series.0.categoryAxis.label.rotate', 0, 0, 75, 1),
-        checkboxControl('labelShow', 'Value labels', 'series.0.label.show', false)
-      ],
-      option: (data) => {
-        const errorData = Array.isArray(data.errorChart) ? data.errorChart : [];
-        return {
-          animation: true,
-          backgroundColor: '#ffffff',
-          title: {
-            text: 'Project Lead Time',
-            left: 'center',
-            top: 10,
-            textStyle: {
-              color: '#1f2937',
-              fontSize: 21,
-              fontWeight: 700
-            }
-          },
-          series: [
-            {
-              type: 'errorChart',
-              top: 56,
-              width: '92%',
-              height: '80%',
-              padding: { top: 18, right: 36, bottom: 72, left: 74 },
-              variant: 'line',
-              categoryField: 'month',
-              valueField: 'duration',
-              lowField: 'low',
-              highField: 'high',
-              xField: 'x',
-              yField: 'duration',
-              xLowField: 'xLow',
-              xHighField: 'xHigh',
-              yLowField: 'low',
-              yHighField: 'high',
-              categories: errorData.map((item) => item.month),
-              data: errorData,
-              min: 0,
-              max: 320,
-              xMin: 0,
-              xMax: 13,
-              baseline: 0,
-              tickCount: 5,
-              capWidth: 14,
-              symbolSize: 8,
-              enterAnimation: { duration: 620, stagger: 36, easing: 'cubicOut' },
-              valueAxis: {
-                name: 'Man-hours',
-                label: { color: '#64748b', fontSize: 12, formatter: (value) => `${value}` },
-                splitLine: {
-                  lineStyle: { color: '#d8e0ea', width: 1, opacity: 0.8, type: 'dashed' }
-                },
-                axisLine: {
-                  lineStyle: { color: '#94a3b8', width: 1.1, opacity: 1 }
-                },
-                nameTextStyle: { color: '#475569', fontSize: 13, fontWeight: 650 }
-              },
-              categoryAxis: {
-                label: { color: '#1f2937', fontSize: 12, fontWeight: 650, rotate: 0, formatter: '{value}' }
-              },
-              lineStyle: { color: '#2563eb', width: 2.4, opacity: 0.94 },
-              errorBarStyle: { color: '#1d4ed8', width: 1.4, opacity: 0.86 },
-              itemStyle: { color: '#60a5fa', borderColor: '#1d4ed8', borderWidth: 1.2, opacity: 0.9 },
-              label: { show: false, color: '#334155', fontSize: 12, formatter: '{b}: {c}d' }
-            }
-          ]
-        };
-      }
-    },
-    'error-chart-dot': {
-      controls: [
         textControl('titleText', 'Title', 'title.text', 'Prime Costs and Prices for ACME Fashion\nCollection "Spring-Summer, 2016"'),
         colorControl('backgroundColor', 'Background', 'backgroundColor', '#ffffff'),
         checkboxControl('animationEnabled', 'Animation', [
           'animation',
           'series.0.animation'
         ], true),
-        selectControl('variant', 'Variant', 'series.0.variant', 'dot', ['dot', 'scatter', 'point', 'column', 'bar', 'line']),
+        selectControl('variant', 'Variant', 'series.0.variant', 'scatter', ['scatter', 'column', 'bar', 'line']),
         rangeControl('xMax', 'Cost max', 'series.0.xMax', 800, 200, 1000, 10),
         rangeControl('valueMax', 'Price max', 'series.0.max', 900, 300, 1200, 10),
         rangeControl('tickCount', 'Tick count', 'series.0.tickCount', 5, 2, 8, 1),
@@ -1418,7 +1339,7 @@
         checkboxControl('labelShow', 'Value labels', 'series.0.label.show', false)
       ],
       option: (data) => {
-        const errorData = Array.isArray(data.errorChartDot) ? data.errorChartDot : [];
+        const errorData = Array.isArray(data.errorChart) ? data.errorChart : [];
         return {
           animation: true,
           backgroundColor: '#ffffff',
@@ -1875,7 +1796,6 @@
     };
   }
 
-
   function playbackRangeControl(id, label, targets, defaultValue, min, max, step, mapValue) {
     return {
       ...rangeControl(id, label, targets, defaultValue, min, max, step, mapValue),
@@ -2041,6 +1961,11 @@
     };
   }
 
+  function readEvolutionFluidEvents(data) {
+    const source = data?.evolutionFluid?.events;
+    return Array.isArray(source) ? source : [];
+  }
+
   function timeToPlaybackNumber(value) {
     if (value instanceof Date) return value.getTime();
     const numeric = Number(value);
@@ -2049,6 +1974,13 @@
 
   function roundTimelineValue(value) {
     return Number(finiteNumber(Number(value), 0).toFixed(3));
+  }
+
+  function easeInOutCubic(value) {
+    const t = clamp(finiteNumber(Number(value), 0), 0, 1);
+    return t < 0.5
+      ? 4 * t * t * t
+      : 1 - ((-2 * t + 2) ** 3) / 2;
   }
 
   function applyControlValues(option, controls, controlValues, context = {}) {
@@ -2089,8 +2021,7 @@
       if (option.tooltip.confine == null) option.tooltip.confine = true;
     }
 
-    const seriesList = Array.isArray(option.series) ? option.series : [option.series].filter(Boolean);
-    seriesList.forEach(applySeriesInteractionDefaults);
+    seriesList(option).forEach(applySeriesInteractionDefaults);
     return option;
   }
 
@@ -2148,7 +2079,6 @@
     });
   }
 
-
   function pathKey(part) {
     const numeric = Number(part);
     return Number.isInteger(numeric) && String(numeric) === part ? numeric : part;
@@ -2182,6 +2112,8 @@
     const deleteDataState = createDeleteDataState(exampleName);
     let customOption = null;
     let replayKey = 0;
+    let timelinePlaybackFrame = 0;
+    let timelinePlaybackWithTimeout = false;
     const controlsPanel = createControlsPanel(entry.controls || [], state, {
       onChange(control) {
         customOption = null;
@@ -2217,7 +2149,11 @@
       }
     });
     mountControlsPanel(chartElement, controlsPanel);
-    const interactions = attachDemoInteractions(chart, chartElement, controlsPanel);
+    const interactions = attachDemoInteractions(chart, chartElement, controlsPanel, {
+      onTimelineTickClick(time) {
+        playTimelineEvent(time);
+      }
+    });
     render();
     root.addEventListener('resize', () => {
       chart.resize();
@@ -2233,6 +2169,63 @@
         updateOptionEditor(controlsPanel, option);
       };
       setDemoOption(chart, option, context, afterSet);
+    }
+
+    function playTimelineEvent(time) {
+      const control = (entry.controls || []).find((item) => item.id === 'currentTime');
+      if (!control) return;
+      const events = readEvolutionFluidEvents(data);
+      const range = resolveEvolutionFluidEventPlaybackRange(events, time, {
+        min: control.min,
+        max: control.max
+      });
+      clearTimelinePlayback();
+      const duration = Math.max(240, finiteNumber(Number(control.eventPlaybackDuration), 1400));
+      const startedAt = Date.now();
+      const from = range.start;
+      const to = range.end;
+      setControlValue(control, from);
+
+      const step = () => {
+        const elapsed = Date.now() - startedAt;
+        const progress = clamp(elapsed / duration, 0, 1);
+        const eased = easeInOutCubic(progress);
+        setControlValue(control, from + (to - from) * eased);
+        if (progress >= 1) {
+          timelinePlaybackFrame = 0;
+          return;
+        }
+        scheduleTimelinePlayback(step);
+      };
+
+      scheduleTimelinePlayback(step);
+    }
+
+    function scheduleTimelinePlayback(callback) {
+      if (root.requestAnimationFrame) {
+        timelinePlaybackWithTimeout = false;
+        timelinePlaybackFrame = root.requestAnimationFrame(callback);
+        return;
+      }
+      timelinePlaybackWithTimeout = true;
+      timelinePlaybackFrame = root.setTimeout(callback, 16);
+    }
+
+    function clearTimelinePlayback() {
+      if (!timelinePlaybackFrame) return;
+      if (timelinePlaybackWithTimeout) root.clearTimeout?.(timelinePlaybackFrame);
+      else root.cancelAnimationFrame?.(timelinePlaybackFrame);
+      timelinePlaybackFrame = 0;
+    }
+
+    function setControlValue(control, nextValue) {
+      state[control.id] = snapRangeValue(control, nextValue);
+      customOption = null;
+      syncControlElements(controlsPanel, entry.controls || [], state);
+      render({
+        interactionControlId: control.id,
+        realtimeControlId: control.realtime === true ? control.id : null
+      });
     }
   }
 
@@ -2334,7 +2327,6 @@
     if (exampleName === 'fisheye') return appendFisheyeScatterData(data, index);
     if (exampleName === 'seasonal-radial') return appendSeasonalRadialData(data, index);
     if (exampleName === 'error-chart') return appendErrorChartData(data, index);
-    if (exampleName === 'error-chart-dot') return appendErrorChartDotData(data, index);
     if (exampleName === 'lollipop') return appendLollipopData(data, index);
     if (exampleName === 'beeswarm') return appendBeeswarmData(data, index);
     if (exampleName === 'spiral') return appendSpiralData(data, index);
@@ -2363,7 +2355,6 @@
     if (exampleName === 'fisheye') return removeArrayData(data, 'fisheyeScatter', isAddedItem);
     if (exampleName === 'seasonal-radial') return removeArrayData(data, 'seasonalRadial', isAddedItem);
     if (exampleName === 'error-chart') return removeArrayData(data, 'errorChart', isAddedItem);
-    if (exampleName === 'error-chart-dot') return removeArrayData(data, 'errorChartDot', isAddedItem);
     if (exampleName === 'lollipop') return removeArrayData(data, 'lollipop', isAddedItem);
     if (exampleName === 'beeswarm') return removeArrayData(data, 'beeswarm', isAddedItem);
     if (exampleName === 'spiral') return removeArrayData(data, 'spiral', isAddedItem);
@@ -2528,7 +2519,6 @@
     return entity?.generated === true || entity?.raw?.generated === true;
   }
 
-
   function findSubwayStation(routes, predicate) {
     for (let routeIndex = routes.length - 1; routeIndex >= 0; routeIndex -= 1) {
       const route = routes[routeIndex];
@@ -2605,7 +2595,6 @@
     if (exampleName === 'fisheye') return arrayLength(data.fisheyeScatter);
     if (exampleName === 'seasonal-radial') return arrayLength(data.seasonalRadial);
     if (exampleName === 'error-chart') return arrayLength(data.errorChart);
-    if (exampleName === 'error-chart-dot') return arrayLength(data.errorChartDot);
     if (exampleName === 'lollipop') return arrayLength(data.lollipop);
     if (exampleName === 'beeswarm') return arrayLength(data.beeswarm);
     if (exampleName === 'spiral') return arrayLength(data.spiral);
@@ -2868,7 +2857,6 @@
     return true;
   }
 
-
   function appendFlameData(data, index) {
     const root = data.flame || (data.flame = { name: 'root', children: [] });
     const group = ensureTreeGroup(root, index);
@@ -2921,43 +2909,14 @@
     return true;
   }
 
-  function appendErrorChartData(data, index) {
-    const list = ensureArrayData(data, 'errorChart');
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const x = list.length + 1;
-    const duration = 24 + x * 21 + ((index * 13) % 18);
-    const lowerError = 10 + index % 8;
-    const upperError = 14 + index % 12;
-    list.push({
-      id: `added-error-chart-${index}`,
-      month: monthNames[(x - 1) % monthNames.length],
-      x,
-      duration,
-      low: Math.max(0, duration - lowerError),
-      high: duration + upperError,
-      xLow: Number((x - 0.3).toFixed(2)),
-      xHigh: Number((x + 0.3).toFixed(2)),
-      itemStyle: { color: addDataColor(index) }
-    });
-    return true;
-  }
-
-  function appendErrorChartDotData(data, index) {
-    const list = ensureArrayData(data, 'errorChartDot');
-    const cost = 80 + ((list.length * 43 + index * 17) % 620);
-    const price = Math.min(860, 90 + cost * 0.95 + ((index * 53) % 190));
-    const costError = 12 + index % 18;
-    const priceError = 18 + index % 32;
-    list.push({
-      id: `added-error-chart-dot-${index}`,
-      name: `Added ${index}`,
-      cost,
-      price,
-      costLow: Math.max(0, cost - costError),
-      costHigh: cost + costError,
-      priceLow: Math.max(0, price - priceError),
-      priceHigh: price + priceError,
-      itemStyle: { color: addDataColor(index) }
+  function appendLollipopData(data, index) {
+    const list = ensureArrayData(data, 'lollipop');
+    const insertIndex = list.length ? (index * 3) % (list.length + 1) : 0;
+    list.splice(insertIndex, 0, {
+      id: `added-lollipop-${index}`,
+      country: `Added ${index}`,
+      population: 90 + (index * 41) % 520,
+      itemStyle: { color: '#2db5ff' }
     });
     return true;
   }
@@ -2976,14 +2935,22 @@
     return true;
   }
 
-  function appendLollipopData(data, index) {
-    const list = ensureArrayData(data, 'lollipop');
-    const insertIndex = list.length ? (index * 3) % (list.length + 1) : 0;
-    list.splice(insertIndex, 0, {
-      id: `added-lollipop-${index}`,
-      country: `Added ${index}`,
-      population: 90 + (index * 41) % 520,
-      itemStyle: { color: '#2db5ff' }
+  function appendErrorChartData(data, index) {
+    const list = ensureArrayData(data, 'errorChart');
+    const cost = 80 + ((list.length * 43 + index * 17) % 620);
+    const price = Math.min(860, 90 + cost * 0.95 + ((index * 53) % 190));
+    const costError = 12 + index % 18;
+    const priceError = 18 + index % 32;
+    list.push({
+      id: `added-error-chart-${index}`,
+      name: `Added ${index}`,
+      cost,
+      price,
+      costLow: Math.max(0, cost - costError),
+      costHigh: cost + costError,
+      priceLow: Math.max(0, price - priceError),
+      priceHigh: price + priceError,
+      itemStyle: { color: addDataColor(index) }
     });
     return true;
   }
@@ -3461,7 +3428,6 @@
     return wrapper;
   }
 
-
   function snapRangeValue(control, value) {
     const min = finiteNumber(Number(control.min), 0);
     const max = finiteNumber(Number(control.max), min);
@@ -3477,7 +3443,6 @@
     if (!text.includes('.')) return 0;
     return text.length - text.indexOf('.') - 1;
   }
-
 
   function createControlInput(control, value) {
     if (control.type === 'json') {
@@ -3716,12 +3681,21 @@
 
     function onZrClick(event) {
       if (Date.now() < suppressClickUntil || !event?.target) return;
+      const timelineTime = readTimelineTickTime(event.target);
+      if (Number.isFinite(timelineTime)) {
+        options.onTimelineTickClick?.(timelineTime, event);
+        suppressClickUntil = Date.now() + 80;
+      }
       updateInteractionValue(status.clickValue, formatZrInteractionEvent('click', event.target));
     }
 
     function onDomClickFallback() {
       const target = activeZrHoverTarget || lastZrHoverTarget;
       if (Date.now() < suppressClickUntil || !target) return;
+      const timelineTime = readTimelineTickTime(target);
+      if (Number.isFinite(timelineTime)) {
+        options.onTimelineTickClick?.(timelineTime, { target });
+      }
       updateInteractionValue(status.clickValue, formatZrInteractionEvent('click', target));
     }
 
@@ -3901,6 +3875,12 @@
       current = current.parent;
     }
     return '';
+  }
+
+  function readTimelineTickTime(target) {
+    const key = readGraphicElementKey(target);
+    if (!key.startsWith('timeline:')) return NaN;
+    return timeToPlaybackNumber(key.slice('timeline:'.length));
   }
 
   function formatInteractionTime(date) {

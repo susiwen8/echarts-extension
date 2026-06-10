@@ -328,6 +328,10 @@ function localizeChineseText(html) {
     ['Arc', '弧线图'],
     ['Beeswarm', '蜂群图'],
     ['Cause and Effect Diagram', '因果图'],
+    ['Circle Packing: China 1911-1949', '圆形打包图：中国 1911-1949'],
+    ['Circle Packing: Company Incubation', '圆形打包图：公司孵化'],
+    ['Illustrative values map late-Qing collapse, warlord fragmentation, the Northern Expedition, wartime fronts, and the 1949 political transition with fluid merge/split events.', '用示意值呈现清朝覆灭、军阀分裂、北伐、抗战格局与 1949 年政权转折，并通过 fluid 合并/分裂事件播放。'],
+    ['A compact fluid story of teams spinning out, acquiring each other, returning to the parent company, and splitting into new operating groups.', '用紧凑的 fluid 故事展示团队孵化、独立、吞并、回到母公司，以及继续分裂成新运营小组。'],
     ['Circle Packing', '圆形打包图'],
     ['Concentric', '同心布局'],
     ['Fisheye', '鱼眼交互'],
@@ -420,7 +424,8 @@ function localizeChineseText(html) {
     ['Standard example', '标准示例'],
     ['All ECharts charts', '全部 ECharts 图表'],
     ['Bubble case', '气泡示例'],
-    ['Hollow case', '空心示例']
+    ['Hollow case', '空心示例'],
+    ['Cases', '示例列表']
   ]);
 
   for (const [source, target] of replacements) {
@@ -453,19 +458,15 @@ function replaceTextNodes(html, source, target) {
 function localizeChineseLinks(relativeHtmlPath, html) {
   if (relativeHtmlPath === 'index.html') {
     return html
-      .replace(/href="\.\/packages\/([^"/]+)\/"/g, 'href="./packages/$1/index.zh.html"')
-      .replace(/href="\.\/packages\/echarts-venn\/hollow\.html"/g, 'href="./packages/echarts-venn/hollow.zh.html"')
-      .replace(/href="\.\/packages\/echarts-venn\/bubble\.html"/g, 'href="./packages/echarts-venn/bubble.zh.html"');
+      .replace(/href="\.\/packages\/([^"/]+)\/([^"/]+)\.html"/g, 'href="./packages/$1/$2.zh.html"')
+      .replace(/href="\.\/packages\/([^"/]+)\/"/g, 'href="./packages/$1/index.zh.html"');
   }
 
   return html
-    .replace(/content="0; url=\.\/hollow\.html"/g, 'content="0; url=./hollow.zh.html"')
+    .replace(/content="0; url=\.\/([^"/]+)\.html"/g, 'content="0; url=./$1.zh.html"')
     .replace(/href="\.\.\/\.\.\/"/g, 'href="../../index.zh.html"')
     .replace(/href="\.\.\/\.\.\/options\.html#/g, 'href="../../options.zh.html#')
-    .replace(/href="\.\/large\.html"/g, 'href="./large.zh.html"')
-    .replace(/href="\.\/all-charts\.html"/g, 'href="./all-charts.zh.html"')
-    .replace(/href="\.\/hollow\.html"/g, 'href="./hollow.zh.html"')
-    .replace(/href="\.\/bubble\.html"/g, 'href="./bubble.zh.html"')
+    .replace(/href="\.\/([^"/]+)\.html"/g, 'href="./$1.zh.html"')
     .replace(/href="\.\/"/g, 'href="./index.zh.html"');
 }
 

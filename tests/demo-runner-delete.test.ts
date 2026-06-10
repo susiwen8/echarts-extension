@@ -182,6 +182,26 @@ test('evolution-fluid time control exposes playback metadata', () => {
   assert.equal(timeControl.playbackAutoplay, false);
 });
 
+test('circle-packing demo uses the company incubation fluid playback dataset', () => {
+  const namespace = loadDemoNamespace();
+  const data = namespace.cloneExampleData(namespace.data);
+  const entry = namespace.registry['circle-packing'];
+  const state = namespace.createControlState(entry.controls);
+  const option = namespace.createDemoOption('circle-packing', data, state);
+  const stepControl = entry.controls.find((control) => control.id === 'currentTime');
+
+  assert.ok(stepControl);
+  assert.equal(stepControl.type, 'range');
+  assert.equal(stepControl.playback, true);
+  assert.equal(stepControl.defaultValue, 0.5);
+  assert.equal(stepControl.min, 0);
+  assert.equal(stepControl.max, 8);
+  assert.equal(option.series[0].data.id, 'company-incubation-story');
+  assert.equal(option.series[0].fluid.enabled, true);
+  assert.equal(option.series[0].fluid.currentTime, 0.5);
+  assert.ok(option.series[0].fluid.events.some((event) => event.id === 'a-reacquires-b'));
+});
+
 test('evolution-fluid uses timeline nodes to play one event window', () => {
   const namespace = loadDemoNamespace();
   const data = namespace.cloneExampleData(namespace.data);

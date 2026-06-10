@@ -841,20 +841,6 @@
     ],
     seasonalRadial: createSeasonalRadialData(),
     errorChart: [
-      { month: 'Jan', x: 1, duration: 28, low: 18, high: 40, xLow: 0.75, xHigh: 1.25, itemStyle: { color: '#60a5fa' } },
-      { month: 'Feb', x: 2, duration: 54, low: 44, high: 62, xLow: 1.72, xHigh: 2.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Mar', x: 3, duration: 88, low: 76, high: 100, xLow: 2.72, xHigh: 3.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Apr', x: 4, duration: 100, low: 92, high: 112, xLow: 3.72, xHigh: 4.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'May', x: 5, duration: 90, low: 82, high: 98, xLow: 4.72, xHigh: 5.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Jun', x: 6, duration: 105, low: 96, high: 116, xLow: 5.72, xHigh: 6.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Jul', x: 7, duration: 124, low: 112, high: 136, xLow: 6.72, xHigh: 7.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Aug', x: 8, duration: 205, low: 190, high: 220, xLow: 7.72, xHigh: 8.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Sep', x: 9, duration: 204, low: 192, high: 214, xLow: 8.72, xHigh: 9.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Oct', x: 10, duration: 260, low: 248, high: 274, xLow: 9.72, xHigh: 10.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Nov', x: 11, duration: 187, low: 174, high: 198, xLow: 10.72, xHigh: 11.28, itemStyle: { color: '#60a5fa' } },
-      { month: 'Dec', x: 12, duration: 292, low: 280, high: 312, xLow: 11.7, xHigh: 12.3, itemStyle: { color: '#60a5fa' } }
-    ],
-    errorChartDot: [
       { name: 'Blouse', cost: 95, price: 405, costLow: 73, costHigh: 112, priceLow: 368, priceHigh: 430, itemStyle: { color: '#4aa3df' } },
       { name: 'Skirt', cost: 100, price: 102, costLow: 76, costHigh: 117, priceLow: 72, priceHigh: 120, itemStyle: { color: '#4aa3df' } },
       { name: 'Tee', cost: 120, price: 257, costLow: 98, costHigh: 136, priceLow: 238, priceHigh: 279, itemStyle: { color: '#4aa3df' } },

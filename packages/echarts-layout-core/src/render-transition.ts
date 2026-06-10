@@ -62,6 +62,11 @@ export interface AliveGraphicGroup extends AliveGraphicElement {
 export interface AliveRenderHost {
   graphic: {
     Group: new () => AliveGraphicGroup;
+    makePath?: (path: string, options: {
+      style: Record<string, unknown>;
+      silent?: boolean;
+      z2?: number;
+    }) => AliveGraphicElement;
   };
 }
 
