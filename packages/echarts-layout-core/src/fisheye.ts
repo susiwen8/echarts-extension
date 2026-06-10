@@ -92,6 +92,7 @@ interface FisheyeTargetBaseline {
   localOriginX: number;
   localOriginY: number;
   center: FisheyePoint;
+  parentTransformSignature: string;
 }
 
 export function resolveFisheyeOptions(
@@ -304,8 +305,20 @@ function resolveTargetBaseline(
   element: FisheyeGraphicElement,
   baselines: Map<FisheyeGraphicElement, FisheyeTargetBaseline>
 ): FisheyeTargetBaseline | null {
+  const parentTransformSignature = readParentTransformSignature(element);
   const cached = baselines.get(element);
-  if (cached) return cached;
+  if (cached) {
+    if (cached.parentTransformSignature === parentTransformSignature) return cached;
+    setFisheyeElementTransform(element, {
+      x: cached.x,
+      y: cached.y,
+      scaleX: cached.scaleX,
+      scaleY: cached.scaleY,
+      originX: cached.originX,
+      originY: cached.originY
+    });
+    baselines.delete(element);
+  }
 
   const rect = readElementRect(element);
   if (!rect) return null;
@@ -326,10 +339,33 @@ function resolveTargetBaseline(
     originY: typeof element.originY === 'number' && Number.isFinite(element.originY) ? element.originY : undefined,
     localOriginX: localOrigin[0],
     localOriginY: localOrigin[1],
-    center
+    center,
+    parentTransformSignature
   };
   baselines.set(element, baseline);
   return baseline;
+}
+
+function readParentTransformSignature(element: FisheyeGraphicElement): string {
+  const parts: string[] = [];
+  let current = element.parent;
+  while (current) {
+    parts.push(readElementTransformSignature(current));
+    current = current.parent;
+  }
+  return parts.join('|');
+}
+
+function readElementTransformSignature(element: FisheyeGraphicElement): string {
+  return [
+    ...(readTransformMatrix(element) || []),
+    finiteNumber(element.x, 0),
+    finiteNumber(element.y, 0),
+    finiteNumber(element.scaleX, 1),
+    finiteNumber(element.scaleY, 1),
+    finiteNumber(element.originX, NaN),
+    finiteNumber(element.originY, NaN)
+  ].join(',');
 }
 
 function resolveTargetElements(options: FisheyeControllerOptions): Array<FisheyeGraphicElement | null | undefined> {
@@ -407,14 +443,13 @@ function setFisheyeElementTransform(
 }
 
 function readElementRect(element: FisheyeGraphicElement): FisheyeRect | null {
+  const localRect = readElementLocalRect(element);
+  const transform = readTransformMatrix(element);
+  if (localRect && transform) return transformRect(localRect, transform);
+
   const rect = readFiniteRect(element.getPaintRect?.() || null);
   if (rect) return rect;
-
-  const localRect = readElementLocalRect(element);
-  if (!localRect) return null;
-  const transform = readTransformMatrix(element);
-  if (!transform) return localRect;
-  return transformRect(localRect, transform);
+  return localRect;
 }
 
 function readElementLocalRect(element: FisheyeGraphicElement): FisheyeRect | null {

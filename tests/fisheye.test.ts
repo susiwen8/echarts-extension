@@ -625,3 +625,49 @@ test('layout-core fisheye controller handles parent matrix transforms and invali
 
   controller.dispose();
 });
+
+test('layout-core fisheye controller refreshes cached baselines after parent zoom transforms', () => {
+  const zoomRoot = {
+    transform: [1, 0, 0, 1, 0, 0],
+    parent: {}
+  };
+  const child = {
+    x: 0,
+    y: 0,
+    scaleX: 1,
+    scaleY: 1,
+    parent: zoomRoot,
+    getBoundingRect: () => ({ x: 0, y: 0, width: 10, height: 10 }),
+    getComputedTransform: () => zoomRoot.transform,
+    attr(patch) {
+      Object.assign(this, patch);
+    }
+  };
+  const zr = new FakeZRender([child]);
+  const fisheye = resolveFisheyeOptions({ show: true, radius: 30, scale: 2.5 }, {
+    x: 0,
+    y: 0,
+    width: 120,
+    height: 80
+  });
+  const controller = installFisheyeController({
+    zrender: zr,
+    viewport: { x: 0, y: 0, width: 120, height: 80 },
+    fisheye
+  });
+
+  assert.ok(controller);
+  controller.apply([5, 5]);
+  assert.ok(child.scaleX > 1);
+  controller.reset();
+  assert.equal(child.scaleX, 1);
+
+  zoomRoot.transform = [2, 0, 0, 2, 40, 0];
+  controller.apply([50, 10]);
+
+  assert.ok(child.scaleX > 1);
+  assert.equal(child.originX, 5);
+  assert.equal(child.originY, 5);
+
+  controller.dispose();
+});
