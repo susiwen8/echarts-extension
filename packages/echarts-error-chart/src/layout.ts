@@ -5,7 +5,7 @@ const DEFAULT_TICK_COUNT = 5;
 const EPSILON = 1e-9;
 
 export type ErrorChartVariant = 'column' | 'bar' | 'line' | 'scatter';
-export type ErrorChartVariantOption = ErrorChartVariant | 'marker' | 'dot' | 'point';
+export type ErrorChartVariantOption = ErrorChartVariant;
 export type ErrorChartOrientation = 'vertical' | 'horizontal' | 'cartesian';
 export type ErrorChartField = string | number;
 export type ErrorChartPaddingOption = number | Partial<ErrorChartPadding>;
@@ -826,20 +826,16 @@ function niceStep(rawStep: number): number {
 
 function readVariant(value: unknown): ErrorChartVariant {
   if (value === 'bar' || value === 'line') return value;
-  if (isPointVariant(value)) {
+  if (value === 'scatter') {
     return 'scatter';
   }
   return 'column';
 }
 
 function readVariantOption(value: unknown): ErrorChartVariantOption | undefined {
-  return value === 'column' || value === 'bar' || value === 'line' || isPointVariant(value)
+  return value === 'column' || value === 'bar' || value === 'line' || value === 'scatter'
     ? value
     : undefined;
-}
-
-function isPointVariant(value: unknown): value is 'scatter' | 'marker' | 'dot' | 'point' {
-  return value === 'scatter' || value === 'marker' || value === 'dot' || value === 'point';
 }
 
 function resolveOrientation(variant: ErrorChartVariant, value: unknown): ErrorChartOrientation {
@@ -937,7 +933,6 @@ export const __test__ = {
   niceStep,
   readVariant,
   readVariantOption,
-  isPointVariant,
   resolveOrientation,
   readOrientationOption,
   normalizeDimensions,

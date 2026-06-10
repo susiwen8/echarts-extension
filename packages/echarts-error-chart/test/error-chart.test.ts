@@ -121,26 +121,11 @@ test('computes scatter x and y error ranges on two numeric axes', () => {
   assert.ok(result.points[0].upperY < result.points[0].y);
 });
 
-test('treats dot and point variants as cartesian point error charts', () => {
+test('treats scatter variants as cartesian point error charts', () => {
   const result = layoutErrorChart([
-    { name: 'Coat', cost: 278, price: 790, costLow: 255, costHigh: 296, priceLow: 762, priceHigh: 829 }
-  ], {
-    variant: 'dot' as never,
-    xField: 'cost',
-    yField: 'price',
-    xLowField: 'costLow',
-    xHighField: 'costHigh',
-    yLowField: 'priceLow',
-    yHighField: 'priceHigh',
-    xMin: 0,
-    xMax: 800,
-    min: 0,
-    max: 900
-  });
-  const pointAlias = layoutErrorChart([
     { name: 'Dress', x: 680, y: 790, xMinus: 18, xPlus: 12, yMinus: 30, yPlus: 34 }
   ], {
-    variant: 'point' as never,
+    variant: 'scatter',
     xMin: 0,
     xMax: 800,
     min: 0,
@@ -149,14 +134,13 @@ test('treats dot and point variants as cartesian point error charts', () => {
 
   assert.equal(result.variant, 'scatter');
   assert.equal(result.orientation, 'cartesian');
-  assert.equal(result.points[0].xValue, 278);
+  assert.equal(result.points[0].xValue, 680);
   assert.equal(result.points[0].value, 790);
   assert.ok(result.points[0].xLowerX < result.points[0].x);
   assert.ok(result.points[0].xUpperX > result.points[0].x);
   assert.ok(result.points[0].lowerY > result.points[0].y);
   assert.ok(result.points[0].upperY < result.points[0].y);
-  assert.equal(pointAlias.variant, 'scatter');
-  assert.equal(pointAlias.orientation, 'cartesian');
+  assert.equal(result.orientation, 'cartesian');
 });
 
 test('maps configured fields into ECharts data for tooltip hover values', () => {
@@ -388,12 +372,9 @@ test('covers layout fallback branches for sparse and mixed error chart data', ()
   assert.equal(createCategoryLabel('A', 0, 1, 'horizontal', plot).y, 40);
   assert.equal(projectCategoryX(0, 1, plot), 50);
   assert.equal(projectCategoryY(0, 1, plot), 40);
-  assert.equal(readVariant('marker'), 'scatter');
-  assert.equal(readVariant('dot'), 'scatter');
-  assert.equal(readVariant('point'), 'scatter');
+  assert.equal(readVariant('scatter'), 'scatter');
   assert.equal(readVariant('bad'), 'column');
-  assert.equal(readVariantOption('dot'), 'dot');
-  assert.equal(readVariantOption('point'), 'point');
+  assert.equal(readVariantOption('scatter'), 'scatter');
   assert.equal(readVariantOption('line'), 'line');
   assert.equal(readVariantOption('bad'), undefined);
   assert.equal(resolveOrientation('bar', undefined), 'horizontal');

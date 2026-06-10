@@ -1,6 +1,6 @@
 import 'echarts';
 
-type ErrorChartVariant = 'column' | 'bar' | 'line' | 'scatter' | 'marker' | 'dot' | 'point';
+type ErrorChartVariant = 'column' | 'bar' | 'line' | 'scatter';
 type ErrorChartField = string | number;
 type ErrorChartPaddingOption = number | {
   top?: number;

@@ -1,7 +1,7 @@
 {
   "name": "@echarts-extension/error-chart",
   "version": "0.1.0",
-  "description": "ECharts extension chart for error bars on column, bar, line, and dot/scatter charts",
+  "description": "ECharts extension chart for error bars on column, bar, line, and scatter charts",
   "type": "module",
   "main": "lib/index.js",
   "types": "index.d.ts",
