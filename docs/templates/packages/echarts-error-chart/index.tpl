@@ -13,11 +13,10 @@
       <div>
         <p class="eyebrow">echarts-error-chart</p>
         <h1>Error Chart</h1>
-        <p>Lead-time values are drawn with upper and lower error intervals across line, column, and bar variants.</p>
+        <p>Two numeric axes show point values with horizontal and vertical error intervals.</p>
       </div>
       <nav class="demo-links" aria-label="Example navigation">
         <a href="../../">All examples</a>
-        <a href="./dot.html">Dot error chart</a>
         <a href="../../options.html#echarts-error-chart">Options</a>
       </nav>
     </header>
