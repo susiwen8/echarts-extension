@@ -147,6 +147,28 @@ export const browserVisualCases = [
     maxDiffPixels: 140
   },
   {
+    name: 'echarts-algorithm-sort',
+    path: '/docs/packages/echarts-algorithm-sort/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main',
+    waitAfterRenderMs: 0,
+    playbackControls: {
+      currentStep: 18
+    },
+    maxDiffPixels: 140
+  },
+  {
+    name: 'echarts-algorithm-shortest-path',
+    path: '/docs/packages/echarts-algorithm-shortest-path/',
+    readySelector: '#chart canvas, #chart svg',
+    screenshotSelector: 'main',
+    waitAfterRenderMs: 0,
+    playbackControls: {
+      currentStep: 2
+    },
+    maxDiffPixels: 140
+  },
+  {
     name: 'echarts-beeswarm',
     path: '/docs/packages/echarts-beeswarm/',
     readySelector: '#chart canvas, #chart svg',

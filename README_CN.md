@@ -137,6 +137,16 @@ ECharts Extension 收集了一组风格各异的可视化图表，适合用来�
   </tr>
   <tr>
     <td align="center" width="50%">
+      <a href="./packages/echarts-algorithm-sort/README_CN.md"><strong>Algorithm Sort</strong></a><br>
+      <img src="./visual-baseline/echarts-algorithm-sort.png" alt="Algorithm Sort" width="520">
+    </td>
+    <td align="center" width="50%">
+      <a href="./packages/echarts-algorithm-shortest-path/README_CN.md"><strong>Algorithm Shortest Path</strong></a><br>
+      <img src="./visual-baseline/echarts-algorithm-shortest-path.png" alt="Algorithm Shortest Path" width="520">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
       <a href="./packages/echarts-beeswarm/README_CN.md"><strong>Beeswarm</strong></a><br>
       <img src="./visual-baseline/echarts-beeswarm.png" alt="Beeswarm" width="520">
     </td>

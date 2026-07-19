@@ -4,6 +4,10 @@ import { test } from 'vitest';
 import { normalizeSvgForComparison } from './svg-normalize.ts';
 import {
   actualPath,
+  algorithmShortestPathActualPath,
+  algorithmShortestPathSnapshotPath,
+  algorithmSortActualPath,
+  algorithmSortSnapshotPath,
   evolutionFluidActualPath,
   evolutionFluidSnapshotPath,
   errorChartActualPath,
@@ -20,6 +24,8 @@ import {
   radialBoxplotSnapshotPath,
   readSnapshot,
   renderFixture,
+  renderAlgorithmShortestPathFixture,
+  renderAlgorithmSortFixture,
   renderEvolutionFluidFixture,
   renderErrorChartFixture,
   renderFlameFixture,
@@ -116,6 +122,18 @@ const cases = [
     name: 'Lollipop',
     render: renderLollipopFixture,
     snapshotPath: lollipopSnapshotPath
+  },
+  {
+    actualPath: algorithmSortActualPath,
+    name: 'Algorithm sort',
+    render: renderAlgorithmSortFixture,
+    snapshotPath: algorithmSortSnapshotPath
+  },
+  {
+    actualPath: algorithmShortestPathActualPath,
+    name: 'Algorithm shortest path',
+    render: renderAlgorithmShortestPathFixture,
+    snapshotPath: algorithmShortestPathSnapshotPath
   }
 ];
 

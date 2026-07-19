@@ -16,6 +16,8 @@ import '@echarts-extension/error-chart';
 import '@echarts-extension/flame';
 import '@echarts-extension/grid';
 import '@echarts-extension/lollipop';
+import '@echarts-extension/algorithm-sort';
+import '@echarts-extension/algorithm-shortest-path';
 import '@echarts-extension/mds';
 import '@echarts-extension/mosaic';
 import '@echarts-extension/nested-circle';
@@ -93,6 +95,95 @@ test('cartesian custom charts render axis, label, style, silent, and animation v
       { country: 'A', population: 1 },
       { country: 'B', population: 2 }
     ],
+    animation: false
+  });
+
+  renderSeries({
+    type: 'algorithmSort',
+    algorithm: 'quick',
+    order: 'descending',
+    currentStep: 4,
+    data: [
+      { name: 'A', value: 5, itemStyle: { color: '#2563eb' } },
+      { name: 'B', value: 2 },
+      { name: 'C', value: 8 }
+    ],
+    label: { show: true, formatter: ({ name, value, state }) => `${name}:${value}:${state}` },
+    valueAxis: {
+      label: { formatter: (value) => `${value}`, fontSize: '11' },
+      splitLine: { lineStyle: { type: 'dotted', width: '2', opacity: '0.5' } },
+      axisLine: { lineStyle: { type: [4, 2], color: '#888' } }
+    },
+    categoryAxis: {
+      label: { formatter: 'Item {value}', color: '#222' }
+    },
+    itemStyle: { borderColor: '#fff', borderWidth: '2', opacity: '0.86' },
+    stateStyle: {
+      compare: { color: '#f59e0b' },
+      swap: { color: '#ef4444' },
+      write: { color: '#14b8a6' },
+      pivot: { color: '#8b5cf6' },
+      sorted: { color: '#22c55e' }
+    },
+    rangeStyle: { color: '#dbeafe', opacity: '0.4' }
+  });
+  renderSeries({
+    type: 'algorithmSort',
+    silent: true,
+    values: [3, 1, 2],
+    progress: 1,
+    grid: { show: false },
+    valueAxis: { show: false, label: { show: false } },
+    categoryAxis: { show: false, label: { show: false } },
+    stepLabel: { show: false },
+    animation: false
+  });
+
+  renderSeries({
+    type: 'algorithmShortestPath',
+    algorithm: 'a-star',
+    start: 'A',
+    target: 'F',
+    currentStep: 6,
+    nodes: [
+      { id: 'A', x: 0.08, y: 0.5, itemStyle: { color: '#22c55e' } },
+      { id: 'B', x: 0.24, y: 0.25 },
+      { id: 'C', x: 0.3, y: 0.72 },
+      { id: 'D', x: 0.52, y: 0.42 },
+      { id: 'E', x: 0.7, y: 0.58 },
+      { id: 'F', x: 0.9, y: 0.46 }
+    ],
+    edges: [
+      { source: 'A', target: 'B', weight: 2 },
+      { source: 'A', target: 'C', weight: 5 },
+      { source: 'B', target: 'D', weight: 2 },
+      { source: 'C', target: 'D', weight: 1 },
+      { source: 'D', target: 'E', weight: 3 },
+      { source: 'E', target: 'F', weight: 1 }
+    ],
+    label: { show: true, formatter: ({ name, distance, state }) => `${name}:${distance}:${state}` },
+    edgeLabel: { show: true, fontSize: '10' },
+    distanceLabel: { show: true, fontSize: '9' },
+    edgeStyle: { type: 'dashed', width: '2', opacity: '0.7' },
+    nodeStyle: { borderColor: '#fff', borderWidth: '2' },
+    stateStyle: {
+      start: { color: '#22c55e' },
+      target: { color: '#ef4444' },
+      frontier: { color: '#38bdf8' },
+      current: { color: '#f59e0b' },
+      path: { color: '#8b5cf6' }
+    }
+  });
+  renderSeries({
+    type: 'algorithmShortestPath',
+    silent: true,
+    data: null,
+    links: null,
+    progress: 1,
+    edgeLabel: { show: false },
+    label: { show: false },
+    distanceLabel: { show: false },
+    stepLabel: { show: false },
     animation: false
   });
 
@@ -641,6 +732,8 @@ test('graph layout custom charts render node, edge, label, fisheye, and animatio
 test('custom chart renderers tolerate empty, malformed, and disabled option variants', () => {
   const variants = [
     { type: 'lollipop', data: null, label: { show: true }, valueAxis: { show: false }, categoryAxis: { show: false } },
+    { type: 'algorithmSort', data: null, label: { show: true }, valueAxis: { show: false }, categoryAxis: { show: false }, stepLabel: { show: false } },
+    { type: 'algorithmShortestPath', data: null, links: null, label: { show: true }, edgeLabel: { show: true }, distanceLabel: { show: true }, stepLabel: { show: false } },
     { type: 'beeswarm', data: null, label: { show: true }, valueAxis: { show: false }, categoryAxis: { show: false } },
     { type: 'circlePacking', data: null, rootVisible: false, label: { show: true }, itemStyle: null },
     { type: 'packBubble', data: null, label: { show: true }, itemStyle: null },
