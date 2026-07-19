@@ -122,6 +122,14 @@
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-lollipop.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Lollipop</span>
       </a>
+      <a class="chart-gallery-card" href="./packages/echarts-algorithm-sort/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-algorithm-sort.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Algorithm Sort</span>
+      </a>
+      <a class="chart-gallery-card" href="./packages/echarts-algorithm-shortest-path/">
+        <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-algorithm-shortest-path.png" alt="" loading="lazy"></span>
+        <span class="chart-gallery-card__title">Algorithm Shortest Path</span>
+      </a>
       <a class="chart-gallery-card" href="./packages/echarts-seasonal-radial/">
         <span class="chart-gallery-card__media"><img src="../visual-baseline/echarts-seasonal-radial.png" alt="" loading="lazy"></span>
         <span class="chart-gallery-card__title">Seasonal Radial</span>

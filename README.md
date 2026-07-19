@@ -137,6 +137,16 @@ Visit the live site at [susiwen8.github.io/echarts-extension](https://susiwen8.g
   </tr>
   <tr>
     <td align="center" width="50%">
+      <a href="./packages/echarts-algorithm-sort/README.md"><strong>Algorithm Sort</strong></a><br>
+      <img src="./visual-baseline/echarts-algorithm-sort.png" alt="Algorithm Sort" width="520">
+    </td>
+    <td align="center" width="50%">
+      <a href="./packages/echarts-algorithm-shortest-path/README.md"><strong>Algorithm Shortest Path</strong></a><br>
+      <img src="./visual-baseline/echarts-algorithm-shortest-path.png" alt="Algorithm Shortest Path" width="520">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
       <a href="./packages/echarts-beeswarm/README.md"><strong>Beeswarm</strong></a><br>
       <img src="./visual-baseline/echarts-beeswarm.png" alt="Beeswarm" width="520">
     </td>

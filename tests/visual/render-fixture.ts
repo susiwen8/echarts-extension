@@ -19,6 +19,8 @@ import '@echarts-extension/flame';
 import '@echarts-extension/sunrise-sunset';
 import '@echarts-extension/error-chart';
 import '@echarts-extension/lollipop';
+import '@echarts-extension/algorithm-sort';
+import '@echarts-extension/algorithm-shortest-path';
 
 export const snapshotPath = path.resolve('tests/visual/__snapshots__/graph-layouts.svg');
 export const actualPath = path.resolve('test-results/visual/graph-layouts.actual.svg');
@@ -44,6 +46,10 @@ export const errorChartSnapshotPath = path.resolve('tests/visual/__snapshots__/e
 export const errorChartActualPath = path.resolve('test-results/visual/error-chart.actual.svg');
 export const lollipopSnapshotPath = path.resolve('tests/visual/__snapshots__/lollipop.svg');
 export const lollipopActualPath = path.resolve('test-results/visual/lollipop.actual.svg');
+export const algorithmSortSnapshotPath = path.resolve('tests/visual/__snapshots__/algorithm-sort.svg');
+export const algorithmSortActualPath = path.resolve('test-results/visual/algorithm-sort.actual.svg');
+export const algorithmShortestPathSnapshotPath = path.resolve('tests/visual/__snapshots__/algorithm-shortest-path.svg');
+export const algorithmShortestPathActualPath = path.resolve('test-results/visual/algorithm-shortest-path.actual.svg');
 
 const graph = {
   data: [
@@ -337,6 +343,48 @@ const lollipopData = [
   { country: 'Russia', population: 144, itemStyle: { color: '#2db5ff' } },
   { country: 'Ethiopia', population: 129, itemStyle: { color: '#2db5ff' } }
 ];
+
+const algorithmSortData = [
+  { name: 'A', value: 42 },
+  { name: 'B', value: 16 },
+  { name: 'C', value: 64 },
+  { name: 'D', value: 28 },
+  { name: 'E', value: 74 },
+  { name: 'F', value: 36 },
+  { name: 'G', value: 58 },
+  { name: 'H', value: 22 },
+  { name: 'I', value: 88 },
+  { name: 'J', value: 48 },
+  { name: 'K', value: 12 },
+  { name: 'L', value: 70 }
+];
+
+const algorithmShortestPathData = {
+  nodes: [
+    { id: 'A', x: 0.08, y: 0.5 },
+    { id: 'B', x: 0.24, y: 0.22 },
+    { id: 'C', x: 0.28, y: 0.76 },
+    { id: 'D', x: 0.47, y: 0.4 },
+    { id: 'E', x: 0.6, y: 0.16 },
+    { id: 'F', x: 0.65, y: 0.68 },
+    { id: 'G', x: 0.82, y: 0.34 },
+    { id: 'H', x: 0.92, y: 0.62 }
+  ],
+  edges: [
+    { source: 'A', target: 'B', weight: 2 },
+    { source: 'A', target: 'C', weight: 4 },
+    { source: 'B', target: 'D', weight: 2 },
+    { source: 'B', target: 'E', weight: 7 },
+    { source: 'C', target: 'D', weight: 1 },
+    { source: 'C', target: 'F', weight: 5 },
+    { source: 'D', target: 'E', weight: 3 },
+    { source: 'D', target: 'F', weight: 2 },
+    { source: 'E', target: 'G', weight: 2 },
+    { source: 'F', target: 'G', weight: 2 },
+    { source: 'F', target: 'H', weight: 4 },
+    { source: 'G', target: 'H', weight: 1 }
+  ]
+};
 
 const errorChartData = [
   { month: 'Jan', x: 1, duration: 28, low: 18, high: 40, xLow: 0.75, xHigh: 1.25, itemStyle: { color: '#60a5fa' } },
@@ -857,6 +905,128 @@ export function renderLollipopFixture() {
           color: '#2db5ff',
           borderColor: '#2db5ff',
           borderWidth: 0
+        }
+      }
+    ]
+  }, 980, 540));
+}
+
+export function renderAlgorithmSortFixture() {
+  return normalizeSvg(renderOption({
+    animation: false,
+    backgroundColor: '#f8fafc',
+    title: {
+      text: 'Sorting Algorithm Steps',
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: '#0f172a',
+        fontSize: 21,
+        fontWeight: 760
+      }
+    },
+    series: [
+      {
+        type: 'algorithmSort',
+        top: 46,
+        width: '92%',
+        height: '84%',
+        padding: { top: 58, right: 34, bottom: 72, left: 62 },
+        data: algorithmSortData,
+        algorithm: 'quick',
+        currentStep: 18,
+        min: 0,
+        max: 100,
+        tickCount: 5,
+        barWidth: 22,
+        valueAxis: {
+          label: { color: '#64748b', fontSize: 12 },
+          splitLine: { lineStyle: { color: '#e2e8f0', width: 1, opacity: 1 } },
+          axisLine: { lineStyle: { color: '#94a3b8', width: 1.2 } }
+        },
+        categoryAxis: {
+          label: { color: '#64748b', fontSize: 12 }
+        },
+        itemStyle: {
+          color: '#5f7eea',
+          opacity: 0.92,
+          borderColor: '#ffffff',
+          borderWidth: 1.2
+        },
+        stateStyle: {
+          compare: { color: '#f59e0b' },
+          swap: { color: '#ef4444' },
+          write: { color: '#14b8a6' },
+          pivot: { color: '#8b5cf6' },
+          sorted: { color: '#22c55e' }
+        },
+        rangeStyle: { color: '#dbeafe', opacity: 0.58 },
+        label: { show: false },
+        stepLabel: {
+          color: '#0f172a',
+          mutedColor: '#64748b',
+          fontSize: 13,
+          fontWeight: 760
+        }
+      }
+    ]
+  }, 980, 540));
+}
+
+export function renderAlgorithmShortestPathFixture() {
+  return normalizeSvg(renderOption({
+    animation: false,
+    backgroundColor: '#f8fafc',
+    title: {
+      text: 'Shortest Path Search',
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: '#0f172a',
+        fontSize: 21,
+        fontWeight: 760
+      }
+    },
+    series: [
+      {
+        type: 'algorithmShortestPath',
+        top: 48,
+        width: '92%',
+        height: '84%',
+        padding: { top: 58, right: 46, bottom: 56, left: 46 },
+        nodes: algorithmShortestPathData.nodes,
+        edges: algorithmShortestPathData.edges,
+        algorithm: 'dijkstra',
+        start: 'A',
+        target: 'H',
+        currentStep: 18,
+        nodeRadius: 18,
+        edgeWidth: 2.4,
+        edgeStyle: { color: '#94a3b8', width: 2.4, opacity: 0.58 },
+        nodeStyle: {
+          color: '#e2e8f0',
+          borderColor: '#ffffff',
+          borderWidth: 2
+        },
+        stateStyle: {
+          start: { color: '#22c55e' },
+          target: { color: '#ef4444' },
+          frontier: { color: '#38bdf8' },
+          visited: { color: '#64748b' },
+          current: { color: '#f59e0b' },
+          path: { color: '#8b5cf6' },
+          activeEdge: { color: '#f59e0b' },
+          relaxedEdge: { color: '#38bdf8' },
+          pathEdge: { color: '#8b5cf6' }
+        },
+        edgeLabel: { show: true, color: '#475569', fontSize: 11, fontWeight: 700 },
+        label: { show: true, color: '#0f172a', fontSize: 12, fontWeight: 800, formatter: '{b}' },
+        distanceLabel: { show: true, color: '#64748b', fontSize: 10, fontWeight: 700 },
+        stepLabel: {
+          color: '#0f172a',
+          mutedColor: '#64748b',
+          fontSize: 13,
+          fontWeight: 760
         }
       }
     ]

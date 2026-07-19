@@ -1,0 +1,64 @@
+<svg width="980" height="540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 980 540">
+<rect width="980" height="540" x="0" y="0" fill="#f8fafc"></rect>
+<path d="M62 381.6L867.6 381.6" transform="translate(39.2 46)" fill="none" pointer-events="visible" stroke="#e2e8f0" class="zr-cls-0"></path>
+<path d="M62 300.7L867.6 300.7" transform="translate(39.2 46)" fill="none" pointer-events="visible" stroke="#e2e8f0" class="zr-cls-0"></path>
+<path d="M62 219.8L867.6 219.8" transform="translate(39.2 46)" fill="none" pointer-events="visible" stroke="#e2e8f0" class="zr-cls-0"></path>
+<path d="M62 138.9L867.6 138.9" transform="translate(39.2 46)" fill="none" pointer-events="visible" stroke="#e2e8f0" class="zr-cls-0"></path>
+<path d="M62 58L867.6 58" transform="translate(39.2 46)" fill="none" pointer-events="visible" stroke="#e2e8f0" class="zr-cls-0"></path>
+<path d="M62 381.6L867.6 381.6" transform="translate(39.2 46)" fill="none" pointer-events="visible" stroke="#94a3b8" stroke-width="1.2" class="zr-cls-0"></path>
+<text dominant-baseline="central" text-anchor="end" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="52" y="381.59999999999997" transform="translate(39.2 46)" fill="#64748b">0</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="52" y="300.7" transform="translate(39.2 46)" fill="#64748b">25</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="52" y="219.79999999999998" transform="translate(39.2 46)" fill="#64748b">50</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="52" y="138.89999999999998" transform="translate(39.2 46)" fill="#64748b">75</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="52" y="58" transform="translate(39.2 46)" fill="#64748b">100</text>
+<path d="M80.6 58l768.5 0l0 323.6l-768.5 0Z" transform="translate(39.2 46)" fill="#dbeafe" fill-opacity="0.58" class="zr-cls-0"></path>
+<path d="M89.6 245.7L101.6 245.7A5 5 0 0 1 106.6 250.7L106.6 376.6A5 5 0 0 1 101.6 381.6L89.6 381.6A5 5 0 0 1 84.6 376.6L84.6 250.7A5 5 0 0 1 89.6 245.7Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M156.7 329.8L168.7 329.8A5 5 0 0 1 173.7 334.8L173.7 376.6A5 5 0 0 1 168.7 381.6L156.7 381.6A5 5 0 0 1 151.7 376.6L151.7 334.8A5 5 0 0 1 156.7 329.8Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M223.8 174.5L235.8 174.5A5 5 0 0 1 240.8 179.5L240.8 376.6A5 5 0 0 1 235.8 381.6L223.8 381.6A5 5 0 0 1 218.8 376.6L218.8 179.5A5 5 0 0 1 223.8 174.5Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M291 291L303 291A5 5 0 0 1 308 296L308 376.6A5 5 0 0 1 303 381.6L291 381.6A5 5 0 0 1 286 376.6L286 296A5 5 0 0 1 291 291Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="3" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M358.1 265.1L370.1 265.1A5 5 0 0 1 375.1 270.1L375.1 376.6A5 5 0 0 1 370.1 381.6L358.1 381.6A5 5 0 0 1 353.1 376.6L353.1 270.1A5 5 0 0 1 358.1 265.1Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="5" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M425.2 193.9L437.2 193.9A5 5 0 0 1 442.2 198.9L442.2 376.6A5 5 0 0 1 437.2 381.6L425.2 381.6A5 5 0 0 1 420.2 376.6L420.2 198.9A5 5 0 0 1 425.2 193.9Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="6" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M492.4 310.4L504.4 310.4A5 5 0 0 1 509.4 315.4L509.4 376.6A5 5 0 0 1 504.4 381.6L492.4 381.6A5 5 0 0 1 487.4 376.6L487.4 315.4A5 5 0 0 1 492.4 310.4Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="7" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M559.5 226.3L571.5 226.3A5 5 0 0 1 576.5 231.3L576.5 376.6A5 5 0 0 1 571.5 381.6L559.5 381.6A5 5 0 0 1 554.5 376.6L554.5 231.3A5 5 0 0 1 559.5 226.3Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="9" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M626.6 342.8L638.6 342.8A5 5 0 0 1 643.6 347.8L643.6 376.6A5 5 0 0 1 638.6 381.6L626.6 381.6A5 5 0 0 1 621.6 376.6L621.6 347.8A5 5 0 0 1 626.6 342.8Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="10" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M693.8 155.1L705.8 155.1A5 5 0 0 1 710.8 160.1L710.8 376.6A5 5 0 0 1 705.8 381.6L693.8 381.6A5 5 0 0 1 688.8 376.6L688.8 160.1A5 5 0 0 1 693.8 155.1Z" transform="translate(39.2 46)" fill="#ef4444" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="11" ecmeta_ssr_type="chart" class="zr-cls-2"></path>
+<path d="M760.9 96.8L772.9 96.8A5 5 0 0 1 777.9 101.8L777.9 376.6A5 5 0 0 1 772.9 381.6L760.9 381.6A5 5 0 0 1 755.9 376.6L755.9 101.8A5 5 0 0 1 760.9 96.8Z" transform="translate(39.2 46)" fill="#5f7eea" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="8" ecmeta_ssr_type="chart" class="zr-cls-1"></path>
+<path d="M828 142.1L840 142.1A5 5 0 0 1 845 147.1L845 376.6A5 5 0 0 1 840 381.6L828 381.6A5 5 0 0 1 823 376.6L823 147.1A5 5 0 0 1 828 142.1Z" transform="translate(39.2 46)" fill="#8b5cf6" fill-opacity="0.92" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.92" ecmeta_series_index="0" ecmeta_data_index="4" ecmeta_ssr_type="chart" class="zr-cls-3"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="95.56666666666666" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">A</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="162.7" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">B</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="229.83333333333334" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">C</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="296.9666666666667" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">D</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="364.1" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">F</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="431.23333333333335" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">G</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="498.36666666666673" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">H</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="565.5000000000001" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">J</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="632.6333333333334" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">K</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="699.7666666666668" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">L</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="766.9000000000001" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">I</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:12px;font-family:sans-serif;font-weight:650;" x="834.0333333333334" y="403.59999999999997" transform="translate(39.2 46)" fill="#64748b">E</text>
+<text dominant-baseline="central" text-anchor="start" style="font-size:13px;font-family:sans-serif;font-weight:760;" xml:space="preserve" x="62" y="26" transform="translate(39.2 46)" fill="#0f172a">Quick sort · step 18/69</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:12px;font-family:sans-serif;font-weight:650;" xml:space="preserve" x="867.6" y="26" transform="translate(39.2 46)" fill="#64748b">compare 11 · swap 6 · write 0</text>
+<text dominant-baseline="central" text-anchor="start" style="font-size:12px;font-family:sans-serif;font-weight:600;" xml:space="preserve" x="62" y="46" transform="translate(39.2 46)" fill="#64748b">Place pivot L at position 10.</text>
+<path d="M-115.7 -5l231.3 0l0 31l-231.3 0Z" transform="translate(490 15)" fill="rgb(0,0,0)" fill-opacity="0" stroke="#3c3c41" stroke-width="0" class="zr-cls-0"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:21px;font-family:sans-serif;font-weight:760;" xml:space="preserve" y="10.5" transform="translate(490 15)" fill="#0f172a">Sorting Algorithm Steps</text>
+<style ><![CDATA[
+.zr-cls-0:hover {
+pointer-events:none;
+}
+.zr-cls-1:hover {
+cursor:pointer;
+fill:rgba(104,138,255,1);
+}
+.zr-cls-2:hover {
+cursor:pointer;
+fill:rgba(255,74,74,1);
+}
+.zr-cls-3:hover {
+cursor:pointer;
+fill:rgba(152,101,255,1);
+}
+
+]]>
+
+</style>
+</svg>

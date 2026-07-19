@@ -85,6 +85,8 @@
       'Grid': '网格布局',
       'Layout Core': '布局核心',
       'Lollipop': '棒棒糖图',
+      'Algorithm Sort': '排序算法',
+      'Algorithm Shortest Path': '最短路径算法',
       'MDS': 'MDS 布局',
       'Mosaic': '马赛克图',
       'Nested Circle': '嵌套圆图',
@@ -132,6 +134,8 @@
       'Flame Large Profile': '火焰图大规模剖析',
       'Sunrise Sunset Large Data Parse': '日出日落大数据解析',
       'Lollipop Large Categories': '棒棒糖图大规模分类',
+      'Sorting Algorithm Steps': '排序算法步骤',
+      'Shortest Path Search': '最短路径搜索',
       'Beeswarm Large Points': '蜂群图大规模点',
       'Spiral Large Segments': '螺旋图大规模分段',
       'Vector Field Large Grid': '向量场大规模网格',
@@ -220,7 +224,30 @@
       'Dot scale': '点大小比例',
       'Dot opacity': '点透明度',
       'Legend': '图例',
-      'Draggable': '节点拖拽'
+      'Draggable': '节点拖拽',
+      'Algorithm': '算法',
+      'Start': '起点',
+      'Order': '顺序',
+      'ascending': '升序',
+      'descending': '降序',
+      'bubble': '冒泡排序',
+      'selection': '选择排序',
+      'insertion': '插入排序',
+      'merge': '归并排序',
+      'quick': '快速排序',
+      'heap': '堆排序',
+      'dijkstra': 'Dijkstra',
+      'bfs': '广度优先搜索',
+      'a-star': 'A* 搜索',
+      'bellman-ford': 'Bellman-Ford',
+      'Max items': '最大元素数',
+      'Bar width': '柱宽',
+      'Node radius': '节点半径',
+      'Edge width': '边线宽',
+      'Directed': '有向图',
+      'Edge labels': '边权重标签',
+      'Distance labels': '距离标签',
+      'Node labels': '节点标签'
     }
   };
 
@@ -1488,6 +1515,185 @@
         };
       }
     },
+    'algorithm-sort': {
+      controls: [
+        textControl('titleText', 'Title', 'title.text', 'Sorting Algorithm Steps'),
+        colorControl('backgroundColor', 'Background', 'backgroundColor', '#f8fafc'),
+        selectControl('algorithm', 'Algorithm', 'series.0.algorithm', 'bubble', ['bubble', 'selection', 'insertion', 'merge', 'quick', 'heap']),
+        selectControl('order', 'Order', 'series.0.order', 'ascending', ['ascending', 'descending']),
+        {
+          ...playbackRangeControl('currentStep', 'Step', 'series.0.currentStep', 0, 0, 220, 0.01),
+          playbackDuration: 9000,
+          playbackAutoplay: true,
+          playbackLoop: true,
+          playbackFinalHold: 700
+        },
+        rangeControl('maxItems', 'Max items', 'series.0.maxItems', 24, 6, 48, 1),
+        rangeControl('tickCount', 'Tick count', 'series.0.tickCount', 5, 2, 8, 1),
+        rangeControl('barWidth', 'Bar width', 'series.0.barWidth', 22, 4, 44, 1),
+        checkboxControl('labelShow', 'Value labels', 'series.0.label.show', false)
+      ],
+      option: (data) => {
+        const sortData = Array.isArray(data.algorithmSort) ? data.algorithmSort : [];
+        return {
+          animation: true,
+          backgroundColor: '#f8fafc',
+          title: {
+            text: 'Sorting Algorithm Steps',
+            left: 'center',
+            top: 10,
+            textStyle: {
+              color: '#0f172a',
+              fontSize: 21,
+              fontWeight: 760
+            }
+          },
+          series: [
+            {
+              id: 'algorithm-sort-bars',
+              type: 'algorithmSort',
+              top: 46,
+              width: '92%',
+              height: '84%',
+              padding: { top: 58, right: 34, bottom: 72, left: 62 },
+              data: sortData,
+              valueField: 'value',
+              nameField: 'name',
+              algorithm: 'bubble',
+              order: 'ascending',
+              currentStep: 0,
+              maxItems: 24,
+              maxFrames: 5000,
+              min: 0,
+              max: 100,
+              tickCount: 5,
+              barWidth: 22,
+              valueAxis: {
+                label: { color: '#64748b', fontSize: 12 },
+                splitLine: { lineStyle: { color: '#e2e8f0', width: 1, opacity: 1 } },
+                axisLine: { lineStyle: { color: '#94a3b8', width: 1.2 } }
+              },
+              categoryAxis: {
+                label: { color: '#64748b', fontSize: 12, formatter: '{value}' }
+              },
+              itemStyle: {
+                color: '#5f7eea',
+                opacity: 0.92,
+                borderColor: '#ffffff',
+                borderWidth: 1.2
+              },
+              stateStyle: {
+                compare: { color: '#f59e0b' },
+                swap: { color: '#ef4444' },
+                write: { color: '#14b8a6' },
+                pivot: { color: '#8b5cf6' },
+                sorted: { color: '#22c55e' }
+              },
+              rangeStyle: { color: '#dbeafe', opacity: 0.58 },
+              label: { show: false, color: '#0f172a', fontSize: 11, formatter: '{c}' },
+              stepLabel: {
+                color: '#0f172a',
+                mutedColor: '#64748b',
+                fontSize: 13,
+                fontWeight: 760
+              }
+            }
+          ]
+        };
+      }
+    },
+    'algorithm-shortest-path': {
+      controls: [
+        textControl('titleText', 'Title', 'title.text', 'Shortest Path Search'),
+        colorControl('backgroundColor', 'Background', 'backgroundColor', '#f8fafc'),
+        selectControl('algorithm', 'Algorithm', 'series.0.algorithm', 'dijkstra', ['dijkstra', 'bfs', 'a-star', 'bellman-ford']),
+        selectControl('start', 'Start', 'series.0.start', 'A', ['A', 'B', 'C', 'D', 'E']),
+        selectControl('target', 'Target', 'series.0.target', 'J', ['F', 'G', 'H', 'I', 'J']),
+        {
+          ...playbackRangeControl('currentStep', 'Step', 'series.0.currentStep', 0, 0, 180, 0.01),
+          playbackDuration: 9500,
+          playbackAutoplay: true,
+          playbackLoop: true,
+          playbackFinalHold: 800
+        },
+        rangeControl('nodeRadius', 'Node radius', 'series.0.nodeRadius', 18, 8, 32, 1),
+        rangeControl('edgeWidth', 'Edge width', ['series.0.edgeWidth', 'series.0.edgeStyle.width'], 2.4, 0.8, 7, 0.1),
+        checkboxControl('directed', 'Directed', 'series.0.directed', false),
+        checkboxControl('nodeLabels', 'Node labels', 'series.0.label.show', true),
+        checkboxControl('edgeLabels', 'Edge labels', 'series.0.edgeLabel.show', true),
+        checkboxControl('distanceLabels', 'Distance labels', 'series.0.distanceLabel.show', true)
+      ],
+      option: (data) => {
+        const graph = data.algorithmShortestPath || { nodes: [], edges: [] };
+        return {
+          animation: true,
+          backgroundColor: '#f8fafc',
+          title: {
+            text: 'Shortest Path Search',
+            left: 'center',
+            top: 10,
+            textStyle: {
+              color: '#0f172a',
+              fontSize: 21,
+              fontWeight: 760
+            }
+          },
+          series: [
+            {
+              id: 'algorithm-shortest-path-graph',
+              type: 'algorithmShortestPath',
+              top: 48,
+              width: '92%',
+              height: '84%',
+              padding: { top: 58, right: 46, bottom: 56, left: 46 },
+              nodes: Array.isArray(graph.nodes) ? graph.nodes : [],
+              edges: Array.isArray(graph.edges) ? graph.edges : [],
+              algorithm: 'dijkstra',
+              start: 'A',
+              target: 'J',
+              currentStep: 0,
+              maxNodes: 64,
+              maxEdges: 160,
+              maxFrames: 5000,
+              nodeRadius: 18,
+              edgeWidth: 2.4,
+              directed: false,
+              edgeStyle: {
+                color: '#94a3b8',
+                width: 2.4,
+                opacity: 0.58
+              },
+              nodeStyle: {
+                color: '#e2e8f0',
+                borderColor: '#ffffff',
+                borderWidth: 2,
+                opacity: 1
+              },
+              stateStyle: {
+                start: { color: '#22c55e' },
+                target: { color: '#ef4444' },
+                frontier: { color: '#38bdf8' },
+                visited: { color: '#64748b' },
+                current: { color: '#f59e0b' },
+                path: { color: '#8b5cf6' },
+                activeEdge: { color: '#f59e0b' },
+                relaxedEdge: { color: '#38bdf8' },
+                pathEdge: { color: '#8b5cf6' }
+              },
+              edgeLabel: { show: true, color: '#475569', fontSize: 11, fontWeight: 700 },
+              label: { show: true, color: '#0f172a', fontSize: 12, fontWeight: 800, formatter: '{b}' },
+              distanceLabel: { show: true, color: '#64748b', fontSize: 10, fontWeight: 700 },
+              stepLabel: {
+                color: '#0f172a',
+                mutedColor: '#64748b',
+                fontSize: 13,
+                fontWeight: 760
+              }
+            }
+          ]
+        };
+      }
+    },
     beeswarm: {
       controls: [
         ...commonChartControls('Team Score Beeswarm', [0]),
@@ -2328,6 +2534,8 @@
     if (exampleName === 'seasonal-radial') return appendSeasonalRadialData(data, index);
     if (exampleName === 'error-chart') return appendErrorChartData(data, index);
     if (exampleName === 'lollipop') return appendLollipopData(data, index);
+    if (exampleName === 'algorithm-sort') return appendAlgorithmSortData(data, index);
+    if (exampleName === 'algorithm-shortest-path') return appendAlgorithmShortestPathData(data, index);
     if (exampleName === 'beeswarm') return appendBeeswarmData(data, index);
     if (exampleName === 'spiral') return appendSpiralData(data, index);
     if (exampleName === 'smith') return appendSmithData(data, index);
@@ -2356,6 +2564,8 @@
     if (exampleName === 'seasonal-radial') return removeArrayData(data, 'seasonalRadial', isAddedItem);
     if (exampleName === 'error-chart') return removeArrayData(data, 'errorChart', isAddedItem);
     if (exampleName === 'lollipop') return removeArrayData(data, 'lollipop', isAddedItem);
+    if (exampleName === 'algorithm-sort') return removeArrayData(data, 'algorithmSort', isAddedItem);
+    if (exampleName === 'algorithm-shortest-path') return removeAlgorithmShortestPathData(data);
     if (exampleName === 'beeswarm') return removeArrayData(data, 'beeswarm', isAddedItem);
     if (exampleName === 'spiral') return removeArrayData(data, 'spiral', isAddedItem);
     if (exampleName === 'smith') return removeArrayData(data, 'smith', isAddedItem);
@@ -2373,6 +2583,25 @@
     if (nodeIndex < 0) return false;
     const [removed] = nodes.splice(nodeIndex, 1);
     const removedId = dataItemKey(removed, nodeIndex);
+    const edges = Array.isArray(graph.edges) ? graph.edges : Array.isArray(graph.links) ? graph.links : [];
+    removeMatchingItems(edges, (edge) => {
+      const source = String(edge?.source ?? '');
+      const target = String(edge?.target ?? '');
+      return source === removedId || target === removedId;
+    });
+    return true;
+  }
+
+  function removeAlgorithmShortestPathData(data) {
+    const graph = data?.algorithmShortestPath;
+    if (!graph || typeof graph !== 'object') return false;
+    const nodes = graphNodes(graph);
+    if (nodes.length <= 2) return false;
+    const nodeIndex = findRemovableIndex(nodes, isAddedItem, nodes.length - 1, 1);
+    const index = nodeIndex >= 0 ? nodeIndex : nodes.length - 2;
+    if (index <= 0 || index >= nodes.length) return false;
+    const [removed] = nodes.splice(index, 1);
+    const removedId = dataItemKey(removed, index);
     const edges = Array.isArray(graph.edges) ? graph.edges : Array.isArray(graph.links) ? graph.links : [];
     removeMatchingItems(edges, (edge) => {
       const source = String(edge?.source ?? '');
@@ -2596,6 +2825,8 @@
     if (exampleName === 'seasonal-radial') return arrayLength(data.seasonalRadial);
     if (exampleName === 'error-chart') return arrayLength(data.errorChart);
     if (exampleName === 'lollipop') return arrayLength(data.lollipop);
+    if (exampleName === 'algorithm-sort') return arrayLength(data.algorithmSort);
+    if (exampleName === 'algorithm-shortest-path') return graphNodes(data.algorithmShortestPath).length;
     if (exampleName === 'beeswarm') return arrayLength(data.beeswarm);
     if (exampleName === 'spiral') return arrayLength(data.spiral);
     if (exampleName === 'smith') return arrayLength(data.smith);
@@ -2918,6 +3149,56 @@
       population: 90 + (index * 41) % 520,
       itemStyle: { color: '#2db5ff' }
     });
+    return true;
+  }
+
+  function appendAlgorithmSortData(data, index) {
+    const list = ensureArrayData(data, 'algorithmSort');
+    const insertIndex = list.length ? (index * 5) % (list.length + 1) : 0;
+    list.splice(insertIndex, 0, {
+      id: `added-sort-${index}`,
+      name: `N${index}`,
+      value: 10 + (index * 37) % 86
+    });
+    return true;
+  }
+
+  function appendAlgorithmShortestPathData(data, index) {
+    if (!data.algorithmShortestPath || typeof data.algorithmShortestPath !== 'object') {
+      data.algorithmShortestPath = { nodes: [], edges: [] };
+    }
+    const graph = data.algorithmShortestPath;
+    const nodes = ensureGraphNodes(graph);
+    const edges = ensureGraphEdges(graph);
+    const id = `X${index}`;
+    const anchor = nodes.length > 1 ? nodes[(index * 3) % (nodes.length - 1)] : nodes[0];
+    const target = nodes.find((node) => String(node?.id ?? node?.name ?? '') === 'J') || nodes[nodes.length - 1];
+    const x = 0.14 + ((index * 17) % 74) / 100;
+    const y = 0.16 + ((index * 29) % 68) / 100;
+
+    nodes.splice(Math.max(1, nodes.length - 1), 0, {
+      id,
+      name: id,
+      x: Number(Math.min(0.94, x).toFixed(2)),
+      y: Number(Math.min(0.86, y).toFixed(2))
+    });
+
+    if (anchor) {
+      edges.push({
+        id: `added-path-${index}-in`,
+        source: dataItemKey(anchor, 0),
+        target: id,
+        weight: 1 + (index % 5)
+      });
+    }
+    if (target) {
+      edges.push({
+        id: `added-path-${index}-out`,
+        source: id,
+        target: dataItemKey(target, nodes.length - 1),
+        weight: 2 + ((index * 2) % 6)
+      });
+    }
     return true;
   }
 

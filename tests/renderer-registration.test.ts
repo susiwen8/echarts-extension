@@ -576,6 +576,43 @@ test('captured renderer registrations cover lifecycle across the remaining custo
       }
     },
     {
+      path: '../packages/echarts-algorithm-sort/src/algorithm-sort.ts?registration',
+      option: {
+        data: [
+          { name: 'A', value: 5 },
+          { name: 'B', value: 2 },
+          { name: 'C', value: 8 }
+        ],
+        algorithm: 'quick',
+        currentStep: 3,
+        label: { show: true, formatter: '{b} {c}' }
+      }
+    },
+    {
+      path: '../packages/echarts-algorithm-shortest-path/src/algorithm-shortest-path.ts?registration',
+      option: {
+        nodes: [
+          { id: 'A', x: 0.1, y: 0.5 },
+          { id: 'B', x: 0.3, y: 0.25 },
+          { id: 'C', x: 0.55, y: 0.58 },
+          { id: 'D', x: 0.82, y: 0.42 }
+        ],
+        edges: [
+          { source: 'A', target: 'B', weight: 2 },
+          { source: 'B', target: 'C', weight: 3 },
+          { source: 'A', target: 'C', weight: 7 },
+          { source: 'C', target: 'D', weight: 1 }
+        ],
+        algorithm: 'dijkstra',
+        start: 'A',
+        target: 'D',
+        currentStep: 4,
+        label: { show: true, formatter: '{b} {distance}' },
+        edgeLabel: { show: true },
+        distanceLabel: { show: true }
+      }
+    },
+    {
       path: '../packages/echarts-error-chart/src/error-chart.ts?registration',
       option: {
         data: [

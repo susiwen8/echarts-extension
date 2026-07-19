@@ -871,6 +871,51 @@
       { country: 'Russia', population: 144, itemStyle: { color: '#2db5ff' } },
       { country: 'Ethiopia', population: 129, itemStyle: { color: '#2db5ff' } }
     ],
+    algorithmSort: [
+      { name: 'A', value: 42 },
+      { name: 'B', value: 16 },
+      { name: 'C', value: 64 },
+      { name: 'D', value: 28 },
+      { name: 'E', value: 74 },
+      { name: 'F', value: 36 },
+      { name: 'G', value: 58 },
+      { name: 'H', value: 22 },
+      { name: 'I', value: 88 },
+      { name: 'J', value: 48 },
+      { name: 'K', value: 12 },
+      { name: 'L', value: 70 }
+    ],
+    algorithmShortestPath: {
+      nodes: [
+        { id: 'A', name: 'A', x: 0.08, y: 0.5 },
+        { id: 'B', name: 'B', x: 0.22, y: 0.2 },
+        { id: 'C', name: 'C', x: 0.24, y: 0.78 },
+        { id: 'D', name: 'D', x: 0.43, y: 0.36 },
+        { id: 'E', name: 'E', x: 0.48, y: 0.68 },
+        { id: 'F', name: 'F', x: 0.63, y: 0.2 },
+        { id: 'G', name: 'G', x: 0.67, y: 0.54 },
+        { id: 'H', name: 'H', x: 0.81, y: 0.34 },
+        { id: 'I', name: 'I', x: 0.82, y: 0.75 },
+        { id: 'J', name: 'J', x: 0.94, y: 0.52 }
+      ],
+      edges: [
+        { source: 'A', target: 'B', weight: 2 },
+        { source: 'A', target: 'C', weight: 4 },
+        { source: 'B', target: 'D', weight: 2 },
+        { source: 'B', target: 'F', weight: 7 },
+        { source: 'C', target: 'D', weight: 1 },
+        { source: 'C', target: 'E', weight: 3 },
+        { source: 'D', target: 'F', weight: 3 },
+        { source: 'D', target: 'G', weight: 2 },
+        { source: 'E', target: 'G', weight: 2 },
+        { source: 'E', target: 'I', weight: 6 },
+        { source: 'F', target: 'H', weight: 2 },
+        { source: 'G', target: 'H', weight: 2 },
+        { source: 'G', target: 'I', weight: 3 },
+        { source: 'H', target: 'J', weight: 2 },
+        { source: 'I', target: 'J', weight: 1 }
+      ]
+    },
     fisheyeScatter: createFisheyeScatterData(),
     spiral: createSpiralData(),
     smith: [

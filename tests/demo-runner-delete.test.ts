@@ -1,15 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { runInNewContext } from 'node:vm';
 import { test } from 'vitest';
 
-function loadDemoNamespace() {
-  const window = {};
-  const document = { addEventListener() {} };
-  runInNewContext(readFileSync(new URL('../docs/shared/demo-data.js', import.meta.url), 'utf8'), { window });
-  runInNewContext(readFileSync(new URL('../docs/shared/demo-runner.js', import.meta.url), 'utf8'), { window, document });
-  return window.EChartsExtensionExamples;
-}
+import { loadDemoNamespace } from './demo-runner-test-utils.ts';
 
 test('shared examples can delete one data item after add-data', () => {
   const namespace = loadDemoNamespace();
@@ -182,6 +175,53 @@ test('evolution-fluid time control exposes playback metadata', () => {
   assert.equal(timeControl.playbackAutoplay, false);
 });
 
+test('algorithm-sort step control autoplays through sorting frames', () => {
+  const namespace = loadDemoNamespace();
+  const entry = namespace.registry['algorithm-sort'];
+  const data = namespace.cloneExampleData(namespace.data);
+  assert.ok(entry);
+
+  const stepControl = entry.controls.find((control) => control.id === 'currentStep');
+  const option = namespace.createDemoOption('algorithm-sort', data, namespace.createControlState(entry.controls));
+
+  assert.ok(stepControl);
+  assert.equal(stepControl.type, 'range');
+  assert.equal(stepControl.playback, true);
+  assert.equal(stepControl.defaultValue, 0);
+  assert.equal(stepControl.min, 0);
+  assert.equal(stepControl.max, 220);
+  assert.equal(stepControl.step, 0.01);
+  assert.equal(stepControl.playbackAutoplay, true);
+  assert.equal(stepControl.playbackLoop, true);
+  assert.equal(option.series[0].id, 'algorithm-sort-bars');
+});
+
+test('algorithm-shortest-path step control autoplays through graph search frames', () => {
+  const namespace = loadDemoNamespace();
+  const entry = namespace.registry['algorithm-shortest-path'];
+  const data = namespace.cloneExampleData(namespace.data);
+  assert.ok(entry);
+
+  const stepControl = entry.controls.find((control) => control.id === 'currentStep');
+  const state = namespace.createControlState(entry.controls);
+  const option = namespace.createDemoOption('algorithm-shortest-path', data, state);
+
+  assert.ok(stepControl);
+  assert.equal(stepControl.type, 'range');
+  assert.equal(stepControl.playback, true);
+  assert.equal(stepControl.defaultValue, 0);
+  assert.equal(stepControl.min, 0);
+  assert.equal(stepControl.max, 180);
+  assert.equal(stepControl.step, 0.01);
+  assert.equal(stepControl.playbackAutoplay, true);
+  assert.equal(stepControl.playbackLoop, true);
+  assert.equal(option.series[0].id, 'algorithm-shortest-path-graph');
+  assert.equal(option.series[0].type, 'algorithmShortestPath');
+  assert.ok(option.series[0].nodes.length >= 10);
+  assert.ok(option.series[0].edges.length >= 12);
+});
+
+
 test('circle-packing demo uses the company incubation fluid playback dataset', () => {
   const namespace = loadDemoNamespace();
   const data = namespace.cloneExampleData(namespace.data);
@@ -276,6 +316,12 @@ test('delete-data buttons keep their labels on one line', () => {
 
   assert.match(demoPageCss, /\.demo-control-button[^{]*\{[^}]*white-space:\s*nowrap/s);
   assert.match(layoutCoreHtml, /\.layout-card__button[^{]*\{[^}]*white-space:\s*nowrap/s);
+});
+
+test('demo pages hide long generated header paragraphs', () => {
+  const demoPageCss = readFileSync(new URL('../docs/shared/demo-page.css', import.meta.url), 'utf8');
+
+  assert.match(demoPageCss, /body\.demo-page\s+\.demo-header\s+p:not\(\.eyebrow\)[^{]*\{[^}]*display:\s*none/s);
 });
 
 test('standalone example pages and layout-core package do not include hand-drawn wiring', () => {
